@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#F5F5F5"
     tools:context=".HomeFragment">
 
-    <!-- QIDIRUV QISMI (TEPADA) -->
+    <!-- QIDIRUV KARTASI -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,100 +19,151 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sayohat qidirish"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp"
-                android:textColor="@color/black"/>
-
-            <!-- 1. Qayerdan -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+            <!-- 1. QAYERDAN (Bosganda yangi oyna ochiladi) -->
+            <LinearLayout
+                android:id="@+id/containerFrom"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Qayerdan">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:background="?attr/selectableItemBackground">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etSearchFrom"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_location_from"
+                    app:tint="@color/black" />
+
+                <TextView
+                    android:id="@+id/tvSearchFrom"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapWords"
-                    android:singleLine="true"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginStart="16dp"
+                    android:text="Qayerdan"
+                    android:textSize="18sp"
+                    android:textColor="#757575" />
+            </LinearLayout>
 
-            <!-- 2. Qayerga -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+            <!-- Ajratuvchi chiziq -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginStart="56dp"
+                android:background="#E0E0E0" />
+
+            <!-- 2. QAYERGA (Bosganda yangi oyna ochiladi) -->
+            <LinearLayout
+                android:id="@+id/containerTo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="Qayerga">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:background="?attr/selectableItemBackground">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etSearchTo"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_location_to"
+                    app:tint="@color/black" />
+
+                <TextView
+                    android:id="@+id/tvSearchTo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapWords"
-                    android:singleLine="true"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginStart="16dp"
+                    android:text="Qayerga"
+                    android:textSize="18sp"
+                    android:textColor="#757575" />
+            </LinearLayout>
 
-            <!-- 3. Sana va Odam soni -->
+            <!-- Ajratuvchi chiziq -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0" />
+
+            <!-- 3. SANA VA ODAM SONI -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
-                <!-- Sana -->
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+                <!-- SANA -->
+                <LinearLayout
+                    android:id="@+id/containerDate"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1.5"
-                    android:hint="Sana">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etSearchDate"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:focusable="false"
-                        android:clickable="true"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Odam soni -->
-                <com.google.android.material.textfield.TextInputLayout
-                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
                     android:layout_weight="1"
-                    android:hint="Joy">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="16dp"
+                    android:background="?attr/selectableItemBackground">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etSearchSeats"
-                        android:layout_width="match_parent"
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_calendar"
+                        app:tint="@color/black" />
+
+                    <TextView
+                        android:id="@+id/tvSearchDate"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
+                        android:layout_marginStart="12dp"
+                        android:text="Bugun"
+                        android:textSize="16sp"
+                        android:textColor="@color/black" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="#E0E0E0" />
+
+                <!-- ODAM SONI (YANGILANGAN) -->
+                <LinearLayout
+                    android:id="@+id/containerSeats"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="16dp"
+                    android:background="?attr/selectableItemBackground">
+
+                    <!-- Ikonka o'zgartirildi -->
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_person2"
+                        app:tint="@color/black" />
+
+                    <TextView
+                        android:id="@+id/tvSearchSeats"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
                         android:text="1"
-                        android:gravity="center"/>
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:textSize="16sp"
+                        android:textColor="@color/black" />
+                </LinearLayout>
             </LinearLayout>
 
-            <!-- Qidirish Tugmasi -->
-            <com.google.android.material.button.MaterialButton
+            <!-- QIDIRISH TUGMASI -->
+            <Button
                 android:id="@+id/btnSearch"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="24dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
                 android:text="Qidirish"
                 android:textSize="18sp"
-                app:cornerRadius="12dp"/>
+                android:backgroundTint="#2196F3"
+                android:padding="12dp" />
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
