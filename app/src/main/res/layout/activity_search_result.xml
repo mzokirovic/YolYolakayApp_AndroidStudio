@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5"
+    tools:context=".SearchResultsActivity">
+
+    <!-- Sarlavha (ixtiyoriy, masalan "Qidiruv natijalari") -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="Qidiruv natijalari"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:background="@android:color/white"/>
+
+    <!-- E'lonlar ro'yxati -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvResults"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp"
+        android:clipToPadding="false"/>
+
+    <!-- Agar topilmasa ko'rinadigan yozuv -->
+    <TextView
+        android:id="@+id/tvNoResults"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="Afsuski, bunday safar topilmadi"
+        android:textSize="18sp"
+        android:visibility="gone"/>
+
+</LinearLayout>

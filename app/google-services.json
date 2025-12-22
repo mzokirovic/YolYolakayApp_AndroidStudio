@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "518917350346",
+    "project_id": "myapp1f",
+    "storage_bucket": "myapp1f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:518917350346:android:fa7597a32e227e93b4a533",
+        "android_client_info": {
+          "package_name": "com.example.yol_yolakay"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6FaBBWa2tZGkUXy3kgiL7kosU7uCw2M0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

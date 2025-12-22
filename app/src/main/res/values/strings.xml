@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Yo\'l-Yo\'lakay</string>
+    <!-- Mana shu ikki qator juda muhim -->
+    <string name="price_format">%d so\'m</string>
+    <string name="seats_format">%d ta</string>
+</resources>
