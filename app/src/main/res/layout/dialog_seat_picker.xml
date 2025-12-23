@@ -1,60 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:background="@android:color/white"
     android:padding="24dp">
 
+    <!-- 1. Yopish tugmasi va Sarlavha bir qatorda -->
+    <ImageView
+        android:id="@+id/btnClose"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_close"
+        app:tint="#757575"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Yo'lovchilar sonini tanlang"
+        android:text="Yo'lovchilar soni"
+        android:textColor="#212121"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/black"
-        android:layout_gravity="center_horizontal"/>
+        android:gravity="center"
+        app:layout_constraintStart_toEndOf="@id/btnClose"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btnClose"
+        app:layout_constraintBottom_toBottomOf="@id/btnClose"/>
 
+    <!-- 2. Asosiy boshqaruv qismi (Markazda, ixcham) -->
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="24dp"
-        android:gravity="center_vertical">
-
-        <!-- Minus tugmasi -->
-        <ImageButton
-            android:id="@+id/btnMinus"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_minus"
-            android:contentDescription="Kamaytirish"/>
-
-        <!-- Son ko'rsatadigan joy -->
-        <TextView
-            android:id="@+id/tvSeatCount"
-            android:layout_width="60dp"
-            android:layout_height="wrap_content"
-            android:text="1"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:gravity="center"/>
-
-        <!-- Plus tugmasi -->
-        <ImageButton
-            android:id="@+id/btnPlus"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_add"
-            android:contentDescription="Ko'paytirish"/>
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/btnConfirm"
+        android:id="@+id/counterContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Tasdiqlash"
-        android:textSize="18sp"/>
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle">
 
-</LinearLayout>
+        <!-- Minus tugmasi (Aylana fon bilan) -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#F5F5F5">
+            <ImageView
+                android:id="@+id/btnMinus"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerInside"
+                android:padding="16dp"
+                android:src="@drawable/ic_minus"
+                app:tint="#00AFF5"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"/>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Son (Katta va aniq) -->
+        <TextView
+            android:id="@+id/tvSeatCount"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="1"
+            android:textColor="#212121"
+            android:textSize="48sp"
+            android:textStyle="bold" />
+
+        <!-- Plus tugmasi (Aylana fon bilan) -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            app:cardCornerRadius="28dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#F5F5F5">
+            <ImageView
+                android:id="@+id/btnPlus"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerInside"
+                android:padding="16dp"
+                android:src="@drawable/ic_add"
+                app:tint="#00AFF5"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"/>
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+
+
+    <!-- 3. Tasdiqlash tugmasi (Katta, pastda) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnConfirm"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="16dp"
+        android:text="Tasdiqlash"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        app:cornerRadius="12dp"
+        android:backgroundTint="#00AFF5"
+        app:layout_constraintTop_toBottomOf="@id/counterContainer"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
