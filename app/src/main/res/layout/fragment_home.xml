@@ -12,7 +12,7 @@
         android:id="@+id/headerBackground"
         android:layout_width="match_parent"
         android:layout_height="220dp"
-        android:background="#054652"
+        android:background="#00AFF5"
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Tepa qismdagi shior so'zi -->
@@ -112,7 +112,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginStart="16dp"
+                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:background="#EEEEEE" />
 
@@ -183,7 +183,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="0dp"
-                android:background="#00AFF5"
                 android:backgroundTint="#00AFF5"
                 android:text="Qidirish"
                 android:textColor="@android:color/white"

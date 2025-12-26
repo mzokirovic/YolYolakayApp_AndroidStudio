@@ -27,16 +27,21 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_add -> {
-                    // E'lon berish oynasini ochamiz
                     startActivity(Intent(this, AddTripActivity::class.java))
-                    // O'ZGARTIRILDI: false o'rniga true qaytaramiz.
-                    // Bu tizimga "tugma bosildi va qayta ishlandi" deb xabar beradi.
                     true
                 }
-                R.id.nav_favorites -> {
-                    loadFragment(FavoritesFragment())
+
+                // --- O'ZGARTIRILGAN QISM ---
+                // Agar menyuyingizda ID "nav_favorites" bo'lsa, shunday qolaversin,
+                // lekin ichida TripsFragment() ochilishi kerak.
+                // Agar menyuda "nav_trips" qilgan bo'lsangiz, R.id.nav_trips deb yozing.
+
+                R.id.nav_trips -> {  // Yoki R.id.nav_favorites (Menyu fayliga qarang)
+                    loadFragment(TripsFragment()) // <--- MANA SHU YERDA TripsFragment ochilishi kerak
                     true
                 }
+                // ---------------------------
+
                 R.id.nav_profile -> {
                     loadFragment(ProfileFragment())
                     true
@@ -44,6 +49,7 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+
 
     }
 

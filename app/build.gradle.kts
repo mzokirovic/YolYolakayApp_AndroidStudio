@@ -57,6 +57,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-database-ktx")
 
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+
     // --- FIREBASE BLOKI TUGADI ---
 
     // Testing libraries

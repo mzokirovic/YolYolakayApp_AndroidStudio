@@ -1,78 +1,224 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@android:color/white">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Qayerdan - Qayerga -->
-        <TextView
-            android:id="@+id/tvFromTo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Toshkent - Samarqand"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/black"/>
+        <!-- 1. Haydovchi rasmi (Chap tomonda) -->
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/imgDriver"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_person"
+            app:civ_border_width="1dp"
+            app:civ_border_color="#E0E0E0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- Haydovchi Ismi va Reytingi -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/driverInfoLayout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            android:layout_marginStart="12dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="@id/imgDriver"
+            app:layout_constraintStart_toEndOf="@id/imgDriver"
+            app:layout_constraintTop_toTopOf="@id/imgDriver"
+            app:layout_constraintEnd_toStartOf="@id/priceLayout">
 
-            <!-- Sana -->
             <TextView
-                android:id="@+id/tvDate"
+                android:id="@+id/tvDriverName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="22.12.2025"
-                android:layout_marginEnd="16dp"/>
+                android:text="Haydovchi"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"/>
 
-            <!-- Vaqt -->
-            <TextView
-                android:id="@+id/tvTime"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="14:30"
-                android:textStyle="bold"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="2dp">
+
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:src="@drawable/ic_star"
+                    app:tint="#FFC107"/>
+
+                <TextView
+                    android:text="5.0"
+                    android:textSize="12sp"
+                    android:textColor="#555555"
+                    android:layout_marginStart="4dp"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
         </LinearLayout>
 
+        <!-- Narx (O'ng tomonda) -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/priceLayout"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="12dp"
-            android:gravity="center_vertical">
+            android:orientation="vertical"
+            android:gravity="end"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/imgDriver"
+            app:layout_constraintBottom_toBottomOf="@id/imgDriver">
 
-            <!-- Narx -->
             <TextView
                 android:id="@+id/tvPrice"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="50 000 so'm"
-                android:textColor="#4CAF50"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
-
-            <!-- O'rindiqlar -->
-            <TextView
-                android:id="@+id/tvSeats"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="3 kishi"
-                android:padding="6dp"
-                android:background="#EEE"/>
+                android:text="75,000"
+                android:textColor="#333333"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="so'm"
+                android:textColor="#999999"
+                android:textSize="10sp" />
         </LinearLayout>
 
-    </LinearLayout>
+        <!-- Chiziq -->
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#F0F0F0"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/imgDriver"/>
+
+        <!-- 2. Safar vaqti va yo'nalishi -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/routeLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/divider">
+
+            <!-- Vaqtlar (Chap ustun) -->
+            <TextView
+                android:id="@+id/tvStartTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="08:00"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <!-- Timeline chizig'i -->
+            <View
+                android:id="@+id/lineTop"
+                android:layout_width="2dp"
+                android:layout_height="30dp"
+                android:background="#E0E0E0"
+                android:layout_marginStart="8dp"
+                app:layout_constraintStart_toEndOf="@id/tvStartTime"
+                app:layout_constraintTop_toTopOf="@id/pointStart"
+                app:layout_constraintBottom_toBottomOf="@id/pointEnd"/>
+
+            <ImageView
+                android:id="@+id/pointStart"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:src="@drawable/shape_circle_green"
+                android:layout_marginStart="8dp"
+                app:layout_constraintStart_toEndOf="@id/tvStartTime"
+                app:layout_constraintTop_toTopOf="@id/tvStartTime"
+                app:layout_constraintBottom_toBottomOf="@id/tvStartTime"/>
+
+            <ImageView
+                android:id="@+id/pointEnd"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:src="@drawable/shape_circle_green"
+                app:tint="#BDBDBD"
+                android:layout_marginStart="8dp"
+                app:layout_constraintStart_toEndOf="@id/tvStartTime"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lineTop"/>
+
+            <!-- Shaharlar (O'ng ustun) -->
+            <TextView
+                android:id="@+id/tvFromCity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Toshkent"
+                android:textColor="#333333"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginStart="12dp"
+                app:layout_constraintStart_toEndOf="@id/pointStart"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvStartTime"
+                app:layout_constraintBottom_toBottomOf="@id/tvStartTime"/>
+
+            <TextView
+                android:id="@+id/tvToCity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Samarqand"
+                android:textColor="#333333"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginStart="12dp"
+                app:layout_constraintStart_toEndOf="@id/pointEnd"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/pointEnd"
+                app:layout_constraintBottom_toBottomOf="@id/pointEnd"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 3. Pastki qism: Faqat o'rindiqlar soni qoldi -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/routeLayout">
+
+            <!-- O'rindiqlar -->
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_person"
+                app:tint="#757575"/>
+
+            <TextView
+                android:id="@+id/tvSeatsCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3 o'rin bo'sh"
+                android:textColor="#555555"
+                android:textSize="12sp"
+                android:layout_marginStart="6dp"/>
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
