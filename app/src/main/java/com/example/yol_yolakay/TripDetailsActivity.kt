@@ -3,13 +3,14 @@ package com.example.yol_yolakay
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.yol_yolakay.databinding.ActivityTripDetailsBinding
 import com.example.yol_yolakay.model.Trip
 import com.google.firebase.database.FirebaseDatabase
-import java.util.UUID // ID yo'q bo'lsa ishlatish uchun
+import java.util.UUID
 
 class TripDetailsActivity : AppCompatActivity() {
 
@@ -22,102 +23,144 @@ class TripDetailsActivity : AppCompatActivity() {
         binding = ActivityTripDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        currentTrip = intent.getSerializableExtra("TRIP_DATA") as? Trip
-        isPreview = intent.getBooleanExtra("IS_PREVIEW", false)
+        // ... super.onCreate(savedInstanceState) dan keyin:
 
-        setupUI()
-
-        binding.btnBackHome.setOnClickListener { finish() }
-
-        // Qo'ng'iroq qilish
-        binding.btnCallDriver.setOnClickListener {
-            // Hozircha haydovchi raqami yo'q bo'lsa, o'zimiznikini qo'yamiz
-            val phoneNumber = "tel:+998901234567"
-            val intent = Intent(Intent.ACTION_DIAL)
-            intent.data = Uri.parse(phoneNumber)
-            startActivity(intent)
-        }
-
-        // TUGMA MOSLASHUVI (Preview vs Booking)
-        if (isPreview) {
-            // Agar o'zimizning e'lon bo'lsa -> "Nashr qilish" (Oldingi mantiq)
-            binding.btnBookAction.text = "Nashr qilish"
-            binding.contactButtonsLayout.visibility = View.GONE // O'ziga tel qilmaydi
-
-            binding.btnBookAction.setOnClickListener {
-                publishTrip() // Oldingi Firebasega yozish funksiyasi
-            }
+        // Status bar va navigatsiyani shaffof qilish
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
         } else {
-            // Agar yo'lovchi bo'lsa -> "Bron qilish"
-            binding.btnBookAction.text = "Bron qilish"
-            binding.contactButtonsLayout.visibility = View.VISIBLE
-
-            binding.btnBookAction.setOnClickListener {
-                bookTrip() // Band qilish funksiyasi
-            }
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            window.statusBarColor = android.graphics.Color.TRANSPARENT
         }
+
+        // ... keyin binding inflate qilinadi
+
+
+        // 1. Ma'lumotni JSON orqali olish
+        try {
+            val tripJson = intent.getStringExtra("TRIP_JSON")
+            if (tripJson != null) {
+                val gson = com.google.gson.Gson()
+                currentTrip = gson.fromJson(tripJson, Trip::class.java)
+            } else {
+                // Ehtimol qidiruvdan Parcelable bo'lib kelgandir
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                    currentTrip = intent.getParcelableExtra("TRIP_DATA", Trip::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    currentTrip = intent.getParcelableExtra("TRIP_DATA")
+                }
+            }
+            isPreview = intent.getBooleanExtra("IS_PREVIEW", false)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        // 2. Agar ma'lumot baribir kelmasa
+        if (currentTrip == null) {
+            Toast.makeText(this, "E'lon ma'lumotlari yuklanmadi!", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+
+        // 3. UI ni chizish
+        setupUI()
+        setupButtons()
     }
 
     private fun setupUI() {
         val trip = currentTrip ?: return
 
-        binding.tvFrom.text = trip.from
-        binding.tvTo.text = trip.to
-        binding.tvDateTime.text = "${trip.date} • ${trip.time}"
+        try {
+            // 1. Yo'nalish (XATO TUZATILDI: Ikkita qator alohida yozildi)
+            binding.tvFromCity.text = trip.from ?: "Noma'lum"
+            binding.tvToCity.text = trip.to ?: "Noma'lum"
 
-        val formattedPrice = String.format("%,d", trip.price ?: 0).replace(",", " ")
-        binding.tvTotalPrice.text = "$formattedPrice so'm"
+            // 2. Sana va Vaqt (Yangi dizaynga moslash)
+            binding.tvDateHeader.text = trip.date ?: "Bugun"
+            binding.tvStartTime.text = trip.time ?: "--:--"
 
-        binding.tvSeatsDetail.text = "${trip.seats} ta"
-        binding.tvDriverNameDetails.text = "Haydovchi" // Keyin User nomini ulaymiz
+            // Tugash vaqti (hozircha shartli ravishda)
+            binding.tvEndTime.text = "Manzil"
+
+            // 3. Narx
+            val price = trip.price ?: 0
+            val formattedPrice = String.format("%,d", price).replace(",", " ")
+            binding.tvPrice.text = "$formattedPrice so'm"
+
+            // 4. Haydovchi
+            binding.tvDriverName.text = trip.driverName ?: "Haydovchi"
+
+            // 5. Info
+            if (trip.info.isNullOrEmpty()) {
+                binding.tvInfo.text = "Qo'shimcha ma'lumot yo'q"
+            } else {
+                binding.tvInfo.text = trip.info
+            }
+
+            // Preview bo'lsa telefon tugmasini yashirish
+            if (isPreview) {
+                binding.btnCall.visibility = View.GONE
+            }
+
+        } catch (e: Exception) {
+            Log.e("TripDetails", "UI xatolik: ${e.message}")
+        }
     }
 
-    // 1. HAYDOVCHI UCHUN: NASHR QILISH
+    private fun setupButtons() {
+        binding.btnBack.setOnClickListener { finish() }
+
+        binding.btnCall.setOnClickListener {
+            val phone = currentTrip?.driverPhone
+            if (!phone.isNullOrEmpty()) {
+                try {
+                    val intent = Intent(Intent.ACTION_DIAL)
+                    intent.data = Uri.parse("tel:$phone")
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Qo'ng'iroq qilib bo'lmadi", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this, "Haydovchi raqami yo'q", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        if (isPreview) {
+            binding.btnBook.text = "E'lonni nashr qilish"
+            binding.btnBook.setOnClickListener { publishTrip() }
+        } else {
+            binding.btnBook.text = "Joy band qilish"
+            binding.btnBook.setOnClickListener {
+                Toast.makeText(this, "Safar band qilindi! (Demo)", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+    }
+
     private fun publishTrip() {
         val trip = currentTrip ?: return
         val database = FirebaseDatabase.getInstance().getReference("Trips")
-        val newId = database.push().key ?: return
+        val newId = database.push().key ?: UUID.randomUUID().toString()
         trip.id = newId
 
-        binding.btnBookAction.isEnabled = false
-        binding.btnBookAction.text = "Yuklanmoqda..."
+        binding.btnBook.isEnabled = false
+        binding.btnBook.text = "Yuklanmoqda..."
 
         database.child(newId).setValue(trip)
             .addOnSuccessListener {
-                Toast.makeText(this, "E'lon muvaffaqiyatli joylandi!", Toast.LENGTH_LONG).show()
-                // Bosh sahifaga qaytish
+                Toast.makeText(this, "E'lon joylandi! ✅", Toast.LENGTH_LONG).show()
                 val intent = Intent(this, MainActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
                 startActivity(intent)
                 finish()
             }
             .addOnFailureListener {
-                Toast.makeText(this, "Xatolik bo'ldi", Toast.LENGTH_SHORT).show()
-                binding.btnBookAction.isEnabled = true
-            }
-    }
-
-    // 2. YO'LOVCHI UCHUN: BRON QILISH
-    private fun bookTrip() {
-        val trip = currentTrip ?: return
-        // MVP uchun oddiy yechim:
-        // "BookedTrips" degan alohida joyga yozamiz. Har bir qurilma (user) uchun.
-
-        // Bu qurilma uchun unikal ID (Vaqtinchalik yechim, Auth bo'lmasa)
-        val deviceId = android.provider.Settings.Secure.getString(contentResolver, android.provider.Settings.Secure.ANDROID_ID)
-
-        val database = FirebaseDatabase.getInstance().getReference("BookedTrips")
-
-        // BookedTrips -> UserID -> TripID -> TripObject
-        val tripId = trip.id ?: UUID.randomUUID().toString() // ID bo'lishi shart
-
-        database.child(deviceId).child(tripId).setValue(trip)
-            .addOnSuccessListener {
-                Toast.makeText(this, "Safar muvaffaqiyatli band qilindi! ✅", Toast.LENGTH_LONG).show()
-                finish() // Yopamiz
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Internetda xatolik", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Xatolik: ${it.message}", Toast.LENGTH_SHORT).show()
+                binding.btnBook.isEnabled = true
+                binding.btnBook.text = "E'lonni nashr qilish"
             }
     }
 }

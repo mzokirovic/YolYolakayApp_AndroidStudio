@@ -4,145 +4,145 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:padding="24dp"
-    tools:context=".AddTripActivity">
+    android:background="@android:color/white"
+    tools:context=".AddTripActivity"
+    android:fitsSystemWindows="true">
 
-    <!-- Orqaga qaytish tugmasi -->
+    <!-- 1. Toolbar (Orqaga qaytish) -->
     <ImageView
         android:id="@+id/btnBack"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="12dp"
         android:src="@drawable/ic_back"
-        android:layout_marginTop="16dp"
+        app:tint="#00C896"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="#333" />
+        android:background="?attr/selectableItemBackgroundBorderless"/>
 
-    <!-- Progress Bar -->
-    <com.google.android.material.progressindicator.LinearProgressIndicator
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="E'lon berish"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        app:layout_constraintStart_toEndOf="@id/btnBack"
+        app:layout_constraintTop_toTopOf="@id/btnBack"
+        app:layout_constraintBottom_toBottomOf="@id/btnBack"/>
+
+    <!-- Progress Bar (Qadamlar uchun) -->
+    <ProgressBar
         android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:progress="15"
-        app:indicatorColor="#2196F3"
-        app:layout_constraintTop_toBottomOf="@id/btnBack"
-        app:trackColor="#E0E0E0" />
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="16dp"
+        android:max="100"
+        android:progress="14"
+        android:progressTint="#00C896"
+        app:layout_constraintTop_toBottomOf="@id/btnBack"/>
 
+    <!-- ================== QADAMLAR (STEPS) ================== -->
 
-    <!-- 1-QADAM: QAYERDAN -->
+    <!-- STEP 1: Qayerdan -->
     <LinearLayout
-        android:id="@+id/step1_from"
+        android:id="@+id/step1From"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
         android:orientation="vertical"
-        android:visibility="visible"
+        android:padding="24dp"
         app:layout_constraintTop_toBottomOf="@id/progressBar">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Boshlash manzilingiz qayer?"
-            android:textColor="#333"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:text="Qayerdan yo'lga chiqasiz?"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#333333"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        <EditText
+            android:id="@+id/etFrom"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:layout_marginTop="24dp"
-            android:hint="Shahar yoki tuman">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etFrom"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textCapWords" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:background="@drawable/bg_search_input"
+            android:hint="Manzilni tanlang"
+            android:paddingHorizontal="16dp"
+            android:focusable="false"
+            android:clickable="true"/>
     </LinearLayout>
 
-
-    <!-- 2-QADAM: QAYERGA -->
+    <!-- STEP 2: Qayerga -->
     <LinearLayout
-        android:id="@+id/step2_to"
+        android:id="@+id/step2To"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
         android:orientation="vertical"
+        android:padding="24dp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/progressBar">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Qayerga ketyapsiz?"
-            android:textColor="#333"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:text="Qayerga borasiz?"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#333333"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        <EditText
+            android:id="@+id/etTo"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:layout_marginTop="24dp"
-            android:hint="Shahar yoki tuman">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etTo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textCapWords" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:background="@drawable/bg_search_input"
+            android:hint="Manzilni tanlang"
+            android:paddingHorizontal="16dp"
+            android:focusable="false"
+            android:clickable="true"/>
     </LinearLayout>
 
-
-    <!-- 3-QADAM: SANA -->
+    <!-- STEP 3: Sana -->
     <LinearLayout
-        android:id="@+id/step3_date"
+        android:id="@+id/step3Date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
         android:orientation="vertical"
+        android:padding="24dp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/progressBar">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Qaysi kuni yo'lga chiqasiz?"
-            android:textColor="#333"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:text="Qaysi sanada?"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#333333"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        <EditText
+            android:id="@+id/etDate"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:layout_marginTop="24dp"
-            android:hint="Sana (Kun.Oy.Yil)"
-            app:startIconDrawable="@drawable/ic_calendar">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:cursorVisible="false"
-                android:focusable="false"
-                android:inputType="none" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:background="@drawable/bg_search_input"
+            android:hint="Sanani tanlang"
+            android:paddingHorizontal="16dp"
+            android:focusable="false"
+            android:clickable="true"/>
     </LinearLayout>
 
-
-    <!-- 4-QADAM: VAQT -->
+    <!-- STEP 4: Vaqt -->
     <LinearLayout
-        android:id="@+id/step4_time"
+        android:id="@+id/step4Time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
         android:orientation="vertical"
+        android:padding="24dp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/progressBar">
 
@@ -150,142 +150,121 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Soat nechida?"
-            android:textColor="#333"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#333333"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        <EditText
+            android:id="@+id/etTime"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:layout_marginTop="24dp"
-            android:hint="Vaqt (Soat:Daqiqa)"
-            app:startIconDrawable="@drawable/ic_time">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etTime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:cursorVisible="false"
-                android:focusable="false"
-                android:inputType="none" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:background="@drawable/bg_search_input"
+            android:hint="Vaqtni tanlang"
+            android:paddingHorizontal="16dp"
+            android:focusable="false"
+            android:clickable="true"/>
     </LinearLayout>
 
-    <!-- 5-QADAM: BO'SH JOY SONI (YANGI, ALOHIDA) -->
+    <!-- STEP 5: O'rindiqlar -->
     <LinearLayout
-        android:id="@+id/step5_seats"
+        android:id="@+id/step5Seats"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
         android:orientation="vertical"
+        android:padding="24dp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/progressBar">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nechta bo'sh joy bor?"
-            android:textColor="#333"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:text="Yo'lovchilar uchun nechta joy bor?"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#333333"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        <EditText
+            android:id="@+id/etSeats"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:layout_marginTop="24dp"
-            android:hint="O'rindiqlar soni">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etSeats"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="1" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:background="@drawable/bg_search_input"
+            android:hint="Masalan: 3"
+            android:inputType="number"
+            android:paddingHorizontal="16dp"/>
     </LinearLayout>
 
-    <!-- 6-QADAM: NARXI (YANGI, ALOHIDA) -->
+    <!-- STEP 6: Narx -->
     <LinearLayout
-        android:id="@+id/step6_price"
+        android:id="@+id/step6Price"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
         android:orientation="vertical"
+        android:padding="24dp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/progressBar">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Yo'l haqi qancha?"
-            android:textColor="#333"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:text="Bir kishi uchun narx qancha?"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#333333"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        <EditText
+            android:id="@+id/etPrice"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:layout_marginTop="24dp"
-            android:hint="Narxi (bir kishi uchun)"
-            app:suffixText="so'm">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPrice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:background="@drawable/bg_search_input"
+            android:hint="Masalan: 50000"
+            android:inputType="number"
+            android:paddingHorizontal="16dp"/>
     </LinearLayout>
 
-    <!-- 7-QADAM: QO'SHIMCHA MA'LUMOT (YANGI, ALOHIDA) -->
+    <!-- STEP 7: Qo'shimcha ma'lumot -->
     <LinearLayout
-        android:id="@+id/step7_info"
+        android:id="@+id/step7Info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
         android:orientation="vertical"
+        android:padding="24dp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/progressBar">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Qo'shimcha ma'lumotlar"
-            android:textColor="#333"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:text="Qo'shimcha ma'lumot (ixtiyoriy)"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#333333"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        <EditText
+            android:id="@+id/etInfo"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="120dp"
             android:layout_marginTop="24dp"
-            android:hint="Mashina rusumi, yukxona... (ixtiyoriy)">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="top"
-                android:inputType="textMultiLine|textCapSentences"
-                android:minLines="3" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:background="@drawable/bg_search_input"
+            android:hint="Masalan: Faqat ayollar, konditsioner bor..."
+            android:gravity="top|start"
+            android:padding="16dp"/>
     </LinearLayout>
 
-    <!-- O'ZGARTIRILDI: FAQAT ICONKALI KEYINGI TUGMASI (FAB) -->
+    <!-- KEYINGISI TUGMASI (FAB) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnNext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        app:backgroundTint="#2196F3"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_arrow_right"
+        android:layout_margin="24dp"
+        android:src="@drawable/ic_arrow_right"
+        android:backgroundTint="#00C896"
         app:tint="@android:color/white"
-        tools:ignore="ContentDescription" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Agar ic_arrow_right bo'lmasa, ic_keyboard_right ishlating -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

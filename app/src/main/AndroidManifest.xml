@@ -30,10 +30,7 @@
             android:name=".RegistrationActivity"
             android:exported="false" />
         <activity
-            android:name=".LocationSearchActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SearchResultActivity"
+            android:name=".CitySelectionActivity"
             android:exported="false" />
         <activity
             android:name=".SearchResultActivity"
@@ -50,7 +47,8 @@
         <activity android:name=".TripDetailsActivity" /> <!-- AddTripActivity -->
         <activity
             android:name=".AddTripActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
     </application>
 
 </manifest>

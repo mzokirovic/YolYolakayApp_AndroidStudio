@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    android:gravity="center_vertical"
+    android:background="?attr/selectableItemBackground">
+
+    <!-- Shahar ikonkachasi -->
+    <ImageView
+        android:id="@android:id/icon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_location_to"
+        android:layout_marginEnd="16dp"
+        app:tint="#757575"
+        xmlns:app="http://schemas.android.com/apk/res-auto"/>
+    <!-- Agar ic_location bo'lmasa, android:src="@android:drawable/ic_menu_myplaces" ishlating -->
+
+    <TextView
+        android:id="@android:id/text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Toshkent"
+        android:textSize="16sp"
+        android:textColor="#333333"/>
+
+</LinearLayout>

@@ -25,38 +25,42 @@ class SearchResultActivity : AppCompatActivity() {
         binding = ActivitySearchResultBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 1. MA'LUMOTNI QABUL QILISH (HomeFragment dagi kalit so'zlarga mosladik)
+        // 1. Toolbar sozlamalari
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        binding.toolbar.setNavigationOnClickListener { finish() }
+
+        // 2. MA'LUMOTNI QABUL QILISH
         val searchFrom = intent.getStringExtra("FROM_CITY")?.trim() ?: ""
         val searchTo = intent.getStringExtra("TO_CITY")?.trim() ?: ""
         val searchDate = intent.getStringExtra("DATE")?.trim() ?: ""
 
         // Sarlavhani yangilash
         if (searchFrom.isNotEmpty() && searchTo.isNotEmpty()) {
-            binding.tvTitle.text = "$searchFrom -> $searchTo"
+            supportActionBar?.title = "$searchFrom -> $searchTo"
         } else {
-            binding.tvTitle.text = "Qidiruv natijalari"
+            supportActionBar?.title = "Qidiruv natijalari"
         }
 
-        // 2. Adapterni sozlash
+        // 3. Adapterni sozlash
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = TripAdapter(tripList) { selectedTrip ->
             val intent = Intent(this, TripDetailsActivity::class.java)
             intent.putExtra("TRIP_DATA", selectedTrip)
-            // Qidiruvdan o'tilganda "Preview" emas, oddiy ko'rish rejimi bo'ladi
             intent.putExtra("IS_PREVIEW", false)
             startActivity(intent)
         }
         binding.recyclerView.adapter = adapter
 
-        binding.btnBack.setOnClickListener { finish() }
-
-        // 3. Qidirishni boshlash
+        // 4. Qidirishni boshlash
         searchTrips(searchFrom, searchTo, searchDate)
     }
 
     private fun searchTrips(from: String, to: String, date: String) {
         binding.progressBar.visibility = View.VISIBLE
         binding.emptyStateLayout.visibility = View.GONE
+        binding.recyclerView.visibility = View.GONE
 
         val database = FirebaseDatabase.getInstance().getReference("Trips")
 
@@ -68,14 +72,11 @@ class SearchResultActivity : AppCompatActivity() {
                     val trip = data.getValue(Trip::class.java)
 
                     if (trip != null) {
-                        // --- FILTRLASH MANTIQI (YUMSHATILGAN) ---
-
-                        // 1. Shaharlarni tekshirish (Contains ishlatamiz)
+                        // --- FILTRLASH MANTIQI ---
                         val tripFrom = trip.from?.trim() ?: ""
                         val tripTo = trip.to?.trim() ?: ""
 
-                        // Agar qidiruv so'zi bo'sh bo'lsa, hamma narsani ko'rsataversin (true)
-                        // Agar yozilgan bo'lsa, ichida bor-yo'qligini tekshirsin
+                        // 1. Shaharni tekshirish (Ichida borligini tekshiramiz)
                         val isFromMatch = if (from.isNotEmpty()) {
                             tripFrom.contains(from, ignoreCase = true)
                         } else true
@@ -84,36 +85,34 @@ class SearchResultActivity : AppCompatActivity() {
                             tripTo.contains(to, ignoreCase = true)
                         } else true
 
-                        // 2. Sanani tekshirish
-                        // Agar user sana tanlamagan bo'lsa, hammasi chiqsin.
-                        // Agar tanlagan bo'lsa, aniq tenglik kerak.
+                        // 2. Sanani tekshirish (Agar user tanlagan bo'lsa)
                         val isDateMatch = if (date.isNotEmpty()) {
                             trip.date == date
                         } else true
 
-                        // Hozircha faqat shahar va sana bo'yicha qo'shamiz
+                        // Hozircha faqat shahar va sana bo'yicha
                         if (isFromMatch && isToMatch && isDateMatch) {
                             tripList.add(trip)
                         }
                     }
                 }
 
-                // Adapterga o'zgarishni xabar qilish
-                adapter.notifyDataSetChanged() // Yoki adapter.updateList(tripList) agar funksiya bo'lsa
-
+                // Ekranni yangilash
+                adapter.notifyDataSetChanged()
                 binding.progressBar.visibility = View.GONE
 
-                // Agar ro'yxat bo'sh bo'lsa
                 if (tripList.isEmpty()) {
                     binding.emptyStateLayout.visibility = View.VISIBLE
+                    binding.recyclerView.visibility = View.GONE
                 } else {
                     binding.emptyStateLayout.visibility = View.GONE
+                    binding.recyclerView.visibility = View.VISIBLE
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
                 binding.progressBar.visibility = View.GONE
-                Toast.makeText(this@SearchResultActivity, "Xatolik: ${error.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@SearchResultActivity, "Internetda xatolik: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }

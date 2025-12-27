@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    tools:context=".CitySelectionActivity">
+
+    <!-- 1. Header (Yopish tugmasi va Sarlavha) -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btnClose"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_close"
+            app:tint="#333333"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"/>
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jo'nash manzili"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginEnd="24dp"/> <!-- Markazga to'g'irlash uchun -->
+    </LinearLayout>
+
+    <!-- 2. Qidiruv qatori (Rasmdagidek) -->
+    <LinearLayout
+        android:id="@+id/searchContainer"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginHorizontal="16dp"
+        android:background="@drawable/bg_search_input"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+
+        <!-- Qidiruv ikonka (yoki nuqta) -->
+        <ImageView
+            android:id="@+id/imgSearchIcon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/shape_circle_green"
+            app:tint="#333333"/>
+        <!-- Eslatma: shape_circle_green o'rniga oddiy ic_search ishlatsangiz ham bo'ladi -->
+
+        <EditText
+            android:id="@+id/etSearchCity"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="Shahar, bekat yoki manzil..."
+            android:paddingStart="12dp"
+            android:textSize="16sp"
+            android:textColor="#333333"
+            android:textColorHint="#999999"
+            android:inputType="textCapWords"
+            android:maxLines="1"/>
+
+        <!-- Tozalash (X) tugmasi -->
+        <ImageView
+            android:id="@+id/btnClear"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_close"
+            app:tint="#999999"
+            android:visibility="gone"
+            android:clickable="true"/>
+    </LinearLayout>
+
+    <!-- 3. Mening joylashuvim (Use my location) -->
+    <LinearLayout
+        android:id="@+id/btnUseLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        app:layout_constraintTop_toBottomOf="@id/searchContainer">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_location_searching"
+            app:tint="#FF5252"/>
+        <!-- ic_location (my_location) ikonkasini qo'shish kerak -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mening joylashuvim"
+            android:textSize="16sp"
+            android:textColor="#FF5252"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp"/>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/dividerLoc"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#F0F0F0"
+        app:layout_constraintTop_toBottomOf="@id/btnUseLocation"/>
+
+    <!-- 4. Shaharlar ro'yxati -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvCities"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/dividerLoc"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

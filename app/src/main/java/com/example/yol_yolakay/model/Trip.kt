@@ -1,29 +1,58 @@
 package com.example.yol_yolakay.model
 
-import java.io.Serializable
+import android.os.Parcel
+import android.os.Parcelable
 
-/**
- * Bu klass safar (trip) haqidagi barcha ma'lumotlarni o'zida saqlaydi.
- * Serializable interfeysi bu obyektni Activity'lar o'rtasida uzatish uchun kerak.
- */
 data class Trip(
-    // Asosiy, unikal ID
     var id: String? = null,
-
-    // Yo'nalish
     var from: String? = null,
     var to: String? = null,
-
-    // Vaqt
     var date: String? = null,
-    var time: String? = null, // Vaqt matn ko'rinishida ("14:30")
+    var time: String? = null,
+    var price: Long? = 0,
+    var seats: Int? = 1,
+    var info: String? = null,
+    var driverName: String? = "Haydovchi",
+    var driverPhone: String? = null
+) : Parcelable {
 
-    // Tafsilotlar
-    var seats: Int? = null,    // Joylar soni butun son
-    var price: Long? = null,   // Narx katta son bo'lishi mumkin
-    var info: String? = null   // Qo'shimcha ma'lumot
+    constructor(parcel: Parcel) : this(
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readValue(Long::class.java.classLoader) as? Long,
+        parcel.readValue(Int::class.java.classLoader) as? Int,
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString()
+    )
 
-) : Serializable {
-    // Firebase to'g'ri ishlashi uchun bo'sh konstruktor kerak
-    constructor() : this(null, null, null, null, null, null, null, null)
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(id)
+        parcel.writeString(from)
+        parcel.writeString(to)
+        parcel.writeString(date)
+        parcel.writeString(time)
+        parcel.writeValue(price)
+        parcel.writeValue(seats)
+        parcel.writeString(info)
+        parcel.writeString(driverName)
+        parcel.writeString(driverPhone)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<Trip> {
+        override fun createFromParcel(parcel: Parcel): Trip {
+            return Trip(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Trip?> {
+            return arrayOfNulls(size)
+        }
+    }
 }

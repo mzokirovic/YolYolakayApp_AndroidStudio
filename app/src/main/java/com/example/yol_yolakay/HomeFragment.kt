@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.example.yol_yolakay.databinding.FragmentHomeBinding
 import java.util.Calendar
@@ -20,7 +19,7 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    // Tanlangan sanani saqlash uchun o'zgaruvchi
+    // Tanlangan sanani saqlash
     private var selectedDateString: String = ""
     // Tanlangan o'rindiqlar soni
     private var selectedSeatsCount: Int = 1
@@ -28,10 +27,11 @@ class HomeFragment : Fragment() {
     // 1. "Qayerdan" oynasidan natijani qabul qilish
     private val fromLocationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val city = result.data?.getStringExtra("selected_location")
+            // Yangi Activityda kalit so'z "SELECTED_CITY" edi
+            val city = result.data?.getStringExtra("SELECTED_CITY")
             if (!city.isNullOrEmpty()) {
                 binding.tvSearchFrom.text = city
-                binding.tvSearchFrom.setTextColor(Color.BLACK) // Rangini qoraga o'zgartiramiz
+                binding.tvSearchFrom.setTextColor(Color.BLACK)
             }
         }
     }
@@ -39,7 +39,8 @@ class HomeFragment : Fragment() {
     // 2. "Qayerga" oynasidan natijani qabul qilish
     private val toLocationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val city = result.data?.getStringExtra("selected_location")
+            // Yangi Activityda kalit so'z "SELECTED_CITY" edi
+            val city = result.data?.getStringExtra("SELECTED_CITY")
             if (!city.isNullOrEmpty()) {
                 binding.tvSearchTo.text = city
                 binding.tvSearchTo.setTextColor(Color.BLACK)
@@ -58,15 +59,17 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. "Qayerdan" bosilganda -> LocationSearchActivity ochiladi
+        // 1. "Qayerdan" bosilganda -> Yangi CitySelectionActivity ochiladi
         binding.containerFrom.setOnClickListener {
-            val intent = Intent(requireContext(), LocationSearchActivity::class.java)
+            val intent = Intent(requireContext(), CitySelectionActivity::class.java)
+            intent.putExtra("TYPE", "FROM") // Sarlavha "Jo'nash manzili" bo'lishi uchun
             fromLocationLauncher.launch(intent)
         }
 
-        // 2. "Qayerga" bosilganda -> LocationSearchActivity ochiladi
+        // 2. "Qayerga" bosilganda -> Yangi CitySelectionActivity ochiladi
         binding.containerTo.setOnClickListener {
-            val intent = Intent(requireContext(), LocationSearchActivity::class.java)
+            val intent = Intent(requireContext(), CitySelectionActivity::class.java)
+            intent.putExtra("TYPE", "TO") // Sarlavha "Borish manzili" bo'lishi uchun
             toLocationLauncher.launch(intent)
         }
 
@@ -85,7 +88,7 @@ class HomeFragment : Fragment() {
             val from = binding.tvSearchFrom.text.toString()
             val to = binding.tvSearchTo.text.toString()
 
-            // Tekshiruv: "Qayerdan" yoki "Qayerga" so'zlari turgan bo'lsa, demak tanlanmagan
+            // Tekshiruv
             if (from == "Qayerdan" || to == "Qayerga") {
                 Toast.makeText(context, "Iltimos, manzilni tanlang", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -95,7 +98,7 @@ class HomeFragment : Fragment() {
             val intent = Intent(requireContext(), SearchResultActivity::class.java)
             intent.putExtra("FROM_CITY", from)
             intent.putExtra("TO_CITY", to)
-            intent.putExtra("DATE", selectedDateString) // Sana bo'sh bo'lishi ham mumkin
+            intent.putExtra("DATE", selectedDateString)
             intent.putExtra("SEATS", selectedSeatsCount)
             startActivity(intent)
         }
@@ -106,7 +109,6 @@ class HomeFragment : Fragment() {
         val datePickerDialog = DatePickerDialog(
             requireContext(),
             { _, year, month, dayOfMonth ->
-                // Oy 0 dan boshlanadi, shuning uchun +1 qilamiz
                 selectedDateString = String.format("%02d.%02d.%d", dayOfMonth, month + 1, year)
                 binding.tvSearchDate.text = selectedDateString
                 binding.tvSearchDate.setTextColor(Color.BLACK)
@@ -115,7 +117,6 @@ class HomeFragment : Fragment() {
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
         )
-        // O'tib ketgan sanalarni tanlab bo'lmasligi uchun
         datePickerDialog.datePicker.minDate = System.currentTimeMillis() - 1000
         datePickerDialog.show()
     }
@@ -124,7 +125,6 @@ class HomeFragment : Fragment() {
         val seatPickerFragment = SeatPickerFragment.newInstance(selectedSeatsCount)
         seatPickerFragment.show(childFragmentManager, "SeatPicker")
 
-        // Natijani qabul qilish
         seatPickerFragment.onSeatsConfirmed = { newSeatCount ->
             selectedSeatsCount = newSeatCount
             binding.tvSearchSeats.text = "$newSeatCount kishi"
