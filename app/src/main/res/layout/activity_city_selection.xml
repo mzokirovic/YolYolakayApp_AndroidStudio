@@ -7,7 +7,7 @@
     android:background="@android:color/white"
     tools:context=".CitySelectionActivity">
 
-    <!-- 1. Header (Yopish tugmasi va Sarlavha) -->
+    <!-- 1. Header (Tepa qism) -->
     <LinearLayout
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
@@ -30,15 +30,15 @@
             android:id="@+id/tvTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Jo'nash manzili"
+            android:text="Manzilni tanlang"
             android:gravity="center"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="#333333"
-            android:layout_marginEnd="24dp"/> <!-- Markazga to'g'irlash uchun -->
+            android:layout_marginEnd="24dp"/>
     </LinearLayout>
 
-    <!-- 2. Qidiruv qatori (Rasmdagidek) -->
+    <!-- 2. Qidiruv qatori -->
     <LinearLayout
         android:id="@+id/searchContainer"
         android:layout_width="match_parent"
@@ -49,30 +49,28 @@
         android:paddingHorizontal="12dp"
         app:layout_constraintTop_toBottomOf="@id/headerLayout">
 
-        <!-- Qidiruv ikonka (yoki nuqta) -->
         <ImageView
             android:id="@+id/imgSearchIcon"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:src="@drawable/shape_circle_green"
-            app:tint="#333333"/>
-        <!-- Eslatma: shape_circle_green o'rniga oddiy ic_search ishlatsangiz ham bo'ladi -->
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_search"
+            app:tint="#757575"/>
 
+        <!-- ID: etSearch -->
         <EditText
-            android:id="@+id/etSearchCity"
+            android:id="@+id/etSearch"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@null"
-            android:hint="Shahar, bekat yoki manzil..."
+            android:hint="Shahar nomi..."
             android:paddingStart="12dp"
             android:textSize="16sp"
             android:textColor="#333333"
-            android:textColorHint="#999999"
             android:inputType="textCapWords"
             android:maxLines="1"/>
 
-        <!-- Tozalash (X) tugmasi -->
+        <!-- ID: btnClear -->
         <ImageView
             android:id="@+id/btnClear"
             android:layout_width="20dp"
@@ -83,7 +81,7 @@
             android:clickable="true"/>
     </LinearLayout>
 
-    <!-- 3. Mening joylashuvim (Use my location) -->
+    <!-- 3. Hozirgi joylashuv -->
     <LinearLayout
         android:id="@+id/btnUseLocation"
         android:layout_width="match_parent"
@@ -100,7 +98,6 @@
             android:layout_height="24dp"
             android:src="@drawable/ic_location_searching"
             app:tint="#FF5252"/>
-        <!-- ic_location (my_location) ikonkasini qo'shish kerak -->
 
         <TextView
             android:layout_width="wrap_content"
@@ -119,7 +116,8 @@
         android:background="#F0F0F0"
         app:layout_constraintTop_toBottomOf="@id/btnUseLocation"/>
 
-    <!-- 4. Shaharlar ro'yxati -->
+    <!-- 4. Ro'yxat -->
+    <!-- ID: rvCities -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvCities"
         android:layout_width="match_parent"

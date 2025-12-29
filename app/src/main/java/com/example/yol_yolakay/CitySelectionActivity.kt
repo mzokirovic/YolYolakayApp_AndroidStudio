@@ -1,12 +1,15 @@
 package com.example.yol_yolakay
 
+import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.yol_yolakay.adapters.CityAdapter // Adapterni to'g'ri papkadan olish
 import com.example.yol_yolakay.databinding.ActivityCitySelectionBinding
 
 class CitySelectionActivity : AppCompatActivity() {
@@ -38,29 +41,31 @@ class CitySelectionActivity : AppCompatActivity() {
 
         if (type == "FROM") {
             binding.tvTitle.text = "Jo'nash manzili"
-            binding.etSearchCity.hint = "Qayerdan ketasiz?"
-            binding.imgSearchIcon.setImageResource(R.drawable.shape_circle_green)
+            binding.etSearch.hint = "Qayerdan ketasiz?"
+            // Ikonka resurslari mavjudligiga ishonch hosil qiling, yo'q bo'lsa standartini qo'ying
+            binding.imgSearchIcon.setImageResource(R.drawable.ic_search)
         } else {
             binding.tvTitle.text = "Borish manzili"
-            binding.etSearchCity.hint = "Qayerga borasiz?"
-            binding.imgSearchIcon.setImageResource(R.drawable.shape_circle_green)
-            binding.imgSearchIcon.setColorFilter(android.graphics.Color.RED)
+            binding.etSearch.hint = "Qayerga borasiz?"
+            binding.imgSearchIcon.setImageResource(R.drawable.ic_search)
+            binding.imgSearchIcon.setColorFilter(Color.RED)
         }
 
-        binding.etSearchCity.requestFocus()
+        binding.etSearch.requestFocus()
         binding.btnClose.setOnClickListener { finish() }
 
+        // XML faylda btnUseLocation borligini tekshiring
         binding.btnUseLocation.setOnClickListener {
             returnResult("Toshkent (Lokatsiya)")
         }
 
         binding.btnClear.setOnClickListener {
-            binding.etSearchCity.text.clear()
+            binding.etSearch.text.clear()
         }
     }
 
     private fun setupRecyclerView() {
-        // Adapter yaratamiz. Bosilganda returnResult ishlaydi
+        // Adapter String ro'yxatini qabul qiladi
         adapter = CityAdapter(allCities) { selectedCity ->
             returnResult(selectedCity)
         }
@@ -70,7 +75,7 @@ class CitySelectionActivity : AppCompatActivity() {
     }
 
     private fun setupSearchLogic() {
-        binding.etSearchCity.addTextChangedListener(object : TextWatcher {
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -79,36 +84,29 @@ class CitySelectionActivity : AppCompatActivity() {
 
                 if (searchText.isNotEmpty()) {
                     binding.btnClear.visibility = View.VISIBLE
-                    filter(searchText) // Filtrlash funksiyasini chaqiramiz
+                    filter(searchText)
                 } else {
                     binding.btnClear.visibility = View.GONE
-                    // Agar bo'sh bo'lsa, hammasini yoki hech narsani ko'rsatish mumkin
-                    // Hozircha hammasini ko'rsatamiz:
                     adapter.filterList(allCities)
                 }
             }
         })
     }
 
-    // 🔍 QIDIRUV MANTIGI SHU YERDA
     private fun filter(text: String) {
         val filteredList = ArrayList<String>()
-
         for (city in allCities) {
-            // Katta-kichik harfga qaramasdan qidirish (ignoreCase = true)
             if (city.lowercase().contains(text.lowercase())) {
                 filteredList.add(city)
             }
         }
-
-        // Adapterga yangi ro'yxatni beramiz
         adapter.filterList(filteredList)
     }
 
     private fun returnResult(city: String) {
         val intent = Intent()
         intent.putExtra("SELECTED_CITY", city)
-        setResult(RESULT_OK, intent)
+        setResult(Activity.RESULT_OK, intent)
         finish()
     }
 }

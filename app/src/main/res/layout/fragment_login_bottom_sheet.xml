@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet"
+    android:paddingBottom="40dp">
+
+    <!-- Yopish (X) tugmasi -->
+    <ImageView
+        android:id="@+id/btnCloseSheet"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_close"
+        app:tint="#757575"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Sarlavha: Qanday kirmoqchisiz? -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Tizimga kirish"
+        android:textColor="#054652"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@id/btnCloseSheet"
+        app:layout_constraintTop_toBottomOf="@id/btnCloseSheet" />
+
+    <!-- 1-variant: Email orqali kirish (Tugma ko'rinishida) -->
+    <LinearLayout
+        android:id="@+id/btnOptionLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="24dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingVertical="12dp"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle">
+
+        <!-- Ikonka (Email) -->
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_dialog_email"
+            app:tint="#555555" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:text="Email va parol orqali"
+            android:textColor="#333333"
+            android:textSize="18sp" />
+
+        <!-- O'ngga strelka -->
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow_right"
+            app:tint="#BDBDBD" />
+    </LinearLayout>
+
+    <!-- Chiziq (Divider) -->
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="12dp"
+        android:background="#EEEEEE"
+        app:layout_constraintTop_toBottomOf="@id/btnOptionLogin" />
+
+    <!-- Hali biz bilan emasmi? -->
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Hali biz bilan emasmisiz?"
+        android:textColor="#054652"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@id/tvTitle"
+        app:layout_constraintTop_toBottomOf="@id/divider" />
+
+    <!-- Ro'yxatdan o'tish tugmasi -->
+    <TextView
+        android:id="@+id/btnOptionRegister"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:paddingVertical="8dp"
+        android:text="Ro'yxatdan o'tish"
+        android:textColor="#00AFF5"
+        android:textSize="18sp"
+        android:textStyle="normal"
+        app:layout_constraintStart_toStartOf="@id/tvSubtitle"
+        app:layout_constraintTop_toBottomOf="@id/tvSubtitle" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

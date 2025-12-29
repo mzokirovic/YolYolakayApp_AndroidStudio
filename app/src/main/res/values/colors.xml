@@ -1,5 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Asosiy qora va oq -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- PREMIUM YASHIL PALITRASI (Zamonaviy va Jiddiy) -->
+
+    <!-- Asosiy rang (Tugmalar va muhim elementlar uchun) -->
+    <!-- Eski yorqin yashil o'rniga, bu ko'proq ishonch uyg'otadigan to'qroq yashil -->
+    <color name="primaryColor">#10B981</color>
+    <color name="primaryDark">#059669</color> <!-- Bosilgandagi holat -->
+
+    <!-- Matn ranglari (Premium effekt beradigan yumshoq qora) -->
+    <!-- Qop-qora rang ko'zni charchatadi, bu rang esa o'qishga qulay va qimmat ko'rinadi -->
+    <color name="textPrimary">#1F2937</color>   <!-- Sarlavhalar uchun -->
+    <color name="textSecondary">#6B7280</color> <!-- Kichik izohlar uchun -->
+
+    <!-- Fon ranglari -->
+    <!-- Oppoc oq emas, juda och kulrang fon (ko'zga yoqimli) -->
+    <color name="backgroundColor">#F9FAFB</color>
+    <color name="surfaceColor">#FFFFFF</color> <!-- Kartochkalar (CardView) uchun oq -->
+
+    <!-- Urg'u rangi (Accent) - Yulduzchalar va Narxlar uchun -->
+    <color name="accentColor">#F59E0B</color> <!-- Oltin rang -->
+
+    <!-- Xatolik rangi -->
+    <color name="errorColor">#EF4444</color>
 </resources>

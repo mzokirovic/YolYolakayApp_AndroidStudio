@@ -2,6 +2,7 @@ package com.example.yol_yolakay
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -9,110 +10,109 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.yol_yolakay.adapter.TripAdapter
 import com.example.yol_yolakay.databinding.ActivitySearchResultBinding
 import com.example.yol_yolakay.model.Trip
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
+import com.google.gson.Gson
 
 class SearchResultActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySearchResultBinding
-    private lateinit var adapter: TripAdapter
-    private val tripList = mutableListOf<Trip>()
+    private lateinit var tripAdapter: TripAdapter
+    private val tripsList = ArrayList<Trip>()
+    private lateinit var database: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySearchResultBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 1. Toolbar sozlamalari
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.setDisplayShowHomeEnabled(true)
-        binding.toolbar.setNavigationOnClickListener { finish() }
+        val fromCity = intent.getStringExtra("FROM_CITY") ?: ""
+        val toCity = intent.getStringExtra("TO_CITY") ?: ""
+        val date = intent.getStringExtra("DATE") ?: ""
+        val seats = intent.getIntExtra("SEATS", 1)
 
-        // 2. MA'LUMOTNI QABUL QILISH
-        val searchFrom = intent.getStringExtra("FROM_CITY")?.trim() ?: ""
-        val searchTo = intent.getStringExtra("TO_CITY")?.trim() ?: ""
-        val searchDate = intent.getStringExtra("DATE")?.trim() ?: ""
+        setupToolbar(fromCity, toCity, date, seats)
+        setupRecyclerView()
+        loadTripsFromFirebase(fromCity, toCity, date, seats)
+    }
 
-        // Sarlavhani yangilash
-        if (searchFrom.isNotEmpty() && searchTo.isNotEmpty()) {
-            supportActionBar?.title = "$searchFrom -> $searchTo"
-        } else {
-            supportActionBar?.title = "Qidiruv natijalari"
-        }
+    private fun setupToolbar(from: String, to: String, date: String, seats: Int) {
+        binding.tvRouteInfo.text = "$from → $to\n$date • $seats kishi"
+        binding.btnBack.setOnClickListener { finish() }
+    }
 
-        // 3. Adapterni sozlash
-        binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = TripAdapter(tripList) { selectedTrip ->
+    private fun setupRecyclerView() {
+        tripAdapter = TripAdapter(tripsList) { selectedTrip ->
             val intent = Intent(this, TripDetailsActivity::class.java)
-            intent.putExtra("TRIP_DATA", selectedTrip)
+            val gson = Gson()
+            intent.putExtra("TRIP_JSON", gson.toJson(selectedTrip))
             intent.putExtra("IS_PREVIEW", false)
             startActivity(intent)
         }
-        binding.recyclerView.adapter = adapter
 
-        // 4. Qidirishni boshlash
-        searchTrips(searchFrom, searchTo, searchDate)
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        binding.recyclerView.adapter = tripAdapter
     }
 
-    private fun searchTrips(from: String, to: String, date: String) {
+    private fun loadTripsFromFirebase(from: String, to: String, date: String, seats: Int) {
         binding.progressBar.visibility = View.VISIBLE
-        binding.emptyStateLayout.visibility = View.GONE
-        binding.recyclerView.visibility = View.GONE
 
-        val database = FirebaseDatabase.getInstance().getReference("Trips")
+        // E'lonlar saqlanadigan joy ("Trips" yoki "trips" ekanligini tekshiring, odatda 'trips')
+        database = FirebaseDatabase.getInstance().getReference("trips")
 
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                tripList.clear()
+                tripsList.clear()
 
                 for (data in snapshot.children) {
                     val trip = data.getValue(Trip::class.java)
 
                     if (trip != null) {
-                        // --- FILTRLASH MANTIQI ---
-                        val tripFrom = trip.from?.trim() ?: ""
-                        val tripTo = trip.to?.trim() ?: ""
+                        // ----------------------------------------------------
+                        // FILTRLASH (Sizning Trip.kt ga moslab)
+                        // ----------------------------------------------------
 
-                        // 1. Shaharni tekshirish (Ichida borligini tekshiramiz)
-                        val isFromMatch = if (from.isNotEmpty()) {
-                            tripFrom.contains(from, ignoreCase = true)
-                        } else true
+                        // 1. Shahar tekshiruvi (Katta-kichik harf farqisiz)
+                        // Agar qidiruv bo'sh bo'lsa, hammasini ko'rsataveradi
+                        val dbFrom = trip.from ?: ""
+                        val dbTo = trip.to ?: ""
 
-                        val isToMatch = if (to.isNotEmpty()) {
-                            tripTo.contains(to, ignoreCase = true)
-                        } else true
+                        val isFromMatch = dbFrom.contains(from, ignoreCase = true) || from.isEmpty()
+                        val isToMatch = dbTo.contains(to, ignoreCase = true) || to.isEmpty()
 
-                        // 2. Sanani tekshirish (Agar user tanlagan bo'lsa)
+                        // 2. Sana tekshiruvi
+                        // Agar qidiruvda sana bo'sh bo'lsa yoki bazadagi sana mos kelsa
+                        val dbDate = trip.date ?: ""
                         val isDateMatch = if (date.isNotEmpty()) {
-                            trip.date == date
+                            dbDate.contains(date, ignoreCase = true)
                         } else true
 
-                        // Hozircha faqat shahar va sana bo'yicha
-                        if (isFromMatch && isToMatch && isDateMatch) {
-                            tripList.add(trip)
+                        // 3. Joylar soni (Trip.kt da 'seats' deb nomlangan)
+                        // Bazadagi joylar >= qidirilayotgan joylar
+                        val dbSeats = trip.seats ?: 0
+                        val hasSeats = dbSeats >= seats
+
+                        if (isFromMatch && isToMatch && isDateMatch && hasSeats) {
+                            tripsList.add(trip)
                         }
                     }
                 }
 
-                // Ekranni yangilash
-                adapter.notifyDataSetChanged()
+                tripAdapter.notifyDataSetChanged()
                 binding.progressBar.visibility = View.GONE
 
-                if (tripList.isEmpty()) {
-                    binding.emptyStateLayout.visibility = View.VISIBLE
+                // Bo'sh holat
+                if (tripsList.isEmpty()) {
                     binding.recyclerView.visibility = View.GONE
+                    binding.emptyStateLayout.visibility = View.VISIBLE
                 } else {
-                    binding.emptyStateLayout.visibility = View.GONE
                     binding.recyclerView.visibility = View.VISIBLE
+                    binding.emptyStateLayout.visibility = View.GONE
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
                 binding.progressBar.visibility = View.GONE
-                Toast.makeText(this@SearchResultActivity, "Internetda xatolik: ${error.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@SearchResultActivity, "Xatolik: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }

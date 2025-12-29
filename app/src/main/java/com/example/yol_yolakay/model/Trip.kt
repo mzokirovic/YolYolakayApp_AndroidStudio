@@ -5,6 +5,7 @@ import android.os.Parcelable
 
 data class Trip(
     var id: String? = null,
+    var userId: String? = null, // <-- YANGI: Haydovchi IDsi (Eng muhim joyi)
     var from: String? = null,
     var to: String? = null,
     var date: String? = null,
@@ -18,6 +19,7 @@ data class Trip(
 
     constructor(parcel: Parcel) : this(
         parcel.readString(),
+        parcel.readString(), // userId ni o'qish
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
@@ -31,6 +33,7 @@ data class Trip(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(id)
+        parcel.writeString(userId) // userId ni yozish
         parcel.writeString(from)
         parcel.writeString(to)
         parcel.writeString(date)

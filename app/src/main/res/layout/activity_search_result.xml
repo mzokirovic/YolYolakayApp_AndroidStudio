@@ -5,21 +5,71 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5"
+    android:background="#F8F9FA"
+    android:fitsSystemWindows="true"
     tools:context=".SearchResultActivity">
 
-    <!-- 1. Toolbar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <!-- 1. HEADER (Sarlavha va Yo'nalish) -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="wrap_content"
         android:background="@android:color/white"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp"
         android:elevation="4dp"
-        app:navigationIcon="@android:drawable/ic_menu_revert"
-        app:title="Qidiruv natijalari"
-        app:titleTextColor="#333333"
-        app:layout_constraintTop_toTopOf="parent" />
-    <!-- Eslatma: ic_back muammo chiqarmasligi uchun vaqtinchalik tizim arrow_back belgisini qo'ydim -->
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Orqaga qaytish -->
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:src="@drawable/ic_back"
+            app:tint="#00C896"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Orqaga" />
+
+        <!-- Sarlavha matnlari -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Qidiruv natijalari"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#2D3E50"/>
+
+            <!-- Dinamik o'zgaradigan matn (Masalan: Toshkent - Samarqand) -->
+            <TextView
+                android:id="@+id/tvRouteInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Barcha mavjud safarlar"
+                android:textSize="14sp"
+                android:textColor="#757575"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+        </LinearLayout>
+
+        <!-- Filter tugmasi (Agar kerak bo'lsa, keyinchalik ishlatish uchun) -->
+        <!-- Hozircha joyi turibdi, lekin ko'rinmaydi -->
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_car"
+            app:tint="#BDBDBD"
+            android:visibility="gone"/>
+
+    </LinearLayout>
 
     <!-- 2. Natijalar ro'yxati -->
     <androidx.recyclerview.widget.RecyclerView
@@ -27,12 +77,14 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:paddingTop="8dp"
+        android:paddingBottom="16dp"
         android:clipToPadding="false"
         android:scrollbars="vertical"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        android:background="#F8F9FA"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
-    <!-- 3. Bo'sh holat (Empty State) -->
+    <!-- 3. Bo'sh holat (Empty State) - Chiroyli dizayn -->
     <LinearLayout
         android:id="@+id/emptyStateLayout"
         android:layout_width="match_parent"
@@ -41,34 +93,34 @@
         android:orientation="vertical"
         android:visibility="gone"
         android:padding="32dp"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Agar ic_car yoki ic_search bo'lmasa, tizim ikonkasini ishlating -->
         <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@android:drawable/ic_menu_search"
-            app:tint="#BDBDBD"
-            android:layout_marginBottom="16dp"/>
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/ic_car"
+            app:tint="#E0E0E0"
+            android:layout_marginBottom="24dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Afsuski, safarlar topilmadi"
-            android:textColor="#333333"
-            android:textSize="18sp"
+            android:text="Safarlar topilmadi"
+            android:textColor="#2D3E50"
+            android:textSize="20sp"
             android:textStyle="bold"
             android:gravity="center"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Boshqa sana yoki manzilni sinab ko'ring"
+            android:text="Ushbu yo'nalish yoki sana bo'yicha hozircha haydovchilar yo'q. Boshqa vaqtni sinab ko'ring."
             android:textColor="#757575"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:gravity="center"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:lineSpacingExtra="4dp"/>
 
     </LinearLayout>
 
@@ -77,10 +129,11 @@
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:theme="@style/Theme.AppCompat.Light"
+        android:indeterminateTint="#00C896"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@id/headerLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

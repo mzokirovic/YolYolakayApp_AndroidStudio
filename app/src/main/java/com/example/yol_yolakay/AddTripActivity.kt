@@ -2,16 +2,11 @@ package com.example.yol_yolakay
 
 import android.app.Activity
 import android.app.DatePickerDialog
-import android.app.Dialog
 import android.app.TimePickerDialog
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import android.view.Window
-import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -25,7 +20,7 @@ class AddTripActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddTripBinding
     private lateinit var auth: FirebaseAuth
-    private lateinit var database: com.google.firebase.database.DatabaseReference
+    // Database referenceni har doim to'g'ri olish uchun funksiya ichida chaqiramiz
 
     // Hozirgi qadam (1 dan 7 gacha)
     private var currentStep = 1
@@ -36,14 +31,13 @@ class AddTripActivity : AppCompatActivity() {
     private var tripDate: String = ""
     private var tripTime: String = ""
 
-    // --- YANGI: Shahar tanlash uchun Launcherlar ---
+    // --- Shahar tanlash uchun Launcherlar ---
     private val startLocationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val city = result.data?.getStringExtra("SELECTED_CITY")
             if (!city.isNullOrEmpty()) {
                 binding.etFrom.setText(city)
-                // Avtomatik keyingi qadamga o'tishimiz mumkin (ixtiyoriy)
-                // lekin hozircha foydalanuvchi "Keyingisi" ni bosgani ma'qul
+                binding.etFrom.error = null
             }
         }
     }
@@ -53,6 +47,7 @@ class AddTripActivity : AppCompatActivity() {
             val city = result.data?.getStringExtra("SELECTED_CITY")
             if (!city.isNullOrEmpty()) {
                 binding.etTo.setText(city)
+                binding.etTo.error = null
             }
         }
     }
@@ -64,7 +59,6 @@ class AddTripActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
-        database = FirebaseDatabase.getInstance().getReference("Trips")
 
         setupUI()
     }
@@ -82,7 +76,7 @@ class AddTripActivity : AppCompatActivity() {
             }
         }
 
-        // --- YANGI: Shahar tanlash oynalarini ulash ---
+        // --- Shahar tanlash oynalarini ulash ---
         // 1-qadam: Qayerdan
         binding.etFrom.isFocusable = false
         binding.etFrom.setOnClickListener {
@@ -121,7 +115,7 @@ class AddTripActivity : AppCompatActivity() {
                     updateStepVisibility()
                 } else {
                     // Oxirgi qadamda Firebasega yozamiz
-                    goToPreviewActivity()
+                    checkProfileAndProceed()
                 }
             }
         }
@@ -139,8 +133,6 @@ class AddTripActivity : AppCompatActivity() {
         binding.step7Info.visibility = View.GONE
 
         // --- MUKAMMAL SILLIQ ANIMATSIYA ---
-        // Progress barni aniqligini oshirish uchun layout faylida android:max="1000" qilingan bo'lsa yaxshi,
-        // bo'lmasa shu yerni o'zida to'g'irlaymiz.
         binding.progressBar.max = 1000
 
         // Har bir qadam ~142.8 ball (1000 / 7)
@@ -152,8 +144,7 @@ class AddTripActivity : AppCompatActivity() {
             binding.progressBar.progress,
             targetProgress
         ).apply {
-            duration = 600 // Biroz tezroq (300ms) - bu dinamikroq tuyuladi
-            // FastOutSlowInInterpolator eng tabiiy harakatni beradi (boshida tez, oxirida sekin)
+            duration = 600
             interpolator = androidx.interpolator.view.animation.FastOutSlowInInterpolator()
             start()
         }
@@ -175,52 +166,29 @@ class AddTripActivity : AppCompatActivity() {
 
         // Agar 7-qadam bo'lmasa, strelka qaytib kelishi kerak
         if (currentStep < 7) {
-            binding.btnNext.setImageResource(R.drawable.ic_arrow_right) // Ikonka nomini tekshiring
+            binding.btnNext.setImageResource(R.drawable.ic_arrow_right)
         }
     }
 
-
-
     private fun validateCurrentStep(): Boolean {
         return when (currentStep) {
-            1 -> {
-                if (binding.etFrom.text.isNullOrEmpty()) {
-                    binding.etFrom.error = "Manzilni tanlang"
-                    false
-                } else true
-            }
-            2 -> {
-                if (binding.etTo.text.isNullOrEmpty()) {
-                    binding.etTo.error = "Manzilni tanlang"
-                    false
-                } else true
-            }
-            3 -> {
-                if (binding.etDate.text.isNullOrEmpty()) {
-                    Toast.makeText(this, "Sanani tanlang", Toast.LENGTH_SHORT).show()
-                    false
-                } else true
-            }
-            4 -> {
-                if (binding.etTime.text.isNullOrEmpty()) {
-                    Toast.makeText(this, "Vaqtni tanlang", Toast.LENGTH_SHORT).show()
-                    false
-                } else true
-            }
-            5 -> {
-                if (binding.etSeats.text.isNullOrEmpty()) {
-                    binding.etSeats.error = "Joy sonini kiriting"
-                    false
-                } else true
-            }
-            6 -> {
-                if (binding.etPrice.text.isNullOrEmpty()) {
-                    binding.etPrice.error = "Narxni kiriting"
-                    false
-                } else true
-            }
+            1 -> checkEmpty(binding.etFrom, "Manzilni tanlang")
+            2 -> checkEmpty(binding.etTo, "Manzilni tanlang")
+            3 -> checkEmpty(binding.etDate, "Sanani tanlang")
+            4 -> checkEmpty(binding.etTime, "Vaqtni tanlang")
+            5 -> checkEmpty(binding.etSeats, "Joy sonini kiriting")
+            6 -> checkEmpty(binding.etPrice, "Narxni kiriting")
             else -> true
         }
+    }
+
+    // Yordamchi funksiya kodni ixchamlashtirish uchun
+    private fun checkEmpty(view: android.widget.EditText, msg: String): Boolean {
+        if (view.text.isNullOrEmpty()) {
+            if (view.isFocusable) view.error = msg else Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            return false
+        }
+        return true
     }
 
     private fun saveStepData() {
@@ -232,55 +200,87 @@ class AddTripActivity : AppCompatActivity() {
         }
     }
 
-    private fun goToPreviewActivity() {
+    // --- BU YER O'ZGARTIRILDI: BAZAGA HAQIQIY YOZISH ---
+    private fun checkProfileAndProceed() {
+        val currentUser = auth.currentUser
+
+        if (currentUser == null) {
+            Toast.makeText(this, "Iltimos, avval tizimga kiring!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        binding.btnNext.isEnabled = false
+        Toast.makeText(this, "Ma'lumotlar saqlanmoqda...", Toast.LENGTH_SHORT).show()
+
+        val userRef = FirebaseDatabase.getInstance().getReference("Users").child(currentUser.uid)
+
+        userRef.addListenerForSingleValueEvent(object : com.google.firebase.database.ValueEventListener {
+            override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
+                // Profildan ism va telefonni olamiz
+                val firstName = snapshot.child("firstName").getValue(String::class.java) ?: "Haydovchi"
+                val lastName = snapshot.child("lastName").getValue(String::class.java) ?: ""
+                val phone = snapshot.child("phone").getValue(String::class.java) ?: "+998xxxxxxxxx"
+
+                val fullName = "$firstName $lastName".trim()
+
+                // DIQQAT: Preview ga emas, to'g'ridan-to'g'ri bazaga yozamiz
+                publishTripToFirebase(fullName, phone)
+            }
+
+            override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
+                binding.btnNext.isEnabled = true
+                Toast.makeText(this@AddTripActivity, "Xatolik: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun publishTripToFirebase(driverName: String, driverPhone: String) {
         val seatsStr = binding.etSeats.text.toString().trim()
         val priceStr = binding.etPrice.text.toString().trim()
         val info = binding.etInfo.text.toString().trim()
 
-        // Raqamga aylantirish (xatolik bo'lsa default qiymat)
         val seats = seatsStr.toIntOrNull() ?: 1
         val price = priceStr.toLongOrNull() ?: 0
 
-        val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-        val driverName = sharedPref.getString("USER_NAME", "Haydovchi") ?: "Haydovchi"
-        val driverPhone = sharedPref.getString("USER_PHONE", "") ?: ""
+        // SearchResultActivity 'trips' (kichik harf) da qidiryapti, shunga moslaymiz
+        val database = FirebaseDatabase.getInstance().getReference("trips")
+        val tripId = database.push().key ?: return
 
-        // 1. Trip obyektini yaratamiz
-        val trip = com.example.yol_yolakay.model.Trip(
-            id = null,
+        val trip = Trip(
+            id = tripId,
+            userId = auth.currentUser?.uid,
             from = fromCity,
             to = toCity,
             date = tripDate,
             time = tripTime,
-            seats = seats,
             price = price,
+            seats = seats, // <-- Faqat 'seats' ni o'zini qoldiramiz
+            // seatsAvailable = seats,  <-- BU QATORNI O'CHIRING, modelda yo'q ekan
             info = info,
             driverName = driverName,
             driverPhone = driverPhone
         )
 
-        // 2. Intent yaratamiz
-        val intent = android.content.Intent(this, TripDetailsActivity::class.java)
 
-        // 3. --- ENG MUHIM QISM: JSON ORQALI JO'NATISH ---
-        val gson = com.google.gson.Gson()
-        val tripJson = gson.toJson(trip)
-
-        intent.putExtra("TRIP_JSON", tripJson) // <--- TripDetailsActivity shu nom bilan kutmoqda
-        intent.putExtra("IS_PREVIEW", true)
-
-        startActivity(intent)
-        // Eslatma: finish() ni bu yerda chaqirmay turing, foydalanuvchi "Orqaga" qaytib tahrirlay olishi uchun
+        database.child(tripId).setValue(trip)
+            .addOnSuccessListener {
+                Toast.makeText(this, "E'lon muvaffaqiyatli joylandi!", Toast.LENGTH_LONG).show()
+                finish() // Activity yopiladi va asosiy oynaga qaytadi
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Xatolik: ${e.message}", Toast.LENGTH_SHORT).show()
+                binding.btnNext.isEnabled = true
+            }
     }
-
-
+    // ----------------------------------------------------
 
     private fun showDatePicker() {
         val calendar = Calendar.getInstance()
         val datePickerDialog = DatePickerDialog(
             this,
             { _, year, month, dayOfMonth ->
-                val date = String.format("%02d.%02d.%d", dayOfMonth, month + 1, year)
+                // SearchResultActivity bilan bir xil formatda bo'lishi kerak
+                val date = String.format("%02d-%02d-%d", dayOfMonth, month + 1, year)
                 binding.etDate.setText(date)
             },
             calendar.get(Calendar.YEAR),

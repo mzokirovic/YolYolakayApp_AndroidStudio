@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.yol_yolakay.databinding.FragmentTripsBinding
 import com.google.android.material.tabs.TabLayoutMediator
@@ -13,6 +15,7 @@ class TripsFragment : Fragment() {
 
     private var _binding: FragmentTripsBinding? = null
     private val binding get() = _binding!!
+    private var adapter: TripsPagerAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,34 +28,44 @@ class TripsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ViewPager va Adapterni ulash
-        val adapter = TripsPagerAdapter(this)
+        // Adapterni yaratish
+        adapter = TripsPagerAdapter(childFragmentManager, viewLifecycleOwner.lifecycle)
         binding.viewPager.adapter = adapter
 
-        // TabLayout va ViewPager ni birlashtirish (Sarlavhalar shu yerda beriladi)
+        // ViewPager xotirasini boshqarish
+        binding.viewPager.isSaveEnabled = false
+
+        // Tablarni ulash
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             when (position) {
-                0 -> tab.text = "Band qilingan"
-                1 -> tab.text = "Mening e'lonlarim"
+                0 -> tab.text = "E'lonlarim"   // Tartibini o'zgartirdim (mantiqan to'g'ri bo'lishi uchun)
+                1 -> tab.text = "Band qilingan"
             }
         }.attach()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.viewPager.adapter = null
         _binding = null
     }
 
-    // PagerAdapter klassi (FragmentStateAdapter dan meros oladi)
-    class TripsPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
+    // --- ADAPTER KLASSI ---
+    class TripsPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
+        FragmentStateAdapter(fragmentManager, lifecycle) {
 
         override fun getItemCount(): Int = 2
 
         override fun createFragment(position: Int): Fragment {
+            // DIQQAT: Bu yerda endi UNIVERSAL fragmentni ishlatamiz
             return when (position) {
-                0 -> BookedTripsFragment()     // Agar bu qizil bo'lsa, pastdagi eslatmani o'qing
-                1 -> PublishedTripsFragment()  // Agar bu qizil bo'lsa, pastdagi eslatmani o'qing
-                else -> BookedTripsFragment()
+                // 0-tab: Mening e'lonlarim
+                0 -> MyTripsListFragment.newInstance("PUBLISHED")
+
+                // 1-tab: Men band qilganlarim
+                1 -> MyTripsListFragment.newInstance("BOOKED")
+
+                else -> Fragment()
             }
         }
     }

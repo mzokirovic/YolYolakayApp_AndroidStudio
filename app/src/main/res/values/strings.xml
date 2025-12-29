@@ -4,4 +4,6 @@
     <!-- Mana shu ikki qator juda muhim -->
     <string name="price_format">%d so\'m</string>
     <string name="seats_format">%d ta</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

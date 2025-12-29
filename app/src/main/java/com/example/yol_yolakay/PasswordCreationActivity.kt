@@ -23,24 +23,31 @@ class PasswordCreationActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance()
 
-        // Oldingi oynalardan ma'lumotlarni olish
+        // Oldingi oynalardan kelgan ma'lumotlarni olish
         val firstName = intent.getStringExtra("EXTRA_NAME") ?: ""
         val lastName = intent.getStringExtra("EXTRA_SURNAME") ?: ""
         val email = intent.getStringExtra("EXTRA_EMAIL") ?: ""
         val dob = intent.getStringExtra("EXTRA_DOB") ?: ""
         val gender = intent.getStringExtra("EXTRA_GENDER") ?: ""
 
+        // 1. Orqaga qaytish tugmasi
         binding.btnBack.setOnClickListener { finish() }
 
+        // 2. Ro'yxatdan o'tish tugmasi (FloatingActionButton)
         binding.btnRegister.setOnClickListener {
             val password = binding.etPassword.text.toString().trim()
 
-            // "Confirm Password" qismini olib tashladik, chunki rasmda faqat bitta maydon bor
-
+            // Parol uzunligini tekshirish (sizning XML da hintda 8 ta deyilgan)
             if (password.length < 8) {
                 binding.etPassword.error = "Parol kamida 8 ta belgidan iborat bo'lishi kerak"
                 return@setOnClickListener
             }
+
+            // Tugmani vaqtincha bosib bo'lmaydigan qilish (bloklash)
+            binding.btnRegister.isEnabled = false
+
+            // Foydalanuvchiga jarayon ketayotganini bildirish (Toast orqali, chunki tugma kichkina)
+            Toast.makeText(this, "Ro'yxatdan o'tilmoqda...", Toast.LENGTH_SHORT).show()
 
             // Ro'yxatdan o'tkazishni boshlash
             registerUser(email, password, firstName, lastName, dob, gender)
@@ -48,38 +55,48 @@ class PasswordCreationActivity : AppCompatActivity() {
     }
 
     private fun registerUser(email: String, pass: String, name: String, surname: String, dob: String, gender: String) {
-        // 1. Firebase Auth orqali akkaunt yaratish
+        // Firebase Auth orqali akkaunt yaratish
         auth.createUserWithEmailAndPassword(email, pass)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Akkaunt yaratildi, endi qo'shimcha ma'lumotlarni Databasega yozamiz
                     val userId = auth.currentUser?.uid
-                    val userRef = database.getReference("Users").child(userId!!)
 
-                    val userData = hashMapOf(
-                        "firstName" to name,
-                        "lastName" to surname,
-                        "email" to email,
-                        "dob" to dob,
-                        "gender" to gender
-                    )
+                    if (userId != null) {
+                        val userRef = database.getReference("Users").child(userId)
 
-                    userRef.setValue(userData).addOnCompleteListener { dbTask ->
-                        if (dbTask.isSuccessful) {
-                            Toast.makeText(this, "Ro'yxatdan o'tish muvaffaqiyatli!", Toast.LENGTH_SHORT).show()
+                        // Bazaga to'liq ma'lumot yozish (Crash bo'lmasligi uchun bo'sh joylar bilan)
+                        val userData = hashMapOf(
+                            "id" to userId,
+                            "firstName" to name,
+                            "lastName" to surname,
+                            "email" to email,
+                            "dob" to dob,
+                            "gender" to gender,
+                            "phone" to "",
+                            "profileImage" to ""
+                        )
 
-                            // Asosiy oynaga o'tish va barcha activitylarni yopish
-                            val intent = Intent(this, MainActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                        } else {
-                            Toast.makeText(this, "Ma'lumotlarni saqlashda xatolik", Toast.LENGTH_SHORT).show()
+                        userRef.setValue(userData).addOnCompleteListener { dbTask ->
+                            if (dbTask.isSuccessful) {
+                                Toast.makeText(this, "Ro'yxatdan o'tish muvaffaqiyatli! 🎉", Toast.LENGTH_SHORT).show()
+
+                                // Asosiy oynaga o'tish
+                                val intent = Intent(this, MainActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(intent)
+                                finish()
+                            } else {
+                                // Xatolik bo'lsa tugmani qayta yoqamiz
+                                binding.btnRegister.isEnabled = true
+                                Toast.makeText(this, "Ma'lumotlarni saqlashda xatolik", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
-
                 } else {
-                    // Xatolik bo'lsa
-                    Toast.makeText(this, "Xatolik: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    // Auth xatolik
+                    binding.btnRegister.isEnabled = true
+                    val errorMsg = task.exception?.message ?: "Noma'lum xatolik"
+                    Toast.makeText(this, "Xatolik: $errorMsg", Toast.LENGTH_LONG).show()
                 }
             }
     }
