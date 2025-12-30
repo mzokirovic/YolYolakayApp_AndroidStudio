@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.yol_yolakay.api.RetrofitInstance
 import com.example.yol_yolakay.databinding.ActivityTripDetailsBinding
 import com.example.yol_yolakay.model.NotificationData
@@ -28,6 +29,10 @@ class TripDetailsActivity : AppCompatActivity() {
     private var currentTrip: Trip? = null
     private var isPreview: Boolean = false
 
+    // Yangi: Haydovchi uchun adapter va ro'yxat
+    private lateinit var requestAdapter: RequestAdapter
+    private val requestList = ArrayList<UserRequest>()
+
     private val myUserId: String
         get() = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
@@ -36,7 +41,7 @@ class TripDetailsActivity : AppCompatActivity() {
         binding = ActivityTripDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Status bar dizayni
+        // Status bar dizayni (O'zgarishsiz)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
         } else {
@@ -66,10 +71,10 @@ class TripDetailsActivity : AppCompatActivity() {
                 currentTrip = gson.fromJson(tripJson, Trip::class.java)
             } else {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                    currentTrip = intent.getParcelableExtra("TRIP_DATA", Trip::class.java)
+                    currentTrip = intent.getParcelableExtra("trip_data", Trip::class.java)
                 } else {
                     @Suppress("DEPRECATION")
-                    currentTrip = intent.getParcelableExtra("TRIP_DATA")
+                    currentTrip = intent.getParcelableExtra("trip_data")
                 }
             }
             isPreview = intent.getBooleanExtra("IS_PREVIEW", false)
@@ -99,47 +104,51 @@ class TripDetailsActivity : AppCompatActivity() {
                 binding.tvInfo.text = trip.info
             }
 
-            if (isPreview) {
-                binding.btnCall.visibility = View.GONE
-            }
-
         } catch (e: Exception) {
             Log.e("TripDetails", "UI xatolik: ${e.message}")
         }
     }
 
+    // --- ASOSIY O'ZGARISH: Tugmalar va Mantiq ---
     private fun setupButtons() {
         binding.btnBack.setOnClickListener { finish() }
 
-        // Qo'ng'iroq qilish tugmasi
-        binding.btnCall.setOnClickListener {
-            val phone = currentTrip?.driverPhone
+        val trip = currentTrip ?: return
+
+        // 1. TELEFON QILISH LOGIKASI
+        val callListener = View.OnClickListener {
+            val phone = trip.driverPhone
             if (!phone.isNullOrEmpty()) {
-                try {
-                    val intent = Intent(Intent.ACTION_DIAL)
-                    intent.data = Uri.parse("tel:$phone")
-                    startActivity(intent)
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Qo'ng'iroq qilib bo'lmadi", Toast.LENGTH_SHORT).show()
-                }
+                val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone"))
+                startActivity(intent)
             } else {
-                Toast.makeText(this, "Haydovchi raqami yo'q", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Raqam yo'q", Toast.LENGTH_SHORT).show()
+            }
+        }
+        // Pastdagi yashil tugma
+        binding.btnCallBottom.setOnClickListener(callListener)
+
+        // 2. SMS YOZISH LOGIKASI
+        binding.btnSms.setOnClickListener {
+            val phone = trip.driverPhone
+            if (!phone.isNullOrEmpty()) {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("sms:$phone"))
+                intent.putExtra("sms_body", "Assalomu alaykum! Men ${trip.from} dan ${trip.to} ga ketmoqchi edim.")
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "Raqam yo'q", Toast.LENGTH_SHORT).show()
             }
         }
 
-        // --- TUGMALARNI BOSHQARISH (MANTIQ) ---
-        val trip = currentTrip ?: return
-
-        // 1. Agar men HAYDOVCHI bo'lsam
+        // --- MANTIQ (Haydovchi yoki Yo'lovchi) ---
         if (trip.userId == myUserId && !isPreview) {
-            // Band qilish va Telefon qilish tugmalarini yashiramiz
-            binding.btnBook.visibility = View.GONE
-            binding.btnCall.visibility = View.GONE
+            // A) AGAR MEN HAYDOVCHI BO'LSAM
+            binding.layoutPassengerActions.visibility = View.GONE // SMS/Call/Book yashiramiz
+            binding.btnCompleteTrip.visibility = View.VISIBLE // Yakunlash tugmasi chiqadi
 
-            // Yakunlash tugmasini chiqaramiz
-            binding.btnCompleteTrip.visibility = View.VISIBLE
+            // So'rovlar ro'yxatini yuklaymiz
+            loadRequests(trip.id!!)
 
-            // Agar safar allaqachon tugagan bo'lsa
             if (trip.status == "completed") {
                 binding.btnCompleteTrip.isEnabled = false
                 binding.btnCompleteTrip.text = "Safar yakunlangan"
@@ -151,21 +160,209 @@ class TripDetailsActivity : AppCompatActivity() {
             }
 
         } else {
-            // 2. Agar men YO'LOVCHI bo'lsam (yoki Preview rejimi)
+            // B) AGAR MEN YO'LOVCHI BO'LSAM (yoki Preview)
             binding.btnCompleteTrip.visibility = View.GONE
-            binding.btnBook.visibility = View.VISIBLE
+            binding.layoutPassengerActions.visibility = View.VISIBLE
 
-            // Preview rejimida
             if (isPreview) {
+                // Preview rejimi (E'lon berishdan oldin ko'rish)
                 binding.btnBook.text = "E'lonni nashr qilish"
                 binding.btnBook.setOnClickListener { publishTrip() }
+                binding.btnSms.visibility = View.GONE
+                binding.btnCallBottom.visibility = View.GONE
             } else {
-                // Oddiy rejimda
-                binding.btnBook.text = "Joy band qilish"
-                binding.btnBook.setOnClickListener { bookTripReal() }
+                // Oddiy Yo'lovchi rejimi: Statusni tekshiramiz
+                checkRequestStatus(trip.id!!)
             }
         }
     }
+
+    // --- 1. YO'LOVCHI: So'rov yuborish ---
+    private fun sendBookingRequest() {
+        val trip = currentTrip ?: return
+        if (myUserId.isEmpty()) {
+            Toast.makeText(this, "Iltimos, avval tizimga kiring!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        binding.btnBook.isEnabled = false
+        binding.btnBook.text = "Yuborilmoqda..."
+
+        // Foydalanuvchi ma'lumotlarini olamiz
+        val userRef = FirebaseDatabase.getInstance().getReference("Users").child(myUserId)
+        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val firstName = snapshot.child("firstName").getValue(String::class.java) ?: "Yo'lovchi"
+                val lastName = snapshot.child("lastName").getValue(String::class.java) ?: ""
+                val fullName = "$firstName $lastName".trim()
+                val myPhone = snapshot.child("phone").getValue(String::class.java) ?: ""
+
+                // Ma'lumot tayyor, endi yuboramiz
+                val requestMap = mapOf(
+                    "userId" to myUserId,
+                    "name" to fullName,
+                    "phone" to myPhone,
+                    "status" to "pending"
+                )
+
+                FirebaseDatabase.getInstance().getReference("trips")
+                    .child(trip.id!!)
+                    .child("requests") // requests papkasiga yozamiz
+                    .child(myUserId)
+                    .setValue(requestMap)
+                    .addOnSuccessListener {
+                        Toast.makeText(this@TripDetailsActivity, "So'rov yuborildi! ✅", Toast.LENGTH_LONG).show()
+                        binding.btnBook.text = "So'rov yuborilgan ⏳"
+                        binding.btnBook.setBackgroundColor(android.graphics.Color.parseColor("#FFC107")) // Sariq
+
+                        // Haydovchiga push xabar
+                        sendPushNotificationToDriver(trip.userId ?: "", trip.from ?: "", trip.to ?: "")
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(this@TripDetailsActivity, "Xatolik bo'ldi", Toast.LENGTH_SHORT).show()
+                        binding.btnBook.isEnabled = true
+                        binding.btnBook.text = "So'rov yuborish"
+                    }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                binding.btnBook.isEnabled = true
+            }
+        })
+    }
+
+    // --- 2. YO'LOVCHI: Statusni tekshirish ---
+    private fun checkRequestStatus(tripId: String) {
+        val ref = FirebaseDatabase.getInstance().getReference("trips").child(tripId)
+
+        // A) Band qilinganlar ro'yxatini tekshirish (Qabul qilinganmi?)
+        ref.child("bookedUsers").child(myUserId).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    // Qabul qilingan!
+                    binding.btnBook.text = "Siz qabul qilingansiz ✅"
+                    binding.btnBook.isEnabled = false
+                    binding.btnBook.setBackgroundColor(android.graphics.Color.parseColor("#4CAF50"))
+                } else {
+                    // B) Agar qabul qilinmagan bo'lsa, "requests" ni tekshiramiz (Kutilmoqdami?)
+                    ref.child("requests").child(myUserId).addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(reqSnapshot: DataSnapshot) {
+                            if (reqSnapshot.exists()) {
+                                binding.btnBook.text = "So'rov yuborilgan ⏳"
+                                binding.btnBook.isEnabled = false
+                                binding.btnBook.setBackgroundColor(android.graphics.Color.parseColor("#FFC107"))
+                            } else {
+                                // Hali so'rov yubormagan
+                                binding.btnBook.text = "So'rov yuborish"
+                                binding.btnBook.isEnabled = true
+                                binding.btnBook.setOnClickListener { sendBookingRequest() }
+                            }
+                        }
+                        override fun onCancelled(error: DatabaseError) {}
+                    })
+                }
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+    // --- 3. HAYDOVCHI: So'rovlarni yuklash ---
+    // --- 3. HAYDOVCHI: So'rovlarni yuklash (TUZATILGAN VERSIYA) ---
+    private fun loadRequests(tripId: String) {
+        // 1. Ekranda joy ajratamiz (Avvalboshdan ko'rinib tursin)
+        binding.layoutRequests.visibility = View.VISIBLE
+        binding.tvRequestsTitle.text = "So'rovlar yuklanmoqda..."
+
+        // RecyclerViewni sozlash
+        binding.rvRequests.layoutManager = LinearLayoutManager(this)
+        requestAdapter = RequestAdapter(requestList) { request, isAccepted ->
+            handleRequestAction(tripId, request, isAccepted)
+        }
+        binding.rvRequests.adapter = requestAdapter
+        binding.rvRequests.isNestedScrollingEnabled = false
+
+        // 2. Bazadan o'qish
+        val ref = FirebaseDatabase.getInstance().getReference("trips").child(tripId).child("requests")
+
+        ref.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                requestList.clear()
+
+                // LOG: Tekshirish uchun console ga yozamiz
+                Log.d("TripDetails", "Topilgan so'rovlar soni: ${snapshot.childrenCount}")
+
+                for (child in snapshot.children) {
+                    val userId = child.key ?: ""
+                    val name = child.child("name").getValue(String::class.java) ?: "Noma'lum"
+                    val phone = child.child("phone").getValue(String::class.java) ?: ""
+                    val status = child.child("status").getValue(String::class.java)
+
+                    // Faqat "pending" (kutilayotgan) so'rovlarni qo'shamiz
+                    if (status == "pending") {
+                        requestList.add(UserRequest(userId, name, phone))
+                    }
+                }
+                requestAdapter.notifyDataSetChanged()
+
+                // 3. Natijani ko'rsatish
+                if (requestList.isNotEmpty()) {
+                    binding.tvRequestsTitle.text = "Kutilayotgan so'rovlar (${requestList.size}):"
+                } else {
+                    // Agar bo'sh bo'lsa ham YASHIRMAYMIZ, shunchaki xabar yozamiz
+                    binding.tvRequestsTitle.text = "Hozircha yangi so'rovlar yo'q"
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("TripDetails", "Xatolik: ${error.message}")
+                Toast.makeText(this@TripDetailsActivity, "Xatolik: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+
+    // --- 4. HAYDOVCHI: Qabul qilish yoki Rad etish ---
+    // --- 4. HAYDOVCHI: Qabul qilish yoki Rad etish (YANGILANGAN) ---
+    private fun handleRequestAction(tripId: String, request: UserRequest, isAccepted: Boolean) {
+        val tripRef = FirebaseDatabase.getInstance().getReference("trips").child(tripId)
+
+        if (isAccepted) {
+            // 1. Joriy joylar sonini tekshiramiz
+            tripRef.child("seats").get().addOnSuccessListener { snapshot ->
+                val currentSeats = snapshot.getValue(Int::class.java) ?: 0
+
+                if (currentSeats > 0) {
+                    // Joy bor, qabul qilamiz
+
+                    // A) BookedUsers ga qo'shish
+                    tripRef.child("bookedUsers").child(request.userId).setValue(true)
+
+                    // B) Yo'lovchining profiliga yozish
+                    val userTripsRef = FirebaseDatabase.getInstance().getReference("Users").child(request.userId).child("bookedTrips")
+                    userTripsRef.child(tripId).setValue(true)
+
+                    // C) Requests dan o'chirish
+                    tripRef.child("requests").child(request.userId).removeValue()
+
+                    // D) JOY SONINI 1 TAGA KAMAYTIRISH
+                    tripRef.child("seats").setValue(currentSeats - 1)
+
+                    Toast.makeText(this, "${request.name} qabul qilindi! ✅", Toast.LENGTH_SHORT).show()
+
+                    // Ekranni yangilash (seats o'zgargani uchun)
+                    binding.tvInfo.append("\n(1 ta joy band qilindi)")
+                } else {
+                    // Joy qolmagan bo'lsa
+                    Toast.makeText(this, "Afsuski, bo'sh joy qolmadi! ❌", Toast.LENGTH_LONG).show()
+                }
+            }
+        } else {
+            // Rad etish: Faqat Requests dan o'chirish
+            tripRef.child("requests").child(request.userId).removeValue()
+            Toast.makeText(this, "Rad etildi ❌", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     // --- SAFARNI YAKUNLASH ---
     private fun completeTrip() {
@@ -176,18 +373,12 @@ class TripDetailsActivity : AppCompatActivity() {
             .setTitle("Safarni yakunlash")
             .setMessage("Ushbu safarni haqiqatan ham tugatmoqchimisiz? U 'Tarix' bo'limiga o'tkaziladi.")
             .setPositiveButton("Ha, yakunlash") { _, _ ->
-
-                // Bazada statusni o'zgartirish
                 val ref = FirebaseDatabase.getInstance().getReference("trips").child(trip.id!!)
                 ref.child("status").setValue("completed")
                     .addOnSuccessListener {
-                        Toast.makeText(this, "Safar muvaffaqiyatli yakunlandi! 🏁", Toast.LENGTH_SHORT).show()
-                        finish() // Oynani yopish
+                        Toast.makeText(this, "Safar yakunlandi! 🏁", Toast.LENGTH_SHORT).show()
+                        finish()
                     }
-                    .addOnFailureListener {
-                        Toast.makeText(this, "Xatolik: ${it.message}", Toast.LENGTH_SHORT).show()
-                    }
-
             }
             .setNegativeButton("Yo'q", null)
             .show()
@@ -202,7 +393,6 @@ class TripDetailsActivity : AppCompatActivity() {
 
         trip.id = newId
         trip.userId = myUserId
-        // Yangi e'lon har doim active bo'ladi
         trip.status = "active"
 
         binding.btnBook.isEnabled = false
@@ -223,60 +413,6 @@ class TripDetailsActivity : AppCompatActivity() {
             }
     }
 
-    // --- HAQIQIY BAND QILISH (BOOKING) ---
-    private fun bookTripReal() {
-        if (myUserId.isEmpty()) {
-            Toast.makeText(this, "Iltimos, avval tizimga kiring!", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val trip = currentTrip ?: return
-        val driverId = trip.userId
-
-        if (driverId == myUserId) {
-            Toast.makeText(this, "Siz o'zingizning e'loningizni band qila olmaysiz!", Toast.LENGTH_LONG).show()
-            return
-        }
-
-        if (trip.id.isNullOrEmpty()) {
-            Toast.makeText(this, "E'lon IDsi topilmadi", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        binding.btnBook.isEnabled = false
-        binding.btnBook.text = "Band qilinmoqda..."
-
-        val database = FirebaseDatabase.getInstance()
-        val tripBookingRef = database.getReference("trips").child(trip.id!!).child("bookedUsers")
-        val myProfileRef = database.getReference("Users").child(myUserId).child("bookedTrips")
-
-        // Notification
-        val notificationRef = database.getReference("Notifications").child(driverId ?: "unknown").push()
-        val notificationDataMap = mapOf(
-            "title" to "Yangi yo'lovchi!",
-            "message" to "${trip.from} - ${trip.to} yo'nalishingizga joy band qilindi.",
-            "tripId" to (trip.id ?: ""),
-            "passengerId" to myUserId,
-            "isRead" to false,
-            "timestamp" to System.currentTimeMillis()
-        )
-
-        tripBookingRef.child(myUserId).setValue(true)
-            .addOnSuccessListener {
-                myProfileRef.child(trip.id!!).setValue(true)
-                notificationRef.setValue(notificationDataMap)
-                sendPushNotificationToDriver(driverId ?: "", trip.from ?: "", trip.to ?: "")
-
-                Toast.makeText(this, "Joy muvaffaqiyatli band qilindi! ✅", Toast.LENGTH_LONG).show()
-                finish()
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Xatolik: ${it.message}", Toast.LENGTH_SHORT).show()
-                binding.btnBook.isEnabled = true
-                binding.btnBook.text = "Joy band qilish"
-            }
-    }
-
     // --- PUSH XABAR YUBORISH ---
     private fun sendPushNotificationToDriver(driverId: String, from: String, to: String) {
         if (driverId.isEmpty()) return
@@ -288,27 +424,21 @@ class TripDetailsActivity : AppCompatActivity() {
                 val token = snapshot.getValue(String::class.java)
 
                 if (!token.isNullOrEmpty()) {
-                    val title = "Yangi yo'lovchi! 🚖"
-                    val message = "$from - $to safaringizga joy band qilindi."
+                    val title = "Yangi so'rov! 🙋‍♂️"
+                    val message = "$from - $to safaringizga qo'shilish so'rovi keldi."
 
                     val notificationData = NotificationData(title, message)
                     val pushNotification = PushNotification(notificationData, token)
 
                     CoroutineScope(Dispatchers.IO).launch {
                         try {
-                            val response = RetrofitInstance.api.postNotification(pushNotification)
-                            if (response.isSuccessful) {
-                                Log.d("FCM", "Xabar yuborildi")
-                            } else {
-                                Log.e("FCM", "Xatolik: ${response.errorBody()}")
-                            }
+                            RetrofitInstance.api.postNotification(pushNotification)
                         } catch (e: Exception) {
-                            Log.e("FCM", "Internet xatosi: ${e.message}")
+                            Log.e("FCM", "Xatolik: ${e.message}")
                         }
                     }
                 }
             }
-
             override fun onCancelled(error: DatabaseError) {}
         })
     }
