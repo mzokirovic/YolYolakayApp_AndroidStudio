@@ -1,42 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F9F9F9"
-    tools:context=".TripsFragment">
+    android:background="#FFFFFF">
 
-    <!-- 1. Sarlavha -->
+    <!-- 1. Header: Sarlavha -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Mening safarlarim"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:textStyle="bold"
-        android:textColor="#333333"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="24dp"
-        android:paddingBottom="16dp"
-        android:background="@android:color/white"/>
+        android:textColor="#222222"
+        android:paddingStart="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="10dp"/>
 
-    <!-- 2. TabLayout (Bo'sh qoldiramiz, kod orqali to'ldiriladi) -->
+    <!-- 2. Qidiruv va Filter -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="10dp"
+        android:gravity="center_vertical">
+
+        <!-- Search Bar -->
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_search_input"
+            android:hint="Qidirish..."
+            android:textSize="14sp"
+            android:paddingStart="16dp"
+            android:drawableStart="@android:drawable/ic_menu_search"
+            android:drawablePadding="8dp"
+            android:drawableTint="#999"/>
+
+        <!-- Filter Icon -->
+        <ImageView
+            android:id="@+id/btnFilter"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:src="@android:drawable/ic_menu_sort_by_size"
+            app:tint="#555"
+            android:padding="10dp"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <!-- 3. TABS (Band qilingan | E'lon qilingan) -->
+    <!-- Rasmda chiziq faqat matn tagida turibdi, bu Tablayout stili -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        app:tabIndicatorColor="#00C896"
-        app:tabSelectedTextColor="#00C896"
-        app:tabTextColor="#757575"
-        app:tabMode="fixed"
-        app:tabGravity="fill"/>
+        app:tabIndicatorColor="#2196F3"
+        app:tabSelectedTextColor="#2196F3"
+        app:tabTextColor="#9E9E9E"
+        app:tabTextAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:background="#FFFFFF">
 
-    <!-- 3. Sahifalar o'rnashadigan joy (ViewPager) -->
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPager"
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Band qilingan" /> <!-- Booked -->
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="E'lon qilingan" /> <!-- Published -->
+    </com.google.android.material.tabs.TabLayout>
+
+    <View
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="1dp"
+        android:background="#EEEEEE"/>
+
+    <!-- 4. Ro'yxat -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewTrips"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F9F9F9"
+        android:paddingTop="10dp"
+        android:clipToPadding="false"/>
+
+    <!-- Bo'sh holat uchun -->
+    <TextView
+        android:id="@+id/tvEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Hozircha safarlar yo'q"
+        android:gravity="center"
+        android:layout_marginTop="50dp"
+        android:visibility="gone"/>
 
 </LinearLayout>

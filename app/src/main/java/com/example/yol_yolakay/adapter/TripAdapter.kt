@@ -1,8 +1,11 @@
 package com.example.yol_yolakay.adapter
 
+import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.yol_yolakay.R
 import com.example.yol_yolakay.databinding.ItemTripBinding
 import com.example.yol_yolakay.model.Trip
 
@@ -13,25 +16,38 @@ class TripAdapter(
 
     inner class TripViewHolder(val binding: ItemTripBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(trip: Trip) {
-            // 1. Shaharlar (Yangi XML IDlari bo'yicha)
-            binding.tvFromCity.text = trip.from ?: ""
-            binding.tvToCity.text = trip.to ?: ""
 
-            // 2. Vaqt (Faqat soatni ko'rsatamiz, sana kerak emas, chunki u tepada bo'ladi yoki alohida)
-            binding.tvStartTime.text = trip.time ?: "00:00"
+            // 1. YO'NALISH (Toshkent → Samarqand)
+            // Eski "tvFromCity" va "tvToCity" endi bitta "tvRoute" bo'ldi
+            binding.tvRoute.text = "${trip.from} → ${trip.to}"
 
-            // 3. Narx (Mingliklarni ajratib ko'rsatish: 75 000)
+            // 2. NARX
             val formattedPrice = String.format("%,d", trip.price ?: 0).replace(",", " ")
-            binding.tvPrice.text = formattedPrice
+            binding.tvPrice.text = "$formattedPrice so'm"
 
-            // 4. Haydovchi ismi (Hozircha statik yoki trip modelida bo'lsa o'shani qo'yamiz)
-            // Agar Trip modelida driverName bo'lmasa, vaqtinchalik "Haydovchi" deb turamiz
-            binding.tvDriverName.text = "Haydovchi"
+            // 3. SANA VA VAQT
+            binding.tvDate.text = trip.date ?: "Sana yo'q"
+            binding.tvTime.text = trip.time ?: "Vaqt yo'q"
 
-            // 5. O'rindiqlar soni
-            binding.tvSeatsCount.text = "${trip.seats ?: 0} o'rin bo'sh"
+            // 4. HAYDOVCHI ISMI
+            binding.tvPersonName.text = trip.driverName ?: "Haydovchi"
 
-            // Item bosilganda
+            // 5. STATUS (Yashil yoki Sariq belgi)
+            if (trip.status == "completed") {
+                binding.tvStatusBadge.text = "TUGAGAN"
+                binding.tvStatusBadge.setTextColor(Color.parseColor("#FF9800")) // To'q sariq
+                binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_status_yellow)
+            } else {
+                binding.tvStatusBadge.text = "FAOL"
+                binding.tvStatusBadge.setTextColor(Color.parseColor("#4CAF50")) // Yashil
+                binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_status_green)
+            }
+
+            // 6. AVATAR (Hozircha standart rasm)
+            // Keyinchalik bu yerga Glide kutubxonasi bilan rasm yuklashni qo'shamiz
+            binding.imgAvatar.setImageResource(R.drawable.ic_launcher_foreground)
+
+            // Bosilganda
             binding.root.setOnClickListener {
                 onItemClick(trip)
             }

@@ -14,7 +14,8 @@ data class Trip(
     var seats: Int? = 1,
     var info: String? = null,
     var driverName: String? = "Haydovchi",
-    var driverPhone: String? = null
+    var driverPhone: String? = null,
+    var status: String = "active"
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -28,7 +29,8 @@ data class Trip(
         parcel.readValue(Int::class.java.classLoader) as? Int,
         parcel.readString(),
         parcel.readString(),
-        parcel.readString()
+        parcel.readString(),
+        parcel.readString() ?: "active"
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
@@ -43,6 +45,7 @@ data class Trip(
         parcel.writeString(info)
         parcel.writeString(driverName)
         parcel.writeString(driverPhone)
+        parcel.writeString(status)
     }
 
     override fun describeContents(): Int {
