@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.yol_yolakay.adapter.TripAdapter // Agar qizil bo'lsa, 'adapters' qilib ko'ring
+import com.example.yol_yolakay.adapter.TripAdapter
 import com.example.yol_yolakay.databinding.FragmentMyTripsListBinding
 import com.example.yol_yolakay.model.Trip
 import com.google.firebase.auth.FirebaseAuth
@@ -51,6 +51,9 @@ class MyTripsListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // XML faylingiz nomiga qarab binding o'zgarishi mumkin.
+        // Agar fragment_my_trips_list.xml bo'lsa -> FragmentMyTripsListBinding
+        // Agar fragment_trips_list.xml bo'lsa -> FragmentTripsListBinding
         _binding = FragmentMyTripsListBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -69,6 +72,7 @@ class MyTripsListFragment : Fragment() {
             intent.putExtra("IS_PREVIEW", false)
             startActivity(intent)
         }
+        // binding.recyclerView nomi XML da to'g'ri ekanligiga ishonch hosil qiling
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = tripAdapter
     }
@@ -76,7 +80,7 @@ class MyTripsListFragment : Fragment() {
     private fun loadTrips() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser == null) {
-            showEmptyState("Iltimos, avval tizimga kiring")
+            showEmptyState()
             return
         }
 
@@ -85,7 +89,7 @@ class MyTripsListFragment : Fragment() {
 
         if (fragmentType == "PUBLISHED") {
             // -------------------------------------------------------
-            // 1. MENING E'LONLARIM (Mening IDim bilan qo'shilganlar)
+            // 1. MENING E'LONLARIM
             // -------------------------------------------------------
             val tripsRef = database.getReference("trips")
             val query = tripsRef.orderByChild("userId").equalTo(currentUser.uid)
@@ -96,12 +100,10 @@ class MyTripsListFragment : Fragment() {
                     for (data in snapshot.children) {
                         val trip = data.getValue(Trip::class.java)
                         if (trip != null) {
-                            // ID bo'lmasa, key'dan olamiz
                             if (trip.id == null) trip.id = data.key
                             tripsList.add(trip)
                         }
                     }
-                    // Yangilari tepada tursin
                     tripsList.reverse()
                     updateUI()
                 }
@@ -113,7 +115,7 @@ class MyTripsListFragment : Fragment() {
 
         } else {
             // -------------------------------------------------------
-            // 2. BAND QILINGANLAR (Users -> me -> bookedTrips)
+            // 2. BAND QILINGANLAR
             // -------------------------------------------------------
             val myBookingsRef = database.getReference("Users")
                 .child(currentUser.uid).child("bookedTrips")
@@ -133,7 +135,6 @@ class MyTripsListFragment : Fragment() {
                         tripsList.clear()
                         updateUI()
                     } else {
-                        // IDlar orqali safar tafsilotlarini yuklaymiz
                         fetchBookedTripsDetails(bookedTripIds)
                     }
                 }
@@ -145,13 +146,11 @@ class MyTripsListFragment : Fragment() {
         }
     }
 
-    // Band qilingan safarlarning to'liq ma'lumotini olish
     private fun fetchBookedTripsDetails(ids: List<String>) {
         val database = FirebaseDatabase.getInstance().getReference("trips")
         tripsList.clear()
 
         var loadedCount = 0
-        // Agar birorta ham ID bo'lmasa, shunchaki yangilaymiz
         if (ids.isEmpty()) {
             updateUI()
             return
@@ -167,7 +166,6 @@ class MyTripsListFragment : Fragment() {
                     }
                     loadedCount++
 
-                    // Hammasi yuklanib bo'lgach yangilaymiz
                     if (loadedCount == ids.size) {
                         tripsList.reverse()
                         updateUI()
@@ -189,19 +187,21 @@ class MyTripsListFragment : Fragment() {
         tripAdapter.notifyDataSetChanged()
 
         if (tripsList.isEmpty()) {
-            val msg = if (fragmentType == "PUBLISHED") "Siz hali e'lon bermagansiz" else "Siz hali safar band qilmagansiz"
-            showEmptyState(msg)
+            showEmptyState()
         } else {
             binding.tvEmpty.visibility = View.GONE
             binding.recyclerView.visibility = View.VISIBLE
         }
     }
 
-    private fun showEmptyState(message: String) {
+    // XAVFSIZLIK TUZATISHI: Message argumentini olib tashladik, chunki text o'zgarmaydi
+    private fun showEmptyState() {
         if (_binding == null) return
         binding.progressBar.visibility = View.GONE
         binding.recyclerView.visibility = View.GONE
-        binding.tvEmpty.text = message
+
+        // MUHIM: .text = ... qatori o'chirildi!
+        // Chunki tvEmpty endi LinearLayout va biz XML da unga rasm va yozuv qo'yganmiz.
         binding.tvEmpty.visibility = View.VISIBLE
     }
 

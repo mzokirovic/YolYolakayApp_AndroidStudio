@@ -1,35 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="#F8FAFC">
 
+    <!-- 1. RO'YXAT (RECYCLER VIEW) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp"
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingBottom="80dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
-    <TextView
+    <!-- 2. BO'SH HOLAT (EMPTY STATE - PREMIUM STYLE) -->
+    <LinearLayout
         android:id="@+id/tvEmpty"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ma'lumot yo'q"
-        android:textSize="16sp"
-        android:textColor="#757575"
+        android:gravity="center"
+        android:orientation="vertical"
         android:visibility="gone"
+        android:padding="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
+        <!-- Katta kulrang ikonka -->
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/ic_car"
+            app:tint="#E2E8F0"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Asosiy matn -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Safarlar tarixi bo'sh"
+            android:textColor="#1E293B"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+        <!-- Tushuntirish -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Siz hali hech qanday safarni amalga oshirmadingiz yoki rejalashtirmadingiz."
+            android:textColor="#64748B"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:lineSpacingMultiplier="1.2"/>
+
+    </LinearLayout>
+
+    <!-- 3. YUKLANMOQDA (PROGRESS BAR) -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:indeterminateTint="#2E5BFF"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

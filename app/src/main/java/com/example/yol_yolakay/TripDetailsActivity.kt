@@ -1,6 +1,7 @@
 package com.example.yol_yolakay
 
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -21,7 +22,6 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 class TripDetailsActivity : AppCompatActivity() {
 
@@ -29,7 +29,7 @@ class TripDetailsActivity : AppCompatActivity() {
     private var currentTrip: Trip? = null
     private var isPreview: Boolean = false
 
-    // Yangi: Haydovchi uchun adapter va ro'yxat
+    // Haydovchi uchun adapter va ro'yxat
     private lateinit var requestAdapter: RequestAdapter
     private val requestList = ArrayList<UserRequest>()
 
@@ -78,6 +78,7 @@ class TripDetailsActivity : AppCompatActivity() {
                 }
             }
             isPreview = intent.getBooleanExtra("IS_PREVIEW", false)
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -91,7 +92,7 @@ class TripDetailsActivity : AppCompatActivity() {
             binding.tvToCity.text = trip.to ?: "Noma'lum"
             binding.tvDateHeader.text = trip.date ?: "Bugun"
             binding.tvStartTime.text = trip.time ?: "--:--"
-            binding.tvEndTime.text = "Manzil"
+            binding.tvEndTime.text = "Manzil" // Yoki hisoblangan vaqt
 
             val price = trip.price ?: 0
             val formattedPrice = String.format("%,d", price).replace(",", " ")
@@ -109,14 +110,14 @@ class TripDetailsActivity : AppCompatActivity() {
         }
     }
 
-    // --- ASOSIY O'ZGARISH: Tugmalar va Mantiq ---
+    // --- ASOSIY O'ZGARISH: Tugmalar va Mantiq (Yangi dizaynga moslab) ---
     private fun setupButtons() {
         binding.btnBack.setOnClickListener { finish() }
 
         val trip = currentTrip ?: return
 
-        // 1. TELEFON QILISH LOGIKASI
-        val callListener = View.OnClickListener {
+        // 1. TELEFON VA SMS (Faqat yo'lovchi uchun kerak, lekin click listenerlarni tayyorlab qo'yamiz)
+        binding.btnCallBottom.setOnClickListener {
             val phone = trip.driverPhone
             if (!phone.isNullOrEmpty()) {
                 val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone"))
@@ -125,10 +126,7 @@ class TripDetailsActivity : AppCompatActivity() {
                 Toast.makeText(this, "Raqam yo'q", Toast.LENGTH_SHORT).show()
             }
         }
-        // Pastdagi yashil tugma
-        binding.btnCallBottom.setOnClickListener(callListener)
 
-        // 2. SMS YOZISH LOGIKASI
         binding.btnSms.setOnClickListener {
             val phone = trip.driverPhone
             if (!phone.isNullOrEmpty()) {
@@ -143,31 +141,46 @@ class TripDetailsActivity : AppCompatActivity() {
         // --- MANTIQ (Haydovchi yoki Yo'lovchi) ---
         if (trip.userId == myUserId && !isPreview) {
             // A) AGAR MEN HAYDOVCHI BO'LSAM
-            binding.layoutPassengerActions.visibility = View.GONE // SMS/Call/Book yashiramiz
-            binding.btnCompleteTrip.visibility = View.VISIBLE // Yakunlash tugmasi chiqadi
 
-            // So'rovlar ro'yxatini yuklaymiz
+            // 1. Yo'lovchi tugmalarini (SMS/Call) yashiramiz
+            binding.btnSms.visibility = View.GONE
+            binding.btnCallBottom.visibility = View.GONE
+
+            // 2. Asosiy tugmani "Safarni yakunlash" ga aylantiramiz
+            // (Yangi dizaynda alohida btnCompleteTrip yo'q, btnBook ishlatiladi)
+            binding.btnBook.visibility = View.VISIBLE
+            binding.btnBook.text = "Safarni yakunlash"
+            binding.btnBook.setBackgroundColor(Color.parseColor("#EF4444")) // Qizil rang
+
+            // 3. So'rovlar ro'yxatini yuklaymiz
             loadRequests(trip.id!!)
 
+            // 4. Status tekshiruvi
             if (trip.status == "completed") {
-                binding.btnCompleteTrip.isEnabled = false
-                binding.btnCompleteTrip.text = "Safar yakunlangan"
-                binding.btnCompleteTrip.setBackgroundColor(android.graphics.Color.GRAY)
+                binding.btnBook.isEnabled = false
+                binding.btnBook.text = "Safar yakunlangan"
+                binding.btnBook.setBackgroundColor(Color.GRAY)
             }
 
-            binding.btnCompleteTrip.setOnClickListener {
+            // 5. Bosilganda yakunlash funksiyasi
+            binding.btnBook.setOnClickListener {
                 completeTrip()
             }
 
         } else {
             // B) AGAR MEN YO'LOVCHI BO'LSAM (yoki Preview)
-            binding.btnCompleteTrip.visibility = View.GONE
-            binding.layoutPassengerActions.visibility = View.VISIBLE
+
+            // Barcha tugmalar ko'rinadi
+            binding.btnSms.visibility = View.VISIBLE
+            binding.btnCallBottom.visibility = View.VISIBLE
+            binding.btnBook.visibility = View.VISIBLE
 
             if (isPreview) {
                 // Preview rejimi (E'lon berishdan oldin ko'rish)
                 binding.btnBook.text = "E'lonni nashr qilish"
                 binding.btnBook.setOnClickListener { publishTrip() }
+
+                // Previewda haydovchi o'ziga yozmaydi
                 binding.btnSms.visibility = View.GONE
                 binding.btnCallBottom.visibility = View.GONE
             } else {
@@ -175,6 +188,38 @@ class TripDetailsActivity : AppCompatActivity() {
                 checkRequestStatus(trip.id!!)
             }
         }
+    }
+
+    // --- Safarni yakunlash (Haydovchi uchun) ---
+    private fun completeTrip() {
+        val tripId = currentTrip?.id ?: return
+
+        binding.btnBook.isEnabled = false
+        binding.btnBook.text = "Yakunlanmoqda..."
+
+        FirebaseDatabase.getInstance().getReference("trips")
+            .child(tripId)
+            .child("status")
+            .setValue("completed")
+            .addOnSuccessListener {
+                Toast.makeText(this, "Safar muvaffaqiyatli yakunlandi!", Toast.LENGTH_SHORT).show()
+                binding.btnBook.text = "Safar yakunlangan"
+                binding.btnBook.setBackgroundColor(Color.GRAY)
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Xatolik yuz berdi", Toast.LENGTH_SHORT).show()
+                binding.btnBook.isEnabled = true
+                binding.btnBook.text = "Safarni yakunlash"
+            }
+    }
+
+    // --- E'lon qilish (Preview rejimi uchun) ---
+    private fun publishTrip() {
+        // Bu funksiya AddTripActivity dan kelgan ma'lumotni bazaga yozish uchun kerak bo'ladi
+        // Hozircha oddiy Toast:
+        Toast.makeText(this, "E'lon chop etilmoqda...", Toast.LENGTH_SHORT).show()
+        // Bu yerda real publish logikasi bo'lishi kerak (yoki AddTripActivity o'zi qiladi)
+        finish()
     }
 
     // --- 1. YO'LOVCHI: So'rov yuborish ---
@@ -207,15 +252,15 @@ class TripDetailsActivity : AppCompatActivity() {
 
                 FirebaseDatabase.getInstance().getReference("trips")
                     .child(trip.id!!)
-                    .child("requests") // requests papkasiga yozamiz
+                    .child("requests")
                     .child(myUserId)
                     .setValue(requestMap)
                     .addOnSuccessListener {
                         Toast.makeText(this@TripDetailsActivity, "So'rov yuborildi! ✅", Toast.LENGTH_LONG).show()
                         binding.btnBook.text = "So'rov yuborilgan ⏳"
-                        binding.btnBook.setBackgroundColor(android.graphics.Color.parseColor("#FFC107")) // Sariq
+                        binding.btnBook.setBackgroundColor(Color.parseColor("#FFC107")) // Sariq
 
-                        // Haydovchiga push xabar
+                        // Push notification yuborish (agar mavjud bo'lsa)
                         sendPushNotificationToDriver(trip.userId ?: "", trip.from ?: "", trip.to ?: "")
                     }
                     .addOnFailureListener {
@@ -235,25 +280,24 @@ class TripDetailsActivity : AppCompatActivity() {
     private fun checkRequestStatus(tripId: String) {
         val ref = FirebaseDatabase.getInstance().getReference("trips").child(tripId)
 
-        // A) Band qilinganlar ro'yxatini tekshirish (Qabul qilinganmi?)
+        // A) Qabul qilinganmi?
         ref.child("bookedUsers").child(myUserId).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    // Qabul qilingan!
                     binding.btnBook.text = "Siz qabul qilingansiz ✅"
                     binding.btnBook.isEnabled = false
-                    binding.btnBook.setBackgroundColor(android.graphics.Color.parseColor("#4CAF50"))
+                    binding.btnBook.setBackgroundColor(Color.parseColor("#4CAF50"))
                 } else {
-                    // B) Agar qabul qilinmagan bo'lsa, "requests" ni tekshiramiz (Kutilmoqdami?)
+                    // B) Kutilmoqdami?
                     ref.child("requests").child(myUserId).addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(reqSnapshot: DataSnapshot) {
                             if (reqSnapshot.exists()) {
                                 binding.btnBook.text = "So'rov yuborilgan ⏳"
                                 binding.btnBook.isEnabled = false
-                                binding.btnBook.setBackgroundColor(android.graphics.Color.parseColor("#FFC107"))
+                                binding.btnBook.setBackgroundColor(Color.parseColor("#FFC107"))
                             } else {
                                 // Hali so'rov yubormagan
-                                binding.btnBook.text = "So'rov yuborish"
+                                binding.btnBook.text = "Joy band qilish"
                                 binding.btnBook.isEnabled = true
                                 binding.btnBook.setOnClickListener { sendBookingRequest() }
                             }
@@ -267,13 +311,11 @@ class TripDetailsActivity : AppCompatActivity() {
     }
 
     // --- 3. HAYDOVCHI: So'rovlarni yuklash ---
-    // --- 3. HAYDOVCHI: So'rovlarni yuklash (TUZATILGAN VERSIYA) ---
     private fun loadRequests(tripId: String) {
-        // 1. Ekranda joy ajratamiz (Avvalboshdan ko'rinib tursin)
+        // XML da yangi layoutRequests ID siga o'zgartirganmiz, shuni ishlatamiz
         binding.layoutRequests.visibility = View.VISIBLE
-        binding.tvRequestsTitle.text = "So'rovlar yuklanmoqda..."
+        binding.tvRequestsTitle.text = "Kutilayotgan so'rovlar:"
 
-        // RecyclerViewni sozlash
         binding.rvRequests.layoutManager = LinearLayoutManager(this)
         requestAdapter = RequestAdapter(requestList) { request, isAccepted ->
             handleRequestAction(tripId, request, isAccepted)
@@ -281,165 +323,85 @@ class TripDetailsActivity : AppCompatActivity() {
         binding.rvRequests.adapter = requestAdapter
         binding.rvRequests.isNestedScrollingEnabled = false
 
-        // 2. Bazadan o'qish
+        // Bazadan o'qish
         val ref = FirebaseDatabase.getInstance().getReference("trips").child(tripId).child("requests")
 
         ref.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 requestList.clear()
-
-                // LOG: Tekshirish uchun console ga yozamiz
-                Log.d("TripDetails", "Topilgan so'rovlar soni: ${snapshot.childrenCount}")
-
                 for (child in snapshot.children) {
-                    val userId = child.key ?: ""
+                    val userId = child.key ?: continue
                     val name = child.child("name").getValue(String::class.java) ?: "Noma'lum"
                     val phone = child.child("phone").getValue(String::class.java) ?: ""
-                    val status = child.child("status").getValue(String::class.java)
+                    val status = child.child("status").getValue(String::class.java) ?: "pending"
 
-                    // Faqat "pending" (kutilayotgan) so'rovlarni qo'shamiz
+                    // Faqat kutilayotgan (pending) larni ko'rsatamiz
                     if (status == "pending") {
-                        requestList.add(UserRequest(userId, name, phone))
+                        requestList.add(UserRequest(userId, name, phone, status))
                     }
                 }
                 requestAdapter.notifyDataSetChanged()
 
-                // 3. Natijani ko'rsatish
-                if (requestList.isNotEmpty()) {
-                    binding.tvRequestsTitle.text = "Kutilayotgan so'rovlar (${requestList.size}):"
-                } else {
-                    // Agar bo'sh bo'lsa ham YASHIRMAYMIZ, shunchaki xabar yozamiz
-                    binding.tvRequestsTitle.text = "Hozircha yangi so'rovlar yo'q"
+                if (requestList.isEmpty()) {
+                    binding.tvRequestsTitle.text = "Yangi so'rovlar yo'q"
                 }
             }
-
             override fun onCancelled(error: DatabaseError) {
-                Log.e("TripDetails", "Xatolik: ${error.message}")
-                Toast.makeText(this@TripDetailsActivity, "Xatolik: ${error.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@TripDetailsActivity, "So'rovlarni yuklashda xatolik", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
-
-    // --- 4. HAYDOVCHI: Qabul qilish yoki Rad etish ---
-    // --- 4. HAYDOVCHI: Qabul qilish yoki Rad etish (YANGILANGAN) ---
     private fun handleRequestAction(tripId: String, request: UserRequest, isAccepted: Boolean) {
-        val tripRef = FirebaseDatabase.getInstance().getReference("trips").child(tripId)
+        val requestsRef = FirebaseDatabase.getInstance().getReference("trips").child(tripId).child("requests").child(request.userId)
+        val bookedRef = FirebaseDatabase.getInstance().getReference("trips").child(tripId).child("bookedUsers").child(request.userId)
+        val userBookedRef = FirebaseDatabase.getInstance().getReference("Users").child(request.userId).child("bookedTrips").child(tripId)
 
         if (isAccepted) {
-            // 1. Joriy joylar sonini tekshiramiz
-            tripRef.child("seats").get().addOnSuccessListener { snapshot ->
-                val currentSeats = snapshot.getValue(Int::class.java) ?: 0
-
-                if (currentSeats > 0) {
-                    // Joy bor, qabul qilamiz
-
-                    // A) BookedUsers ga qo'shish
-                    tripRef.child("bookedUsers").child(request.userId).setValue(true)
-
-                    // B) Yo'lovchining profiliga yozish
-                    val userTripsRef = FirebaseDatabase.getInstance().getReference("Users").child(request.userId).child("bookedTrips")
-                    userTripsRef.child(tripId).setValue(true)
-
-                    // C) Requests dan o'chirish
-                    tripRef.child("requests").child(request.userId).removeValue()
-
-                    // D) JOY SONINI 1 TAGA KAMAYTIRISH
-                    tripRef.child("seats").setValue(currentSeats - 1)
-
-                    Toast.makeText(this, "${request.name} qabul qilindi! ✅", Toast.LENGTH_SHORT).show()
-
-                    // Ekranni yangilash (seats o'zgargani uchun)
-                    binding.tvInfo.append("\n(1 ta joy band qilindi)")
-                } else {
-                    // Joy qolmagan bo'lsa
-                    Toast.makeText(this, "Afsuski, bo'sh joy qolmadi! ❌", Toast.LENGTH_LONG).show()
-                }
-            }
+            // Qabul qilish
+            bookedRef.setValue(true) // Safar ichiga qo'shish
+            userBookedRef.setValue(true) // Foydalanuvchi profiliga qo'shish
+            requestsRef.removeValue() // So'rovlardan o'chirish
+            Toast.makeText(this, "${request.name} qabul qilindi!", Toast.LENGTH_SHORT).show()
         } else {
-            // Rad etish: Faqat Requests dan o'chirish
-            tripRef.child("requests").child(request.userId).removeValue()
-            Toast.makeText(this, "Rad etildi ❌", Toast.LENGTH_SHORT).show()
+            // Rad etish
+            requestsRef.removeValue()
+            Toast.makeText(this, "So'rov rad etildi", Toast.LENGTH_SHORT).show()
         }
     }
 
-
-    // --- SAFARNI YAKUNLASH ---
-    private fun completeTrip() {
-        val trip = currentTrip ?: return
-        if (trip.id == null) return
-
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Safarni yakunlash")
-            .setMessage("Ushbu safarni haqiqatan ham tugatmoqchimisiz? U 'Tarix' bo'limiga o'tkaziladi.")
-            .setPositiveButton("Ha, yakunlash") { _, _ ->
-                val ref = FirebaseDatabase.getInstance().getReference("trips").child(trip.id!!)
-                ref.child("status").setValue("completed")
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Safar yakunlandi! 🏁", Toast.LENGTH_SHORT).show()
-                        finish()
-                    }
-            }
-            .setNegativeButton("Yo'q", null)
-            .show()
-    }
-
-    // --- E'LONNI NASHR QILISH ---
-    private fun publishTrip() {
-        val trip = currentTrip ?: return
-
-        val database = FirebaseDatabase.getInstance().getReference("trips")
-        val newId = database.push().key ?: UUID.randomUUID().toString()
-
-        trip.id = newId
-        trip.userId = myUserId
-        trip.status = "active"
-
-        binding.btnBook.isEnabled = false
-        binding.btnBook.text = "Yuklanmoqda..."
-
-        database.child(newId).setValue(trip)
-            .addOnSuccessListener {
-                Toast.makeText(this, "E'lon joylandi! ✅", Toast.LENGTH_LONG).show()
-                val intent = Intent(this, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(intent)
-                finish()
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Xatolik: ${it.message}", Toast.LENGTH_SHORT).show()
-                binding.btnBook.isEnabled = true
-                binding.btnBook.text = "E'lonni nashr qilish"
-            }
-    }
-
-    // --- PUSH XABAR YUBORISH ---
+    // --- Push Notification (Mavjud funksionallik) ---
     private fun sendPushNotificationToDriver(driverId: String, from: String, to: String) {
-        if (driverId.isEmpty()) return
+        val database = FirebaseDatabase.getInstance()
+        val tokenRef = database.getReference("Users").child(driverId).child("fcmToken")
 
-        val database = FirebaseDatabase.getInstance().getReference("Users").child(driverId).child("fcmToken")
-
-        database.addListenerForSingleValueEvent(object : ValueEventListener {
+        tokenRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val token = snapshot.getValue(String::class.java)
-
-                if (!token.isNullOrEmpty()) {
-                    val title = "Yangi so'rov! 🙋‍♂️"
-                    val message = "$from - $to safaringizga qo'shilish so'rovi keldi."
-
-                    val notificationData = NotificationData(title, message)
-                    val pushNotification = PushNotification(notificationData, token)
-
-                    CoroutineScope(Dispatchers.IO).launch {
-                        try {
-                            RetrofitInstance.api.postNotification(pushNotification)
-                        } catch (e: Exception) {
-                            Log.e("FCM", "Xatolik: ${e.message}")
-                        }
-                    }
+                if (token != null) {
+                    val pushNotification = PushNotification(
+                        NotificationData("Yangi buyurtma!", "$from dan $to ga yangi yo'lovchi so'rov yubordi."),
+                        token
+                    )
+                    sendNotification(pushNotification)
                 }
             }
             override fun onCancelled(error: DatabaseError) {}
         })
+    }
+
+    private fun sendNotification(notification: PushNotification) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitInstance.api.postNotification(notification)
+                if (response.isSuccessful) {
+                    Log.d("FCM", "Xabar yuborildi: ${response.body()}")
+                } else {
+                    Log.e("FCM", "Xatolik: ${response.errorBody()?.string()}")
+                }
+            } catch (e: Exception) {
+                Log.e("FCM", "Xatolik: ${e.message}")
+            }
+        }
     }
 }

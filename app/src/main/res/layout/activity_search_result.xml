@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA"
+    android:background="#F8FAFC"
     android:fitsSystemWindows="true"
     tools:context=".SearchResultActivity">
 
@@ -28,7 +28,7 @@
             android:layout_height="48dp"
             android:padding="12dp"
             android:src="@drawable/ic_back"
-            app:tint="#00C896"
+            app:tint="#1E293B"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Orqaga" />
 
@@ -46,7 +46,7 @@
                 android:text="Qidiruv natijalari"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="#2D3E50"/>
+                android:textColor="#1E293B"/>
 
             <!-- Dinamik o'zgaradigan matn (Masalan: Toshkent - Samarqand) -->
             <TextView
@@ -55,18 +55,17 @@
                 android:layout_height="wrap_content"
                 android:text="Barcha mavjud safarlar"
                 android:textSize="14sp"
-                android:textColor="#757575"
+                android:textColor="#64748B"
                 android:maxLines="1"
                 android:ellipsize="end"/>
         </LinearLayout>
 
-        <!-- Filter tugmasi (Agar kerak bo'lsa, keyinchalik ishlatish uchun) -->
-        <!-- Hozircha joyi turibdi, lekin ko'rinmaydi -->
+        <!-- Filter tugmasi (Hozircha yashirin, kelajak uchun) -->
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_car"
-            app:tint="#BDBDBD"
+            app:tint="#CBD5E1"
             android:visibility="gone"/>
 
     </LinearLayout>
@@ -80,7 +79,7 @@
         android:paddingBottom="16dp"
         android:clipToPadding="false"
         android:scrollbars="vertical"
-        android:background="#F8F9FA"
+        android:background="#F8FAFC"
         app:layout_constraintTop_toBottomOf="@id/headerLayout"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
@@ -100,14 +99,14 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:src="@drawable/ic_car"
-            app:tint="#E0E0E0"
+            app:tint="#E2E8F0"
             android:layout_marginBottom="24dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Safarlar topilmadi"
-            android:textColor="#2D3E50"
+            android:textColor="#1E293B"
             android:textSize="20sp"
             android:textStyle="bold"
             android:gravity="center"/>
@@ -116,7 +115,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Ushbu yo'nalish yoki sana bo'yicha hozircha haydovchilar yo'q. Boshqa vaqtni sinab ko'ring."
-            android:textColor="#757575"
+            android:textColor="#64748B"
             android:textSize="15sp"
             android:gravity="center"
             android:layout_marginTop="8dp"
@@ -129,7 +128,7 @@
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:indeterminateTint="#00C896"
+        android:indeterminateTint="#2E5BFF"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

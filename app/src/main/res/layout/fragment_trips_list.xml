@@ -3,37 +3,74 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F9F9F9">
+    android:background="#F8FAFC">
 
-    <!-- Filterlar (Kelgusi, Yakunlangan...) -->
-    <!-- MVP uchun buni keyinroq qo'shsak ham bo'ladi, hozircha ro'yxat muhim -->
-
+    <!-- 1. RO'YXAT (RECYCLER VIEW) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="8dp"
+        android:paddingBottom="80dp"
         android:clipToPadding="false"
+        android:scrollbars="vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
-    <!-- Bo'sh holat -->
-    <TextView
+    <!-- 2. BO'SH HOLAT (PREMIUM STYLE) -->
+    <!-- ID: tvEmpty saqlandi (lekin endi bu LinearLayout) -->
+    <LinearLayout
         android:id="@+id/tvEmpty"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Safarlar topilmadi"
-        android:textColor="#999999"
+        android:gravity="center"
+        android:orientation="vertical"
         android:visibility="gone"
+        android:padding="32dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent">
 
+        <!-- Katta kulrang ikonka -->
+        <!-- Agar ic_car yoki ic_list bo'lmasa, boshqa mavjud ikonka qo'ying -->
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/ic_car"
+            app:tint="#E2E8F0"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="Bo'sh"/>
+
+        <!-- Sarlavha -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Safarlar topilmadi"
+            android:textColor="#1E293B"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+        <!-- Tushuntirish -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hozircha bu ro'yxat bo'sh. Yangi safarlar qo'shilganda shu yerda ko'rinadi."
+            android:textColor="#64748B"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:lineSpacingMultiplier="1.2"/>
+
+    </LinearLayout>
+
+    <!-- 3. YUKLANMOQDA (PROGRESS BAR) -->
     <ProgressBar
         android:id="@+id/progressBarList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:indeterminateTint="#2E5BFF"
+        android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

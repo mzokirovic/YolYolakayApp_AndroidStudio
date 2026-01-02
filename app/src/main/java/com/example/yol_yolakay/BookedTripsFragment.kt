@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-// Agar papka nomi "adapters" bo'lsa, 's' harfini qo'shing
 import com.example.yol_yolakay.databinding.FragmentTripsListBinding
 import com.example.yol_yolakay.model.Trip
 import com.example.yol_yolakay.TripDetailsActivity
@@ -37,6 +36,7 @@ class BookedTripsFragment : Fragment() {
         binding.recyclerViewList.layoutManager = LinearLayoutManager(context)
         adapter = TripAdapter(bookedList) { trip ->
             val intent = Intent(context, TripDetailsActivity::class.java)
+            // Gson orqali obyektni json qilib yuborish (xavfsizroq)
             val gson = com.google.gson.Gson()
             intent.putExtra("TRIP_JSON", gson.toJson(trip))
             intent.putExtra("IS_PREVIEW", false)
@@ -51,10 +51,13 @@ class BookedTripsFragment : Fragment() {
         val auth = FirebaseAuth.getInstance()
         val currentUser = auth.currentUser
 
-        // 1. Faqat haqiqiy User ID ni ishlatamiz (AddTrip va TripDetails bilan bir xil bo'lishi uchun)
         if (currentUser == null) {
             binding.progressBarList.visibility = View.GONE
-            binding.tvEmpty.text = "Iltimos, avval tizimga kiring"
+
+            // XAVFSIZLIK TUZATISHI:
+            // binding.tvEmpty.text = ... qatorini O'CHIRDIK.
+            // Chunki tvEmpty endi LinearLayout va uning text xususiyati yo'q.
+            // XML dagi standart "Safarlar topilmadi" yozuvi ko'rinadi.
             binding.tvEmpty.visibility = View.VISIBLE
             return
         }
@@ -64,7 +67,6 @@ class BookedTripsFragment : Fragment() {
         binding.progressBarList.visibility = View.VISIBLE
         val database = FirebaseDatabase.getInstance()
 
-        // 2. User band qilgan safarlar IDlarini olamiz
         val userBookingsRef = database.getReference("Users").child(myId).child("bookedTrips")
 
         userBookingsRef.addValueEventListener(object : ValueEventListener {
@@ -74,7 +76,6 @@ class BookedTripsFragment : Fragment() {
 
                 for (data in snapshot.children) {
                     val tripId = data.key
-                    // data.value true ekanligini tekshirish ham zarar qilmaydi
                     if (tripId != null) {
                         tripIds.add(tripId)
                     }
@@ -83,7 +84,6 @@ class BookedTripsFragment : Fragment() {
                 if (tripIds.isEmpty()) {
                     updateUI()
                 } else {
-                    // 3. ID lar orqali "trips" dan ma'lumot olamiz
                     fetchTripsDetails(tripIds)
                 }
             }
@@ -98,15 +98,21 @@ class BookedTripsFragment : Fragment() {
     }
 
     private fun fetchTripsDetails(tripIds: List<String>) {
-        // --- ASOSIY TUZATISH: "Trips" -> "trips" ---
         val database = FirebaseDatabase.getInstance().getReference("trips")
         var loadedCount = 0
+
+        // Agar ro'yxat bo'sh bo'lsa darhol UI ni yangilaymiz
+        if (tripIds.isEmpty()) {
+            updateUI()
+            return
+        }
 
         for (tripId in tripIds) {
             database.child(tripId).addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val trip = snapshot.getValue(Trip::class.java)
                     if (trip != null) {
+                        // Ro'yxat boshiga qo'shish (yangi safarlar tepada turishi uchun)
                         bookedList.add(0, trip)
                     }
                     loadedCount++
@@ -130,8 +136,9 @@ class BookedTripsFragment : Fragment() {
             adapter.notifyDataSetChanged()
 
             if (bookedList.isEmpty()) {
+                // XAVFSIZLIK TUZATISHI:
+                // binding.tvEmpty.text = ... qatori O'CHIRILDI.
                 binding.tvEmpty.visibility = View.VISIBLE
-                binding.tvEmpty.text = "Hali safar band qilmadingiz"
             } else {
                 binding.tvEmpty.visibility = View.GONE
             }

@@ -6,6 +6,7 @@ import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView // TextView import qilindi
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -75,14 +76,12 @@ class AddTripActivity : AppCompatActivity() {
         }
 
         // --- Shahar tanlash ---
-        binding.etFrom.isFocusable = false
         binding.etFrom.setOnClickListener {
             val intent = Intent(this, CitySelectionActivity::class.java)
             intent.putExtra("TYPE", "FROM")
             startLocationLauncher.launch(intent)
         }
 
-        binding.etTo.isFocusable = false
         binding.etTo.setOnClickListener {
             val intent = Intent(this, CitySelectionActivity::class.java)
             intent.putExtra("TYPE", "TO")
@@ -90,10 +89,7 @@ class AddTripActivity : AppCompatActivity() {
         }
 
         // Sana va Vaqt
-        binding.etDate.isFocusable = false
         binding.etDate.setOnClickListener { showDatePicker() }
-
-        binding.etTime.isFocusable = false
         binding.etTime.setOnClickListener { showTimePicker() }
 
         binding.btnNext.setOnClickListener {
@@ -152,20 +148,34 @@ class AddTripActivity : AppCompatActivity() {
     }
 
     private fun validateCurrentStep(): Boolean {
+        // MUHIM O'ZGARISH: TextView va EditText ni alohida tekshiramiz
         return when (currentStep) {
             1 -> checkEmpty(binding.etFrom, "Manzilni tanlang")
             2 -> checkEmpty(binding.etTo, "Manzilni tanlang")
-            3 -> checkEmpty(binding.etDate, "Sanani tanlang")
-            4 -> checkEmpty(binding.etTime, "Vaqtni tanlang")
+            // 3 va 4 qadam endi TextView (checkTextEmpty funksiyasiga uzatamiz)
+            3 -> checkTextEmpty(binding.etDate, "Sanani tanlang", "Sanani tanlang")
+            4 -> checkTextEmpty(binding.etTime, "Vaqtni tanlang", "Vaqtni tanlang")
             5 -> checkEmpty(binding.etSeats, "Joy sonini kiriting")
             6 -> checkEmpty(binding.etPrice, "Narxni kiriting")
             else -> true
         }
     }
 
+    // Bu funksiya EditText lar uchun (Shahar, Narx, Joy)
     private fun checkEmpty(view: android.widget.EditText, msg: String): Boolean {
         if (view.text.isNullOrEmpty()) {
             if (view.isFocusable) view.error = msg else Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            return false
+        }
+        return true
+    }
+
+    // YANGI FUNKSIYA: Bu TextView lar uchun (Sana, Vaqt)
+    private fun checkTextEmpty(view: TextView, msg: String, defaultText: String): Boolean {
+        val text = view.text.toString()
+        // Agar matn bo'sh bo'lsa yoki hali ham "Sanani tanlang" deb turgan bo'lsa -> Xato
+        if (text.isEmpty() || text == defaultText) {
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             return false
         }
         return true
@@ -238,7 +248,6 @@ class AddTripActivity : AppCompatActivity() {
         database.child(tripId).setValue(trip)
             .addOnSuccessListener {
                 binding.progressBar.visibility = View.GONE
-                // DIQQAT: O'zgarish shu yerda. ID o'rniga butun trip obyektini berdik
                 showSuccessDialog(trip)
             }
             .addOnFailureListener { e ->
@@ -252,8 +261,10 @@ class AddTripActivity : AppCompatActivity() {
         val datePickerDialog = DatePickerDialog(
             this,
             { _, year, month, dayOfMonth ->
-                val date = String.format("%02d-%02d-%d", dayOfMonth, month + 1, year)
-                binding.etDate.setText(date)
+                val date = String.format("%02d.%02d.%d", dayOfMonth, month + 1, year)
+                // TextView bo'lgani uchun setText o'rniga text = ... ishlatsa ham bo'ladi,
+                // lekin setText ham ishlaydi. Eng asosiysi TextView bu metodni qo'llab-quvvatlaydi.
+                binding.etDate.text = date
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -269,7 +280,7 @@ class AddTripActivity : AppCompatActivity() {
             this,
             { _, hourOfDay, minute ->
                 val time = String.format("%02d:%02d", hourOfDay, minute)
-                binding.etTime.setText(time)
+                binding.etTime.text = time
             },
             calendar.get(Calendar.HOUR_OF_DAY),
             calendar.get(Calendar.MINUTE),
@@ -278,7 +289,6 @@ class AddTripActivity : AppCompatActivity() {
         timePickerDialog.show()
     }
 
-    // --- YANGILANGAN DIALOG FUNKSIYASI ---
     private fun showSuccessDialog(trip: Trip) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_success, null)
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
@@ -291,28 +301,20 @@ class AddTripActivity : AppCompatActivity() {
         val btnViewTrip = dialogView.findViewById<android.widget.Button>(R.id.btnViewTrip)
         val btnClose = dialogView.findViewById<android.widget.Button>(R.id.btnCloseDialog)
 
-        // "E'lonni ko'rish" tugmasi
         btnViewTrip.setOnClickListener {
             dialog.dismiss()
-
-            // TripDetailsActivity ni ochish
             val intent = Intent(this, TripDetailsActivity::class.java)
-
-            // Obyektni JSON orqali ishonchli yuborish
             val gson = com.google.gson.Gson()
             val tripJson = gson.toJson(trip)
-
             intent.putExtra("TRIP_JSON", tripJson)
-            intent.putExtra("IS_PREVIEW", true) // Bu haydovchi o'zi ko'rayotgani uchun
-
+            intent.putExtra("IS_PREVIEW", true)
             startActivity(intent)
-            finish() // Bu Activityni yopamiz
+            finish()
         }
 
-        // "Yopish" tugmasi
         btnClose.setOnClickListener {
             dialog.dismiss()
-            finish() // Asosiy oynaga qaytish
+            finish()
         }
 
         dialog.show()

@@ -4,212 +4,253 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F0F2F5"
+    android:background="#F8FAFC"
     tools:context=".HomeFragment">
 
-    <!-- Tepa qismdagi ko'k fon (Header) -->
+    <!-- 1. PREMIUM GRADIENT HEADER -->
     <View
         android:id="@+id/headerBackground"
         android:layout_width="match_parent"
-        android:layout_height="220dp"
-        android:background="#00AFF5"
+        android:layout_height="260dp"
+        android:background="@drawable/bg_gradient_premium"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Tepa qismdagi shior so'zi -->
+    <!-- 2. SHIOR (Slogan) - Zamonaviy shrift va shaffoflik bilan -->
     <TextView
         android:id="@+id/tvSlogan"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="48dp"
         android:gravity="center"
         android:paddingHorizontal="32dp"
-        android:text="Hamyonbop narxda \nqulay sayohat"
+        android:text="Safar xavfsiz va \nqulay bo'lsin"
         android:textColor="@android:color/white"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:textStyle="bold"
+        android:letterSpacing="0.02"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- QIDIRUV KARTASI (Asosiy qism) -->
+    <TextView
+        android:id="@+id/tvSubSlogan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Minglab haydovchilar sizni kutmoqda"
+        android:textColor="#CCFFFFFF"
+        android:textSize="14sp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/tvSlogan"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- 3. QIDIRUV KARTASI (Premium Shadow Effect) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/searchCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="32dp"
         app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
+        app:cardElevation="12dp"
         app:cardBackgroundColor="@android:color/white"
-        app:layout_constraintTop_toBottomOf="@id/tvSlogan">
+        app:layout_constraintTop_toBottomOf="@id/tvSubSlogan">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- 1. QAYERDAN -->
+            <!-- A. QAYERDAN -->
             <LinearLayout
                 android:id="@+id/containerFrom"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:padding="16dp"
+                android:padding="20dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true">
 
-                <!-- Doira shakl (O) -->
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:src="@drawable/shape_circle_outline"
-                    app:tint="#546E7A" />
+                    app:tint="#4F83FF" /> <!-- Accent Color -->
 
-                <TextView
-                    android:id="@+id/tvSearchFrom"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:text="Qayerdan"
-                    android:textSize="18sp"
-                    android:textColor="#757575" />
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Qayerdan"
+                        android:textSize="12sp"
+                        android:textColor="#94A3B8"/>
+
+                    <TextView
+                        android:id="@+id/tvSearchFrom"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Shaharni tanlang"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#1E293B" />
+                </LinearLayout>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginStart="52dp"
-                android:layout_marginEnd="16dp"
-                android:background="#EEEEEE" />
+                android:layout_marginStart="60dp"
+                android:layout_marginEnd="20dp"
+                android:background="#F1F5F9" />
 
-            <!-- 2. QAYERGA -->
+            <!-- B. QAYERGA -->
             <LinearLayout
                 android:id="@+id/containerTo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:padding="16dp"
+                android:padding="20dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true">
 
-                <!-- Doira shakl (O) -->
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:src="@drawable/shape_circle_outline"
-                    app:tint="#546E7A" />
+                    app:tint="#2E5BFF" /> <!-- Darker Blue -->
 
-                <TextView
-                    android:id="@+id/tvSearchTo"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:text="Qayerga"
-                    android:textSize="18sp"
-                    android:textColor="#757575" />
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Qayerga"
+                        android:textSize="12sp"
+                        android:textColor="#94A3B8"/>
+
+                    <TextView
+                        android:id="@+id/tvSearchTo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Manzilni tanlang"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#1E293B" />
+                </LinearLayout>
             </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                 android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="#EEEEEE" />
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:background="#F1F5F9" />
 
-            <!-- 3. SANA -->
+            <!-- C. SANA VA O'RINLAR (Yonma-yon) -->
             <LinearLayout
-                android:id="@+id/containerDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:padding="16dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true">
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_calendar_today"
-                    app:tint="#546E7A" />
-
-                <TextView
-                    android:id="@+id/tvSearchDate"
-                    android:layout_width="match_parent"
+                <!-- Sana -->
+                <LinearLayout
+                    android:id="@+id/containerDate"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:text="Bugun"
-                    android:textSize="18sp"
-                    android:textColor="#212121" />
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:padding="20dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_calendar_today"
+                        app:tint="#64748B"/>
+
+                    <TextView
+                        android:id="@+id/tvSearchDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="Bugun"
+                        android:textSize="15sp"
+                        android:textColor="#1E293B"/>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginVertical="10dp"
+                    android:background="#F1F5F9"/>
+
+                <!-- O'rinlar -->
+                <LinearLayout
+                    android:id="@+id/containerSeats"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:padding="20dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_person"
+                        app:tint="#64748B"/>
+
+                    <TextView
+                        android:id="@+id/tvSearchSeats"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="1 yo'lovchi"
+                        android:textSize="15sp"
+                        android:textColor="#1E293B"/>
+                </LinearLayout>
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="#EEEEEE" />
-
-            <!-- 4. YO'LOVCHI SONI -->
-            <LinearLayout
-                android:id="@+id/containerSeats"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:padding="16dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true">
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_person"
-                    app:tint="#546E7A" />
-
-                <TextView
-                    android:id="@+id/tvSearchSeats"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:text="1"
-                    android:textSize="18sp"
-                    android:textColor="#212121" />
-            </LinearLayout>
-
-            <!-- 5. QIDIRISH TUGMASI (Katta ko'k tugma) -->
-            <Button
+            <!-- 5. QIDIRISH TUGMASI (Premium Gradient) -->
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnSearch"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="0dp"
-                android:backgroundTint="#00AFF5"
+                android:layout_height="56dp"
+                android:background="@drawable/btn_gradient_bg"
                 android:text="Qidirish"
                 android:textColor="@android:color/white"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:padding="16dp"
-                app:cornerRadius="0dp"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"/>
+                android:textAllCaps="false"
+                android:stateListAnimator="@null"/>
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Pastki qismdagi e'lonlar yoki tarix (ixtiyoriy) -->
+    <!-- Pastki qismdagi e'lonlar labeli -->
     <TextView
         android:id="@+id/tvRecentLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:layout_marginStart="16dp"
-        android:text="Oxirgi qidiruvlar"
+        android:layout_marginStart="24dp"
+        android:text="So'nggi qidiruvlar"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:textColor="#333"
+        android:textColor="#1E293B"
         app:layout_constraintTop_toBottomOf="@id/searchCard"
         app:layout_constraintStart_toStartOf="parent"/>
-
-    <!-- Bu yerga keyinchalik RecyclerView qo'shishingiz mumkin -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

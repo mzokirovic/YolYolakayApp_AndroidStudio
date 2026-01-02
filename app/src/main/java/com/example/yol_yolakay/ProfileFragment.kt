@@ -60,10 +60,13 @@ class ProfileFragment : Fragment() {
         binding.etCarModel.isEnabled = false
         binding.etCarColor.isEnabled = false
         binding.etCarNumber.isEnabled = false
-        binding.btnSave.isEnabled = false
-        binding.btnSave.text = "Saqlash uchun tizimga kiring"
 
-        // Chiqish tugmasi o'rniga "Kirish" tugmasini ishlatamiz
+        // Yangi dizaynda btnSaveCar (kichik yashil tugma) bor, katta btnSave yo'q.
+        // Xavfsizlik uchun '?' qo'yamiz.
+        binding.btnSaveCar?.isEnabled = false
+        binding.btnSaveCar?.alpha = 0.5f
+
+        // Chiqish tugmasi (layout) o'rniga "Kirish" tugmasini ishlatamiz
         binding.btnLogout.setOnClickListener {
             val intent = Intent(context, LoginActivity::class.java)
             startActivity(intent)
@@ -86,7 +89,7 @@ class ProfileFragment : Fragment() {
                 binding.tvFullName.text = "$firstName $lastName"
                 binding.tvPhone.text = phone
 
-                // Statistika (agar bo'lsa)
+                // Statistika
                 val rating = snapshot.child("rating").getValue(String::class.java) ?: "5.0"
                 val tripCount = snapshot.child("tripCount").getValue(Int::class.java) ?: 0
 
@@ -111,9 +114,15 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupButtons() {
-        // SAQLASH TUGMASI
-        binding.btnSave.setOnClickListener {
+        // SAQLASH TUGMASI (Yangi dizayn: btnSaveCar)
+        // Agar btnSaveCar topilmasa, kod qulamaydi (safe call)
+        binding.btnSaveCar?.setOnClickListener {
             saveCarDetails()
+        }
+
+        // Tahrirlash (Headerdagi yozuv)
+        binding.btnEditProfile?.setOnClickListener {
+            Toast.makeText(context, "Tahrirlash oynasi tez orada...", Toast.LENGTH_SHORT).show()
         }
 
         // CHIQISH TUGMASI
@@ -125,9 +134,9 @@ class ProfileFragment : Fragment() {
             startActivity(intent)
         }
 
-        // TIL TUGMASI (Hozircha shunchaki toast)
-        binding.btnLanguage.setOnClickListener {
-            Toast.makeText(context, "Tilni o'zgartirish tez orada qo'shiladi", Toast.LENGTH_SHORT).show()
+        // SOZLAMALAR (Eski btnLanguage o'rniga btnSettings)
+        binding.btnSettings?.setOnClickListener {
+            Toast.makeText(context, "Sozlamalar bo'limi", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -143,8 +152,9 @@ class ProfileFragment : Fragment() {
             return
         }
 
-        binding.btnSave.text = "Saqlanmoqda..."
-        binding.btnSave.isEnabled = false
+        // Animatsiya: Tugmani vaqtincha o'chirib turamiz
+        binding.btnSaveCar?.isEnabled = false
+        binding.btnSaveCar?.alpha = 0.5f
 
         val updates = mapOf<String, Any>(
             "carModel" to model,
@@ -155,16 +165,23 @@ class ProfileFragment : Fragment() {
         database.getReference("Users").child(userId).updateChildren(updates)
             .addOnSuccessListener {
                 if (_binding != null) {
-                    Toast.makeText(context, "Ma'lumotlar saqlandi! ✅", Toast.LENGTH_SHORT).show()
-                    binding.btnSave.text = "O'zgarishlarni saqlash"
-                    binding.btnSave.isEnabled = true
+                    Toast.makeText(context, "Mashina ma'lumotlari saqlandi! ✅", Toast.LENGTH_SHORT).show()
+
+                    // Tugmani qayta yoqamiz
+                    binding.btnSaveCar?.isEnabled = true
+                    binding.btnSaveCar?.alpha = 1.0f
+
+                    // Klaviatura yopilishi va fokus yo'qolishi uchun
+                    binding.etCarModel.clearFocus()
+                    binding.etCarColor.clearFocus()
+                    binding.etCarNumber.clearFocus()
                 }
             }
             .addOnFailureListener {
                 if (_binding != null) {
                     Toast.makeText(context, "Xatolik yuz berdi", Toast.LENGTH_SHORT).show()
-                    binding.btnSave.text = "O'zgarishlarni saqlash"
-                    binding.btnSave.isEnabled = true
+                    binding.btnSaveCar?.isEnabled = true
+                    binding.btnSaveCar?.alpha = 1.0f
                 }
             }
     }

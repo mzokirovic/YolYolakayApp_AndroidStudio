@@ -3,38 +3,46 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="20dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="8dp"
-    app:cardBackgroundColor="#FFFFFF">
+    android:layout_margin="24dp"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="12dp"
+    app:cardBackgroundColor="@android:color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp"
+        android:padding="32dp"
         android:gravity="center_horizontal">
 
-        <!-- Ikonka (Qo'ng'iroqcha yoki mashina rasmi) -->
-        <ImageView
-            android:id="@+id/imgIcon"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:src="@drawable/ic_notifications"
-            android:background="@drawable/circle_bg_light_blue"
-            android:padding="12dp"
-            app:tint="#2196F3"/>
-        <!-- Eslatma: circle_bg_light_blue bo'lmasa, shunchaki android:background="#E3F2FD" qilib turing -->
+        <!-- Ikonka (Premium Style) -->
+        <!-- Aylana fonni CardView orqali yasaymiz, rasm fayli shart emas -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            app:cardCornerRadius="36dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#F1F5F9"> <!-- Juda och kulrang fon -->
+
+            <ImageView
+                android:id="@+id/imgIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_notifications"
+                android:padding="18dp"
+                app:tint="#2E5BFF"/> <!-- Brend rangi -->
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/tvDialogTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Yangi xabar!"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_marginTop="16dp"/>
+            android:textColor="#1E293B"
+            android:gravity="center"
+            android:layout_marginTop="24dp"/>
 
         <TextView
             android:id="@+id/tvDialogMessage"
@@ -42,21 +50,25 @@
             android:layout_height="wrap_content"
             android:text="Sizning safaringizga yangi yo'lovchi qo'shildi."
             android:textSize="16sp"
-            android:textColor="#666666"
+            android:textColor="#64748B"
             android:gravity="center"
-            android:layout_marginTop="8dp"
-            android:lineSpacingExtra="4dp"/>
+            android:layout_marginTop="12dp"
+            android:lineSpacingMultiplier="1.2"/>
 
-        <!-- Tugma -->
+        <!-- Tugma (Premium Blue) -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOk"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:text="Tushunarli"
-            android:layout_marginTop="24dp"
-            app:cornerRadius="8dp"
-            android:backgroundTint="#2196F3"
-            android:textColor="#FFFFFF"/>
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="32dp"
+            app:cornerRadius="16dp"
+            android:backgroundTint="#2E5BFF"
+            android:textColor="@android:color/white"
+            android:elevation="4dp"/>
 
     </LinearLayout>
 

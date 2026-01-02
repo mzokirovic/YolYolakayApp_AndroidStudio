@@ -3,17 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
+    android:background="@drawable/bg_bottom_sheet_rounded"
+    android:backgroundTint="@android:color/white"
     android:padding="24dp">
 
-    <!-- 1. Yopish tugmasi va Sarlavha bir qatorda -->
+    <!-- 1. HEADER: Yopish va Sarlavha -->
     <ImageView
         android:id="@+id/btnClose"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:src="@drawable/ic_close"
-        app:tint="#757575"
+        app:tint="#94A3B8"
         android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="4dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -22,7 +24,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Yo'lovchilar soni"
-        android:textColor="#212121"
+        android:textColor="#1E293B"
         android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center"
@@ -31,62 +33,66 @@
         app:layout_constraintTop_toTopOf="@id/btnClose"
         app:layout_constraintBottom_toBottomOf="@id/btnClose"/>
 
-    <!-- 2. Asosiy boshqaruv qismi (Markazda, ixcham) -->
+    <!-- 2. HISOBLAGICH (Counter) - Zamonaviy va Yassi (Flat) -->
     <LinearLayout
         android:id="@+id/counterContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="48dp"
         android:gravity="center"
         android:orientation="horizontal"
         app:layout_constraintTop_toBottomOf="@id/tvTitle">
 
-        <!-- Minus tugmasi (Aylana fon bilan) -->
+        <!-- MINUS TUGMASI: Neytral (Kulrang) -->
+        <!-- Elevation yo'q, yumshoq fon -->
         <androidx.cardview.widget.CardView
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            app:cardCornerRadius="28dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="#F5F5F5">
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#F1F5F9">
+
             <ImageView
                 android:id="@+id/btnMinus"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerInside"
-                android:padding="16dp"
+                android:padding="20dp"
                 android:src="@drawable/ic_minus"
-                app:tint="#00AFF5"
+                app:tint="#64748B"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"/>
         </androidx.cardview.widget.CardView>
 
-        <!-- Son (Katta va aniq) -->
+        <!-- SON: To'q ko'k va o'rtacha kattalikda -->
         <TextView
             android:id="@+id/tvSeatCount"
-            android:layout_width="100dp"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="1"
-            android:textColor="#212121"
-            android:textSize="48sp"
-            android:textStyle="bold" />
+            android:textColor="#1E293B"
+            android:textSize="42sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"/>
 
-        <!-- Plus tugmasi (Aylana fon bilan) -->
+        <!-- PLUS TUGMASI: Aktiv (Brend rangi foni) -->
         <androidx.cardview.widget.CardView
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            app:cardCornerRadius="28dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="#F5F5F5">
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            app:cardCornerRadius="32dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#EFF6FF">
+
             <ImageView
                 android:id="@+id/btnPlus"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerInside"
-                android:padding="16dp"
+                android:padding="20dp"
                 android:src="@drawable/ic_add"
-                app:tint="#00AFF5"
+                app:tint="#2E5BFF"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"/>
@@ -94,9 +100,19 @@
 
     </LinearLayout>
 
+    <!-- Qo'shimcha izoh (ixtiyoriy, dizaynni to'ldiradi) -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Maksimal 4 kishi tanlash mumkin"
+        android:textColor="#94A3B8"
+        android:textSize="14sp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/counterContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-
-    <!-- 3. Tasdiqlash tugmasi (Katta, pastda) -->
+    <!-- 3. TASDIQLASH TUGMASI -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnConfirm"
         android:layout_width="match_parent"
@@ -107,9 +123,11 @@
         android:textSize="16sp"
         android:textStyle="bold"
         android:textAllCaps="false"
-        app:cornerRadius="12dp"
-        android:backgroundTint="#00AFF5"
+        app:cornerRadius="16dp"
+        android:backgroundTint="#2E5BFF"
+        android:elevation="0dp"
         app:layout_constraintTop_toBottomOf="@id/counterContainer"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="1.0"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

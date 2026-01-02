@@ -5,17 +5,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA"
+    android:background="#F8FAFC"
     android:fitsSystemWindows="true">
 
     <!-- 1. HEADER (Sana va Orqaga tugmasi) -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        android:orientation="vertical"
+        android:paddingTop="16dp"
         android:paddingBottom="16dp"
+        android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -23,32 +24,41 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:padding="12dp"
-            android:src="@drawable/ic_back"
-            app:tint="#00C896"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:layout_marginTop="16dp"
             android:layout_marginStart="8dp"
-            android:contentDescription="Orqaga" />
+            android:src="@drawable/ic_back"
+            app:tint="#1E293B"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Orqaga"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
         <TextView
             android:id="@+id/tvDateHeader"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Bugun, 27 Dekabr"
-            android:textSize="28sp"
+            android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="#2D3E50"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="8dp"/>
-    </LinearLayout>
+            android:textColor="#1E293B"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintStart_toEndOf="@id/btnBack"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- 2. ASOSIY SCROLL QISMI -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="100dp"
         app:layout_constraintTop_toBottomOf="@id/headerLayout"
-        app:layout_constraintBottom_toTopOf="@id/bottomLayout">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -56,13 +66,13 @@
             android:orientation="vertical"
             android:paddingBottom="24dp">
 
-            <!-- SAFAR CHIZIG'I (TIMELINE) -->
+            <!-- SAFAR CHIZIG'I (TIMELINE) - Premium Card -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
+                app:cardElevation="2dp"
                 app:cardBackgroundColor="@android:color/white">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -70,6 +80,7 @@
                     android:layout_height="wrap_content"
                     android:padding="20dp">
 
+                    <!-- TIME & DOTS -->
                     <TextView
                         android:id="@+id/tvStartTime"
                         android:layout_width="wrap_content"
@@ -77,58 +88,29 @@
                         android:text="15:30"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="#2D3E50"
+                        android:textColor="#1E293B"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/circleStart"/>
-
-                    <TextView
-                        android:id="@+id/tvEndTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="20:00"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="#2D3E50"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/circleEnd"/>
+                        app:layout_constraintTop_toTopOf="@id/circleStart"
+                        app:layout_constraintBottom_toBottomOf="@id/circleStart"/>
 
                     <View
                         android:id="@+id/circleStart"
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
                         android:background="@drawable/shape_circle_green"
-                        android:backgroundTint="#00C896"
+                        android:backgroundTint="#2E5BFF"
                         android:layout_marginStart="16dp"
                         app:layout_constraintStart_toEndOf="@id/tvStartTime"
                         app:layout_constraintTop_toTopOf="parent"/>
 
-                    <View
-                        android:layout_width="2dp"
-                        android:layout_height="0dp"
-                        android:background="#E0E0E0"
-                        android:layout_marginVertical="4dp"
-                        app:layout_constraintStart_toStartOf="@id/circleStart"
-                        app:layout_constraintEnd_toEndOf="@id/circleStart"
-                        app:layout_constraintTop_toBottomOf="@id/circleStart"
-                        app:layout_constraintBottom_toTopOf="@id/circleEnd"/>
-
-                    <View
-                        android:id="@+id/circleEnd"
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:background="@drawable/shape_circle_green"
-                        android:backgroundTint="#00C896"
-                        android:layout_marginTop="50dp"
-                        app:layout_constraintStart_toStartOf="@id/circleStart"
-                        app:layout_constraintTop_toBottomOf="@id/circleStart"/>
-
+                    <!-- LOCATION NAMES -->
                     <TextView
                         android:id="@+id/tvFromCity"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="Toshkent"
                         android:textSize="18sp"
-                        android:textColor="#2D3E50"
+                        android:textColor="#1E293B"
                         android:textStyle="bold"
                         android:layout_marginStart="16dp"
                         app:layout_constraintStart_toEndOf="@id/circleStart"
@@ -136,13 +118,46 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintBottom_toBottomOf="@id/circleStart"/>
 
+                    <!-- LINE -->
+                    <View
+                        android:layout_width="2dp"
+                        android:layout_height="40dp"
+                        android:background="#E2E8F0"
+                        android:layout_marginVertical="4dp"
+                        app:layout_constraintStart_toStartOf="@id/circleStart"
+                        app:layout_constraintEnd_toEndOf="@id/circleStart"
+                        app:layout_constraintTop_toBottomOf="@id/circleStart"/>
+
+                    <!-- END SECTION -->
+                    <TextView
+                        android:id="@+id/tvEndTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="20:00"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#64748B"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/circleEnd"
+                        app:layout_constraintBottom_toBottomOf="@id/circleEnd"/>
+
+                    <View
+                        android:id="@+id/circleEnd"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:background="@drawable/shape_circle_green"
+                        android:backgroundTint="#2E5BFF"
+                        android:layout_marginTop="50dp"
+                        app:layout_constraintStart_toStartOf="@id/circleStart"
+                        app:layout_constraintTop_toBottomOf="@id/circleStart"/>
+
                     <TextView
                         android:id="@+id/tvToCity"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="Samarqand"
                         android:textSize="18sp"
-                        android:textColor="#2D3E50"
+                        android:textColor="#1E293B"
                         android:textStyle="bold"
                         android:layout_marginStart="16dp"
                         app:layout_constraintStart_toEndOf="@id/circleEnd"
@@ -154,158 +169,199 @@
             </androidx.cardview.widget.CardView>
 
             <!-- NARX QISMI -->
-            <LinearLayout
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@android:color/white"
-                android:padding="20dp"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="1 yo'lovchi uchun narx"
-                    android:textSize="16sp"
-                    android:textColor="#757575"/>
-
-                <TextView
-                    android:id="@+id/tvPrice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="50,000 so'm"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    android:textColor="#2D3E50"/>
-            </LinearLayout>
-
-            <!-- HAYDOVCHI HAQIDA -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@android:color/white"
-                android:padding="20dp"
-                android:layout_marginTop="8dp"
-                android:orientation="vertical">
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@android:color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:padding="20dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
-                    <LinearLayout
+                    <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:text="1 yo'lovchi uchun narx"
+                        android:textSize="16sp"
+                        android:textColor="#64748B"/>
 
-                        <TextView
-                            android:id="@+id/tvDriverName"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Eshmat Toshmatov"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="#2D3E50"/>
+                    <TextView
+                        android:id="@+id/tvPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="50,000 so'm"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="#2E5BFF"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- HAYDOVCHI HAQIDA -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@android:color/white">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_marginTop="4dp">
-
-                            <ImageView
-                                android:layout_width="16dp"
-                                android:layout_height="16dp"
-                                android:src="@drawable/ic_star"
-                                app:tint="#FFC107"
-                                android:contentDescription="Reyting"/>
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text=" 4.8/5"
-                                android:textSize="14sp"
-                                android:textColor="#757575"
-                                android:layout_marginStart="4dp"/>
+                                android:text="Haydovchi"
+                                android:textSize="12sp"
+                                android:textColor="#94A3B8"
+                                android:textAllCaps="true"/>
+
+                            <TextView
+                                android:id="@+id/tvDriverName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Eshmat Toshmatov"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:textColor="#1E293B"
+                                android:layout_marginTop="2dp"/>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:layout_marginTop="4dp">
+
+                                <ImageView
+                                    android:layout_width="16dp"
+                                    android:layout_height="16dp"
+                                    android:src="@drawable/ic_star"
+                                    app:tint="#FFC107"
+                                    android:contentDescription="Reyting"/>
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text=" 4.8"
+                                    android:textStyle="bold"
+                                    android:textSize="14sp"
+                                    android:textColor="#1E293B"
+                                    android:layout_marginStart="4dp"/>
+                            </LinearLayout>
                         </LinearLayout>
+
+                        <!-- Haydovchi Rasmi -->
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            app:cardCornerRadius="28dp"
+                            app:cardElevation="0dp"
+                            app:cardBackgroundColor="#F1F5F9">
+                            <ImageView
+                                android:id="@+id/imgDriver"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/ic_person"
+                                android:scaleType="centerCrop"
+                                android:padding="8dp"
+                                app:tint="#94A3B8"
+                                android:contentDescription="Haydovchi rasmi"/>
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
-
-                    <!-- Haydovchi Rasmi -->
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        app:cardCornerRadius="25dp"
-                        app:cardElevation="0dp">
-                        <ImageView
-                            android:id="@+id/imgDriver"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="@drawable/ic_person"
-                            android:scaleType="centerCrop"
-                            android:background="#E0F2F1"
-                            android:contentDescription="Haydovchi rasmi"/>
-                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
-                <!-- Eskirgan call textview qoldi, lekin pastda tugmalar bor -->
-                <TextView
-                    android:id="@+id/tvDriverLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Haydovchiga bog'lanish (pastdagi tugmalar orqali)"
-                    android:textColor="#9E9E9E"
-                    android:textSize="14sp"
-                    android:layout_marginTop="8dp"/>
-
-            </LinearLayout>
-
-            <!-- QO'SHIMCHA MA'LUMOT -->
-            <LinearLayout
+            <!-- QO'SHIMCHA MA'LUMOT (MASHINA & INFO) -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@android:color/white"
-                android:padding="20dp"
-                android:layout_marginTop="8dp"
-                android:orientation="vertical">
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@android:color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical">
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_car"
-                        app:tint="#757575"
-                        android:contentDescription="Mashina"/>
-                    <TextView
-                        android:layout_width="wrap_content"
+                    android:padding="20dp"
+                    android:orientation="vertical">
+
+                    <!-- MASHINA -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Chevrolet Cobalt"
-                        android:textSize="16sp"
-                        android:textColor="#2D3E50"
-                        android:layout_marginStart="16dp"/>
+                        android:gravity="center_vertical">
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_car"
+                            app:tint="#2E5BFF"
+                            android:contentDescription="Mashina"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Chevrolet Cobalt"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="#1E293B"
+                            android:layout_marginStart="16dp"/>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#E2E8F0"
+                        android:layout_marginVertical="12dp"/>
+
+                    <!-- INFO -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top">
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_info"
+                            app:tint="#64748B"
+                            android:layout_marginTop="2dp"/>
+                        <TextView
+                            android:id="@+id/tvInfo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Konditsioner bor. Chekish mumkin emas. Yukxona bo'sh."
+                            android:textColor="#64748B"
+                            android:textSize="14sp"
+                            android:layout_marginStart="16dp"
+                            android:lineSpacingExtra="4dp"/>
+                    </LinearLayout>
                 </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#F0F0F0"
-                    android:layout_marginVertical="12dp"/>
-
-                <TextView
-                    android:id="@+id/tvInfo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Konditsioner bor. Chekish mumkin emas."
-                    android:textColor="#757575"
-                    android:textSize="14sp"/>
-            </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <!-- 6. YANGI: HAYDOVCHI UCHUN SO'ROVLAR RO'YXATI (Scroll ichida) -->
             <LinearLayout
@@ -324,7 +380,7 @@
                     android:text="Kutilayotgan so'rovlar:"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="#2D3E50"
+                    android:textColor="#1E293B"
                     android:layout_marginHorizontal="20dp"
                     android:layout_marginBottom="8dp"/>
 
@@ -347,7 +403,7 @@
         android:layout_height="wrap_content"
         android:background="@android:color/white"
         android:padding="16dp"
-        android:elevation="16dp"
+        android:elevation="24dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -359,7 +415,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <!-- SMS Yozish -->
+            <!-- SMS Yozish (Secondary Button Style) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSms"
                 android:layout_width="56dp"
@@ -368,13 +424,16 @@
                 app:icon="@android:drawable/sym_action_chat"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
-                app:iconTint="@color/white"
+                app:iconTint="#2E5BFF"
                 app:cornerRadius="16dp"
-                android:backgroundTint="#2196F3"
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp"
+                android:backgroundTint="@android:color/white"
+                android:elevation="0dp"
                 android:layout_marginEnd="12dp"
                 android:tooltipText="SMS yozish"/>
 
-            <!-- Telefon qilish -->
+            <!-- Telefon qilish (Secondary Button Style) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCallBottom"
                 android:layout_width="56dp"
@@ -383,38 +442,31 @@
                 app:icon="@android:drawable/ic_menu_call"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
-                app:iconTint="@color/white"
+                app:iconTint="#10B981"
                 app:cornerRadius="16dp"
-                android:backgroundTint="#4CAF50"
+                app:strokeColor="#E2E8F0"
+                app:strokeWidth="1dp"
+                android:backgroundTint="@android:color/white"
+                android:elevation="0dp"
                 android:layout_marginEnd="12dp"
                 android:tooltipText="Telefon qilish"/>
 
-            <!-- So'rov yuborish (Asosiy tugma) -->
+            <!-- So'rov yuborish (Asosiy tugma - Premium Blue) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnBook"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_weight="1"
-                android:text="So'rov yuborish"
+                android:text="Joy band qilish"
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/white"
-                android:backgroundTint="#00C896"
-                app:cornerRadius="16dp"/>
+                app:cornerRadius="16dp"
+                android:backgroundTint="#2E5BFF"
+                android:elevation="4dp"/>
+
         </LinearLayout>
-
-        <!-- HAYDOVCHI UCHUN: Safarni yakunlash (Odatiy holatda yashirin) -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnCompleteTrip"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="Safarni yakunlash"
-            android:textSize="16sp"
-            app:cornerRadius="16dp"
-            android:backgroundTint="#FF9800"
-            android:visibility="gone"/>
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

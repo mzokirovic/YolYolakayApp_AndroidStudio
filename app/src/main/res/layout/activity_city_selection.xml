@@ -4,57 +4,71 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
-    tools:context=".CitySelectionActivity">
+    android:background="#F8FAFC"
+    tools:context=".CitySelectionActivity"
+    android:fitsSystemWindows="true">
 
-    <!-- 1. Header (Tepa qism) -->
-    <LinearLayout
+    <!-- 1. HEADER (Oq fon va soya bilan) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:background="@android:color/white"
+        android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent">
 
+        <!-- Yopish tugmasi -->
         <ImageView
             android:id="@+id/btnClose"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:layout_marginStart="8dp"
             android:src="@drawable/ic_close"
-            app:tint="#333333"
+            app:tint="#1E293B"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"/>
+            android:clickable="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
+        <!-- Sarlavha -->
         <TextView
             android:id="@+id/tvTitle"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Manzilni tanlang"
-            android:gravity="center"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_marginEnd="24dp"/>
-    </LinearLayout>
+            android:textColor="#1E293B"
+            app:layout_constraintStart_toEndOf="@id/btnClose"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-    <!-- 2. Qidiruv qatori -->
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 2. QIDIRUV QATORI (Premium Input Style) -->
+    <!-- ID: searchContainer saqlandi -->
     <LinearLayout
         android:id="@+id/searchContainer"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginHorizontal="16dp"
-        android:background="@drawable/bg_search_input"
+        android:layout_height="56dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/bg_input_premium"
         android:gravity="center_vertical"
-        android:paddingHorizontal="12dp"
+        android:paddingHorizontal="16dp"
+        android:elevation="2dp"
         app:layout_constraintTop_toBottomOf="@id/headerLayout">
 
         <ImageView
             android:id="@+id/imgSearchIcon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:src="@drawable/ic_search"
-            app:tint="#757575"/>
+            app:tint="#2E5BFF"/> <!-- Blue Accent -->
 
         <!-- ID: etSearch -->
         <EditText
@@ -63,32 +77,35 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@null"
-            android:hint="Shahar nomi..."
+            android:hint="Shahar yoki tuman nomi..."
+            android:textColorHint="#94A3B8"
             android:paddingStart="12dp"
             android:textSize="16sp"
-            android:textColor="#333333"
+            android:textColor="#1E293B"
             android:inputType="textCapWords"
             android:maxLines="1"/>
 
         <!-- ID: btnClear -->
         <ImageView
             android:id="@+id/btnClear"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:src="@drawable/ic_close"
-            app:tint="#999999"
+            app:tint="#64748B"
             android:visibility="gone"
-            android:clickable="true"/>
+            android:clickable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
     </LinearLayout>
 
-    <!-- 3. Hozirgi joylashuv -->
+    <!-- 3. HOZIRGI JOYLASHUV (Blue Style) -->
     <LinearLayout
         android:id="@+id/btnUseLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="16dp"
+        android:padding="20dp"
+        android:layout_marginTop="8dp"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         app:layout_constraintTop_toBottomOf="@id/searchContainer">
@@ -97,14 +114,14 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_location_searching"
-            app:tint="#FF5252"/>
+            app:tint="#2E5BFF"/> <!-- Blue Accent (Eski Red o'rniga) -->
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Mening joylashuvim"
             android:textSize="16sp"
-            android:textColor="#FF5252"
+            android:textColor="#2E5BFF"
             android:textStyle="bold"
             android:layout_marginStart="16dp"/>
     </LinearLayout>
@@ -113,15 +130,18 @@
         android:id="@+id/dividerLoc"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#F0F0F0"
+        android:layout_marginHorizontal="20dp"
+        android:background="#E2E8F0"
         app:layout_constraintTop_toBottomOf="@id/btnUseLocation"/>
 
-    <!-- 4. Ro'yxat -->
+    <!-- 4. RO'YXAT (RecyclerView) -->
     <!-- ID: rvCities -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvCities"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:paddingTop="8dp"
+        android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/dividerLoc"
         app:layout_constraintBottom_toBottomOf="parent"/>
 

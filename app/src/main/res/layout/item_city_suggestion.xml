@@ -1,29 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="16dp"
-    android:gravity="center_vertical"
+    android:orientation="vertical"
     android:background="?attr/selectableItemBackground">
 
-    <!-- Shahar ikonkachasi -->
-    <ImageView
-        android:id="@android:id/icon"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:src="@drawable/ic_location_to"
-        android:layout_marginEnd="16dp"
-        app:tint="#757575"
-        xmlns:app="http://schemas.android.com/apk/res-auto"/>
-    <!-- Agar ic_location bo'lmasa, android:src="@android:drawable/ic_menu_myplaces" ishlating -->
-
-    <TextView
-        android:id="@android:id/text1"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Toshkent"
-        android:textSize="16sp"
-        android:textColor="#333333"/>
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="12dp">
+
+        <!-- Shahar ikonkachasi (Premium Style) -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#F1F5F9"> <!-- Och kulrang fon -->
+
+            <ImageView
+                android:id="@android:id/icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp"
+                android:src="@drawable/ic_location_to"
+                app:tint="#64748B"/> <!-- Ikonka rangi (Slate Gray) -->
+        </androidx.cardview.widget.CardView>
+
+        <!-- Shahar nomi -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@android:id/text1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Toshkent"
+                android:textColor="#1E293B"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+            <!-- Agar kerak bo'lsa, ikkinchi qator (Viloyat/Mamlakat) uchun joy -->
+            <!-- Hozircha bu yashirin bo'lishi mumkin, lekin kelajakda kerak bo'lsa text2 ishlatasiz -->
+            <!--
+            <TextView
+                android:id="@android:id/text2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="O'zbekiston"
+                android:textColor="#94A3B8"
+                android:textSize="13sp"
+                android:visibility="gone"/>
+            -->
+        </LinearLayout>
+
+        <!-- Tanlash strelkasi (ixtiyoriy, chiroyli ko'rinish uchun) -->
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_keyboard_right"
+            app:tint="#CBD5E1"/>
+
+    </LinearLayout>
+
+    <!-- Ajratuvchi chiziq -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="76dp"
+        android:background="#F1F5F9"/>
 
 </LinearLayout>

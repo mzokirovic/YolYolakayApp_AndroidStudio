@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="#F8FAFC"
     android:padding="24dp"
     tools:context=".EmailInputActivity">
 
@@ -18,7 +18,7 @@
         android:src="@drawable/ic_back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="#00AFF5" />
+        app:tint="#1E293B" />
 
     <!-- 2. Sarlavha -->
     <TextView
@@ -27,34 +27,28 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="Emailingiz nima?"
-        android:textColor="#054652"
+        android:textColor="#1E293B"
         android:textSize="28sp"
         android:textStyle="bold"
+        android:letterSpacing="-0.01"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnBack" />
 
-    <!-- 3. Email kiritish maydoni -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/inputLayoutEmail"
+    <!-- 3. Email kiritish maydoni (Premium Style) -->
+    <!-- TextInputLayout o'rniga oddiy EditText ishlatamiz, chunki bizning dizaynimiz shuni taqozo qiladi -->
+    <EditText
+        android:id="@+id/etEmail"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:layout_marginTop="32dp"
-        app:boxBackgroundMode="none"
-        app:hintEnabled="false"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etEmail"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@drawable/bg_input_field"
-            android:hint="Email"
-            android:inputType="textEmailAddress"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
-    </com.google.android.material.textfield.TextInputLayout>
+        android:background="@drawable/bg_input_premium"
+        android:hint="Email manzilingiz"
+        android:inputType="textEmailAddress"
+        android:paddingHorizontal="20dp"
+        android:textColor="#1E293B"
+        android:textColorHint="#94A3B8"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"/>
 
     <!-- 4. Yangiliklarga obuna bo'lmaslik (Radio Button) -->
     <LinearLayout
@@ -64,21 +58,22 @@
         android:layout_marginTop="24dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/inputLayoutEmail">
+        app:layout_constraintTop_toBottomOf="@id/etEmail">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Men Yo'l-Yo'lakay-dan yangiliklar va sovg'alar olishni xohlamayman."
-            android:textColor="#054652"
-            android:textSize="14sp" />
+            android:textColor="#1E293B"
+            android:textSize="14sp"
+            android:lineSpacingExtra="2dp"/>
 
         <RadioButton
             android:id="@+id/radioNewsOptOut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:buttonTint="#00AFF5" />
+            android:buttonTint="#2E5BFF" />
     </LinearLayout>
 
     <!-- 5. Kichik izoh matni -->
@@ -87,12 +82,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Obuna bo'lganingizdan so'ng, xohlagan vaqtda biz bilan bog'lanish orqali buni bekor qilishingiz mumkin."
-        android:textColor="#9E9E9E"
+        android:textColor="#64748B"
         android:textSize="12sp"
         app:layout_constraintTop_toBottomOf="@id/containerNewsOption" />
 
     <!-- 6. Davom etish tugmasi -->
-    <!-- Xatolik to'g'irlandi: ic_arrow_right -> ic_arrow_forward -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnNext"
         android:layout_width="wrap_content"
@@ -100,7 +94,8 @@
         android:layout_margin="24dp"
         android:contentDescription="Keyingisi"
         android:src="@drawable/ic_arrow_right"
-        app:backgroundTint="#00AFF5"
+        app:backgroundTint="#2E5BFF"
+        app:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="@android:color/white" />

@@ -4,21 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="#F8FAFC"
     android:padding="24dp"
     tools:context=".GenderSelectionActivity">
 
-    <!-- 1. Orqaga qaytish -->
+    <!-- 1. Orqaga qaytish (Close/Back) -->
+    <!-- Logikangizda ic_close ishlatilgan bo'lsa, uni qoldiramiz, lekin rangini to'g'irlaymiz -->
     <ImageButton
         android:id="@+id/btnBack"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Orqaga"
-        android:src="@drawable/ic_close"
+        android:src="@drawable/ic_back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="#00AFF5" />
+        app:tint="#1E293B" />
 
     <!-- 2. Sarlavha -->
     <TextView
@@ -27,9 +28,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="Sizga qanday murojaat \nqilishimizni xohlaysiz?"
-        android:textColor="#054652"
+        android:textColor="#1E293B"
         android:textSize="26sp"
         android:textStyle="bold"
+        android:letterSpacing="-0.01"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnBack" />
 
@@ -50,14 +52,14 @@
             android:clickable="true"
             android:focusable="true"
             android:gravity="center_vertical"
-            android:paddingVertical="16dp">
+            android:paddingVertical="20dp">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Ayol"
-                android:textColor="#054652"
+                android:textColor="#1E293B"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -65,14 +67,14 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_keyboard_right"
-                app:tint="#B0BEC5" />
+                app:tint="#94A3B8" />
         </LinearLayout>
 
         <!-- Chiziq -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#EEEEEE" />
+            android:background="#E2E8F0" />
 
         <!-- 4. Variant: Erkak -->
         <LinearLayout
@@ -83,14 +85,14 @@
             android:clickable="true"
             android:focusable="true"
             android:gravity="center_vertical"
-            android:paddingVertical="16dp">
+            android:paddingVertical="20dp">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Erkak"
-                android:textColor="#054652"
+                android:textColor="#1E293B"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -98,14 +100,14 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_keyboard_right"
-                app:tint="#B0BEC5" />
+                app:tint="#94A3B8" />
         </LinearLayout>
 
         <!-- Chiziq -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#EEEEEE" />
+            android:background="#E2E8F0" />
 
         <!-- 5. Variant: Aytishni xohlamayman -->
         <LinearLayout
@@ -116,14 +118,14 @@
             android:clickable="true"
             android:focusable="true"
             android:gravity="center_vertical"
-            android:paddingVertical="16dp">
+            android:paddingVertical="20dp">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Aytishni xohlamayman"
-                android:textColor="#054652"
+                android:textColor="#1E293B"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -131,14 +133,14 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_keyboard_right"
-                app:tint="#B0BEC5" />
+                app:tint="#94A3B8" />
         </LinearLayout>
 
         <!-- Chiziq (Oxirgisi) -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#EEEEEE" />
+            android:background="#E2E8F0" />
 
     </LinearLayout>
 

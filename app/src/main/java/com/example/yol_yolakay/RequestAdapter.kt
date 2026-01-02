@@ -11,7 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 data class UserRequest(
     val userId: String = "",
     val name: String = "",
-    val phone: String = ""
+    val phone: String = "",
+    val status: String
 )
 
 class RequestAdapter(

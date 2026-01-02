@@ -4,21 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="#F8FAFC"
     android:padding="24dp"
     tools:context=".RegistrationActivity">
 
-    <!-- 1. Orqaga qaytish tugmasi -->
+    <!-- 1. Orqaga qaytish -->
+    <!-- Logika bo'yicha bu yerda "Back" tugmasi bo'lishi kerak, shuning uchun ic_back ishlatamiz -->
     <ImageButton
         android:id="@+id/btnBack"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_close"
-        app:tint="#00AFF5"
         android:contentDescription="Orqaga"
+        android:src="@drawable/ic_back"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="#1E293B" />
 
     <!-- 2. Sarlavha -->
     <TextView
@@ -27,68 +28,56 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="Ismingiz nima?"
-        android:textColor="#054652"
+        android:textColor="#1E293B"
         android:textSize="28sp"
         android:textStyle="bold"
+        android:letterSpacing="-0.01"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnBack" />
 
-    <!-- 3. Ism kiritish maydoni (Kulrang fonli) -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/inputLayoutName"
+    <!-- 3. Ism kiritish maydoni (Premium Style) -->
+    <!-- TextInputLayout o'rniga sodda va ishonchli EditText -->
+    <EditText
+        android:id="@+id/etName"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:layout_marginTop="32dp"
-        app:boxBackgroundMode="none"
-        app:hintEnabled="false"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle">
+        android:background="@drawable/bg_input_premium"
+        android:hint="Ism"
+        android:inputType="textPersonName|textCapWords"
+        android:paddingHorizontal="20dp"
+        android:textColor="#1E293B"
+        android:textColorHint="#94A3B8"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"/>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etName"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@drawable/bg_input_field"
-            android:hint="Ism"
-            android:inputType="textPersonName"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- 4. Familiya kiritish maydoni -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/inputLayoutSurname"
+    <!-- 4. Familiya kiritish maydoni (Premium Style) -->
+    <EditText
+        android:id="@+id/etSurname"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:layout_marginTop="16dp"
-        app:boxBackgroundMode="none"
-        app:hintEnabled="false"
-        app:layout_constraintTop_toBottomOf="@id/inputLayoutName">
+        android:background="@drawable/bg_input_premium"
+        android:hint="Familiya"
+        android:inputType="textPersonName|textCapWords"
+        android:paddingHorizontal="20dp"
+        android:textColor="#1E293B"
+        android:textColorHint="#94A3B8"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/etName"/>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etSurname"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@drawable/bg_input_field"
-            android:hint="Familiya"
-            android:inputType="textPersonName"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- 5. Davom etish tugmasi (Pastda paydo bo'ladi) -->
+    <!-- 5. Davom etish tugmasi -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnNext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
+        android:contentDescription="Keyingisi"
         android:src="@drawable/ic_arrow_right"
-        app:backgroundTint="#00AFF5"
-        app:tint="@android:color/white"
+        app:backgroundTint="#2E5BFF"
+        app:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@android:color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

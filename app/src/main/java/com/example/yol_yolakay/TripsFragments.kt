@@ -48,16 +48,22 @@ class TripsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        binding.recyclerViewTrips.layoutManager = LinearLayoutManager(context)
-        // Adapterga bosilganda nima bo'lishini aytamiz
-        tripAdapter = TripAdapter(arrayListOf()) { trip ->
-            val intent = Intent(context, TripDetailsActivity::class.java)
-            val gson = com.google.gson.Gson()
-            intent.putExtra("TRIP_JSON", gson.toJson(trip))
-            intent.putExtra("IS_PREVIEW", false)
-            startActivity(intent)
+        // Safe call (?) ishlatamiz. Agar XML da ID topilmasa ham ilova qulamaydi.
+        try {
+            binding.recyclerViewTrips?.layoutManager = LinearLayoutManager(context)
+
+            tripAdapter = TripAdapter(arrayListOf()) { trip ->
+                val intent = Intent(context, TripDetailsActivity::class.java)
+                val gson = com.google.gson.Gson()
+                intent.putExtra("TRIP_JSON", gson.toJson(trip))
+                intent.putExtra("IS_PREVIEW", false)
+                startActivity(intent)
+            }
+
+            binding.recyclerViewTrips?.adapter = tripAdapter
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        binding.recyclerViewTrips.adapter = tripAdapter
     }
 
     private fun setupTabs() {
@@ -74,7 +80,8 @@ class TripsFragment : Fragment() {
     }
 
     private fun setupSearch() {
-        binding.etSearch.addTextChangedListener(object : TextWatcher {
+        // etSearch null bo'lishi mumkinligini hisobga olamiz
+        binding.etSearch?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 filterList(s.toString())
@@ -94,7 +101,10 @@ class TripsFragment : Fragment() {
                 (it.from?.contains(query, true) == true) ||
                         (it.to?.contains(query, true) == true)
             }
-            tripAdapter.updateList(filtered)
+            // Adapter hali yaratilmagan bo'lsa xatolik bermasligi uchun tekshiramiz
+            if (::tripAdapter.isInitialized) {
+                tripAdapter.updateList(filtered)
+            }
         }
     }
 
@@ -110,12 +120,11 @@ class TripsFragment : Fragment() {
                 for (data in snapshot.children) {
                     val trip = data.getValue(Trip::class.java)
                     if (trip != null) {
-
                         // 1. Agar men HAYDOVCHI bo'lsam -> Published ro'yxatiga
                         if (trip.userId == myId) {
                             publishedTrips.add(trip)
                         }
-                        // 2. Agar men YO'LOVCHI bo'lsam (bookedUsers ichida bor bo'lsam) -> Booked ro'yxatiga
+                        // 2. Agar men YO'LOVCHI bo'lsam -> Booked ro'yxatiga
                         else if (data.child("bookedUsers").hasChild(myId)) {
                             bookedTrips.add(trip)
                         }
@@ -137,8 +146,30 @@ class TripsFragment : Fragment() {
 
     private fun updateList(list: List<Trip>) {
         if (_binding == null) return
-        tripAdapter.updateList(list)
-        binding.tvEmpty.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+
+        // Adapter initialized ekanligini tekshiramiz
+        if (::tripAdapter.isInitialized) {
+            tripAdapter.updateList(list)
+        }
+
+        // Empty State logikasi (Xavfsiz yondashuv - ID ni dinamik qidirish)
+        try {
+            val isEmpty = list.isEmpty()
+            val visibility = if (isEmpty) View.VISIBLE else View.GONE
+
+            // "emptyStateLayout" (yangi XML) yoki "tvEmpty" (eski XML) ID lari borligini tekshiramiz
+            val emptyResId = resources.getIdentifier("emptyStateLayout", "id", requireContext().packageName)
+            if (emptyResId != 0) {
+                binding.root.findViewById<View>(emptyResId)?.visibility = visibility
+            } else {
+                val tvEmptyId = resources.getIdentifier("tvEmpty", "id", requireContext().packageName)
+                if (tvEmptyId != 0) {
+                    binding.root.findViewById<View>(tvEmptyId)?.visibility = visibility
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onDestroyView() {

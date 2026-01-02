@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="#F8FAFC"
     android:padding="24dp"
     tools:context=".LoginActivity">
 
@@ -15,9 +14,9 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_close"
-        app:tint="#00AFF5"
         android:contentDescription="Yopish"
+        android:src="@drawable/ic_close"
+        app:tint="#1E293B"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -28,61 +27,47 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="Kirish"
-        android:textColor="#054652"
+        android:textColor="#1E293B"
         android:textSize="28sp"
         android:textStyle="bold"
+        android:letterSpacing="-0.01"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/btnBack" />
 
-    <!-- 3. Email maydoni -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/inputLayoutEmail"
+    <!-- 3. Email maydoni (Premium Style) -->
+    <!-- TextInputLayout o'rniga sodda va ishonchli EditText -->
+    <EditText
+        android:id="@+id/etEmail"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:layout_marginTop="32dp"
-        app:boxBackgroundMode="none"
-        app:hintEnabled="false"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle">
+        android:background="@drawable/bg_input_premium"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:paddingHorizontal="20dp"
+        android:textColor="#1E293B"
+        android:textColorHint="#94A3B8"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"/>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etEmail"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@drawable/bg_input_field"
-            android:hint="Email"
-            android:inputType="textEmailAddress"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- 4. Parol maydoni -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/inputLayoutPassword"
+    <!-- 4. Parol maydoni (Premium Style) -->
+    <!-- Bu yerda biz parol ko'rsatish/yashirish uchun "drawableEnd" ishlatishimiz mumkin,
+         lekin oddiylik uchun standart inputType ishlatamiz. -->
+    <EditText
+        android:id="@+id/etPassword"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="64dp"
         android:layout_marginTop="16dp"
-        app:boxBackgroundMode="none"
-        app:hintEnabled="false"
-        app:passwordToggleEnabled="true"
-        app:layout_constraintTop_toBottomOf="@id/inputLayoutEmail">
+        android:background="@drawable/bg_input_premium"
+        android:hint="Parol"
+        android:inputType="textPassword"
+        android:paddingHorizontal="20dp"
+        android:textColor="#1E293B"
+        android:textColorHint="#94A3B8"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/etEmail"/>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etPassword"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@drawable/bg_input_field"
-            android:hint="Parol"
-            android:inputType="textPassword"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <!-- 5. Kirish tugmasi -->
-    <!-- Bu tugmani o'ng pastki burchakka mixladik -->
+    <!-- 5. Kirish tugmasi (FAB) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnLogin"
         android:layout_width="wrap_content"
@@ -90,23 +75,23 @@
         android:layout_margin="24dp"
         android:contentDescription="Kirish"
         android:src="@drawable/ic_arrow_right"
-        app:backgroundTint="#00AFF5"
+        app:backgroundTint="#2E5BFF"
         app:tint="@android:color/white"
+        app:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- 6. Ro'yxatdan o'tish havolasi -->
-    <!-- Buni Kirish tugmasining chap tomoniga to'g'riladik, shunda bir-biriga minishmaydi -->
     <TextView
         android:id="@+id/tvRegisterLink"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="32dp"
         android:gravity="center_vertical|start"
         android:text="Hisobingiz yo'qmi? Ro'yxatdan o'tish"
-        android:textColor="#00AFF5"
-        android:textSize="16sp"
+        android:textColor="#2E5BFF"
+        android:textSize="15sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btnLogin"
