@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="12dp"
+    android:backgroundTint="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 1. HEADER: Oy va Yil -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <!-- Yil va Sana (Clickable qilinadi) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- Yilni bosganda animatsiya bo'lishi uchun background qo'shamiz -->
+                <TextView
+                    android:id="@+id/tvYearHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2024"
+                    android:textSize="14sp"
+                    android:textColor="#94A3B8"
+                    android:textStyle="bold"
+                    android:padding="4dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:drawableEnd="@drawable/ic_arrow_drop_down"
+                    android:drawableTint="#94A3B8"
+                    android:gravity="center_vertical"/>
+
+                <TextView
+                    android:id="@+id/tvDateHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sentabr, 27"
+                    android:textSize="20sp"
+                    android:textColor="#1E293B"
+                    android:textStyle="bold"
+                    android:paddingStart="4dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#F1F5F9"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- CONTAINER: Kalendar va Yillar ro'yxati -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="280dp"> <!-- Balandlikni ixchamlashtirdik -->
+
+            <!-- A) KALENDAR VIEW -->
+            <CalendarView
+                android:id="@+id/calendarView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:theme="@style/ModernCalendarTheme"
+                android:weekDayTextAppearance="@style/CalenderWeekText"
+                android:dateTextAppearance="@style/CalenderDateText"
+                android:showWeekNumber="false"
+                android:firstDayOfWeek="2"/>
+
+            <!-- B) YILLAR RO'YXATI (Boshida yashirin) -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvYears"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:scrollbars="vertical"
+                android:background="@android:color/white"
+                tools:listitem="@layout/item_year_text"/>
+
+        </FrameLayout>
+
+        <!-- Pastki Tugmalar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp"
+            android:gravity="end">
+
+            <TextView
+                android:id="@+id/btnCancelDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bekor qilish"
+                android:textColor="#64748B"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:padding="10dp"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:id="@+id/btnConfirmDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tanlash"
+                android:textColor="#2E5BFF"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:padding="10dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

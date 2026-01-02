@@ -1,38 +1,44 @@
 package com.example.yol_yolakay
 
-import android.app.Activity
-import android.app.DatePickerDialog
+import android.app.Dialog
 import android.app.TimePickerDialog
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.TextView // TextView import qilindi
+import android.view.ViewGroup
+import android.view.Window
+import android.widget.CalendarView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.yol_yolakay.databinding.ActivityAddTripBinding
 import com.example.yol_yolakay.model.Trip
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 class AddTripActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddTripBinding
     private lateinit var auth: FirebaseAuth
 
-    // Hozirgi qadam (1 dan 7 gacha)
     private var currentStep = 1
+    private var fromCity: String? = null
+    private var toCity: String? = null
+    private var tripDate: String? = null
+    private var tripTime: String? = null
 
-    // Ma'lumotlarni vaqtincha saqlash
-    private var fromCity: String = ""
-    private var toCity: String = ""
-    private var tripDate: String = ""
-    private var tripTime: String = ""
-
-    // --- Shahar tanlash uchun Launcherlar ---
+    // Shahar tanlash uchun launcherlar
     private val startLocationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
             val city = result.data?.getStringExtra("SELECTED_CITY")
             if (!city.isNullOrEmpty()) {
                 binding.etFrom.setText(city)
@@ -42,7 +48,7 @@ class AddTripActivity : AppCompatActivity() {
     }
 
     private val endLocationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == AppCompatActivity.RESULT_OK) {
             val city = result.data?.getStringExtra("SELECTED_CITY")
             if (!city.isNullOrEmpty()) {
                 binding.etTo.setText(city)
@@ -50,7 +56,6 @@ class AddTripActivity : AppCompatActivity() {
             }
         }
     }
-    // -----------------------------------------------
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -148,11 +153,9 @@ class AddTripActivity : AppCompatActivity() {
     }
 
     private fun validateCurrentStep(): Boolean {
-        // MUHIM O'ZGARISH: TextView va EditText ni alohida tekshiramiz
         return when (currentStep) {
             1 -> checkEmpty(binding.etFrom, "Manzilni tanlang")
             2 -> checkEmpty(binding.etTo, "Manzilni tanlang")
-            // 3 va 4 qadam endi TextView (checkTextEmpty funksiyasiga uzatamiz)
             3 -> checkTextEmpty(binding.etDate, "Sanani tanlang", "Sanani tanlang")
             4 -> checkTextEmpty(binding.etTime, "Vaqtni tanlang", "Vaqtni tanlang")
             5 -> checkEmpty(binding.etSeats, "Joy sonini kiriting")
@@ -161,7 +164,6 @@ class AddTripActivity : AppCompatActivity() {
         }
     }
 
-    // Bu funksiya EditText lar uchun (Shahar, Narx, Joy)
     private fun checkEmpty(view: android.widget.EditText, msg: String): Boolean {
         if (view.text.isNullOrEmpty()) {
             if (view.isFocusable) view.error = msg else Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
@@ -170,10 +172,8 @@ class AddTripActivity : AppCompatActivity() {
         return true
     }
 
-    // YANGI FUNKSIYA: Bu TextView lar uchun (Sana, Vaqt)
     private fun checkTextEmpty(view: TextView, msg: String, defaultText: String): Boolean {
         val text = view.text.toString()
-        // Agar matn bo'sh bo'lsa yoki hali ham "Sanani tanlang" deb turgan bo'lsa -> Xato
         if (text.isEmpty() || text == defaultText) {
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             return false
@@ -257,21 +257,95 @@ class AddTripActivity : AppCompatActivity() {
     }
 
     private fun showDatePicker() {
-        val calendar = Calendar.getInstance()
-        val datePickerDialog = DatePickerDialog(
-            this,
-            { _, year, month, dayOfMonth ->
-                val date = String.format("%02d.%02d.%d", dayOfMonth, month + 1, year)
-                // TextView bo'lgani uchun setText o'rniga text = ... ishlatsa ham bo'ladi,
-                // lekin setText ham ishlaydi. Eng asosiysi TextView bu metodni qo'llab-quvvatlaydi.
-                binding.etDate.text = date
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+
+        val view = layoutInflater.inflate(R.layout.dialog_calendar_picker, null)
+        dialog.setContentView(view)
+
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.85).toInt(),
+            ViewGroup.LayoutParams.WRAP_CONTENT
         )
-        datePickerDialog.datePicker.minDate = System.currentTimeMillis()
-        datePickerDialog.show()
+
+        val calendarView = view.findViewById<CalendarView>(R.id.calendarView)
+        val rvYears = view.findViewById<RecyclerView>(R.id.rvYears)
+        val tvDateHeader = view.findViewById<TextView>(R.id.tvDateHeader)
+        val tvYearHeader = view.findViewById<TextView>(R.id.tvYearHeader)
+        val btnConfirm = view.findViewById<TextView>(R.id.btnConfirmDate)
+        val btnCancel = view.findViewById<TextView>(R.id.btnCancelDate)
+
+        val dateFormat = SimpleDateFormat("d MMMM", Locale("uz", "UZ"))
+        val yearFormat = SimpleDateFormat("yyyy", Locale("uz", "UZ"))
+
+        val calendar = Calendar.getInstance()
+        calendarView.minDate = System.currentTimeMillis() - 1000
+
+        tvDateHeader.text = dateFormat.format(calendar.time)
+        tvYearHeader.text = yearFormat.format(calendar.time)
+
+        var selectedDay = calendar.get(Calendar.DAY_OF_MONTH)
+        var selectedMonth = calendar.get(Calendar.MONTH)
+        var selectedYear = calendar.get(Calendar.YEAR)
+
+        calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
+            selectedYear = year
+            selectedMonth = month
+            selectedDay = dayOfMonth
+
+            val newDate = Calendar.getInstance()
+            newDate.set(year, month, dayOfMonth)
+
+            tvDateHeader.text = dateFormat.format(newDate.time)
+            tvYearHeader.text = yearFormat.format(newDate.time)
+        }
+
+        // Yil bosilganda RecyclerViewni ko'rsatish
+        tvYearHeader.setOnClickListener {
+            if (rvYears.visibility == View.VISIBLE) {
+                rvYears.visibility = View.GONE
+                calendarView.visibility = View.VISIBLE
+                // Agar ic_arrow_drop_down bo'lmasa, pastdagi qatorni o'chirib tashlang yoki o'rniga boshqa rasm qo'ying
+                try {
+                    tvYearHeader.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_arrow_drop_down, 0)
+                } catch (e: Exception) { /* Rasm topilmasa muammo yo'q */ }
+            } else {
+                calendarView.visibility = View.GONE
+                rvYears.visibility = View.VISIBLE
+
+                val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+                val yearsList = (currentYear..currentYear + 10).toList()
+
+                rvYears.layoutManager = LinearLayoutManager(this)
+                rvYears.adapter = YearAdapter(yearsList, selectedYear) { clickedYear ->
+                    selectedYear = clickedYear
+
+                    val newDate = Calendar.getInstance()
+                    newDate.set(selectedYear, selectedMonth, selectedDay)
+                    calendarView.date = newDate.timeInMillis
+
+                    tvYearHeader.text = clickedYear.toString()
+                    tvDateHeader.text = dateFormat.format(newDate.time)
+
+                    rvYears.visibility = View.GONE
+                    calendarView.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        btnConfirm.setOnClickListener {
+            val finalDate = String.format("%02d.%02d.%d", selectedDay, selectedMonth + 1, selectedYear)
+            binding.etDate.text = finalDate
+            binding.etDate.setTextColor(Color.parseColor("#1E293B"))
+            dialog.dismiss()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun showTimePicker() {
@@ -319,4 +393,38 @@ class AddTripActivity : AppCompatActivity() {
 
         dialog.show()
     }
+}
+
+// YearAdapter klassi AddTripActivity dan tashqarida yoziladi
+class YearAdapter(
+    private val years: List<Int>,
+    private val selectedYear: Int,
+    private val onYearClick: (Int) -> Unit
+) : RecyclerView.Adapter<YearAdapter.YearViewHolder>() {
+
+    inner class YearViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val tvYear: TextView = itemView.findViewById(R.id.tvYearItem)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): YearViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_year_text, parent, false)
+        return YearViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: YearViewHolder, position: Int) {
+        val year = years[position]
+        holder.tvYear.text = year.toString()
+
+        if (year == selectedYear) {
+            holder.tvYear.setTextColor(Color.parseColor("#2E5BFF"))
+            holder.tvYear.textSize = 20f
+        } else {
+            holder.tvYear.setTextColor(Color.parseColor("#1E293B"))
+            holder.tvYear.textSize = 16f
+        }
+
+        holder.itemView.setOnClickListener { onYearClick(year) }
+    }
+
+    override fun getItemCount(): Int = years.size
 }

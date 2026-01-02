@@ -6,4 +6,37 @@
     </style>
 
     <style name="Theme.YolYolakay" parent="Base.Theme.YolYolakay" />
+
+    <!-- Kalendar uchun Premium Style -->
+    <style name="ModernCalendarTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">#2E5BFF</item> <!-- Tanlangan sana rangi (Premium Blue) -->
+        <item name="android:textColorPrimary">#1E293B</item> <!-- Sana raqamlari -->
+        <item name="android:background">@android:color/white</item>
+    </style>
+
+    <!-- Haftaning kunlari (Du, Se...) -->
+    <style name="CalenderWeekText" parent="android:TextAppearance.DeviceDefault.Small">
+        <item name="android:textColor">#94A3B8</item> <!-- Och kulrang -->
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <!-- Kun raqamlari (1, 2, 3...) -->
+    <style name="CalenderDateText" parent="android:TextAppearance.DeviceDefault.Small">
+        <item name="android:textColor">#1E293B</item> <!-- To'q ko'k -->
+        <item name="android:textSize">14sp</item>
+    </style>
+
+
+    <!-- Bottom Sheet Dialog uchun maxsus stil -->
+    <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
+    </style>
+
+    <style name="CustomBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+
+
 </resources>
