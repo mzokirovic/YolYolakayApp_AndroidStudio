@@ -151,7 +151,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:columnCount="2"
-                android:rowCount="2"
+                android:rowCount="1"
                 android:useDefaultMargins="true"
                 android:alignmentMode="alignMargins"
                 android:columnOrderPreserved="false"
@@ -237,189 +237,55 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- 3. CO2 (Eko hissa) -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:cardBackgroundColor="#F1F5F9"
-                    android:layout_marginEnd="8dp">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="20dp">
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_car"
-                            app:tint="#2E5BFF"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="2.1 t"
-                            android:textColor="#1E293B"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="8dp"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="CO₂ tejash"
-                            android:textColor="#64748B"
-                            android:textSize="12sp"/>
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
 
-                <!-- 4. A'zolik vaqti -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp"
-                    app:cardBackgroundColor="#F1F5F9"
-                    android:layout_marginStart="8dp">
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="20dp">
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_calendar_today"
-                            app:tint="#2E5BFF"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="2 yil"
-                            android:textColor="#1E293B"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="8dp"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="A'zolik"
-                            android:textColor="#64748B"
-                            android:textSize="12sp"/>
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
             </GridLayout>
 
             <!-- MENING MASHINAM (List Item style) -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Mening mashinam"
-                android:textColor="#1E293B"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="12dp"/>
-
+            <!-- MENING MASHINAM TUGMASI -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/btnOpenCarInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="#F8FAFC"
+                app:cardBackgroundColor="#F1F5F9"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
                 android:layout_marginBottom="24dp">
 
-                <!-- Mashina ma'lumotlarini ko'rsatish/tahrirlash bloki -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_input_premium"
-                    android:backgroundTint="#F1F5F9"
-                    android:padding="16dp">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="16dp"
+                    android:paddingHorizontal="16dp">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/tvCarInfoTitle"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical">
+                        android:layout_weight="1"
+                        android:text="Mening mashinam"
+                        android:textColor="#1E293B"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
 
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/ic_car"
-                            android:padding="8dp"
-                            android:background="@drawable/shape_circle_green"
-                            android:backgroundTint="#E0E7FF"
-                            app:tint="#2E5BFF"/>
+                    <ImageView
+                        android:id="@+id/ivCarStatusIcon"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/ic_add"
+                        app:tint="#2E5BFF"
+                        android:background="@drawable/shape_circle_green"
+                        android:backgroundTint="#EFF6FF"
+                        android:padding="6dp"/>
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:layout_marginStart="12dp"
-                            android:orientation="vertical">
-
-                            <EditText
-                                android:id="@+id/etCarModel"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="@null"
-                                android:hint="Mashina modeli"
-                                android:text="Chevrolet Cobalt"
-                                android:textStyle="bold"
-                                android:textColor="#1E293B"
-                                android:textSize="16sp"/>
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:layout_marginTop="4dp">
-
-                                <EditText
-                                    android:id="@+id/etCarColor"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:background="@null"
-                                    android:hint="Rangi"
-                                    android:text="Oq"
-                                    android:textColor="#64748B"
-                                    android:textSize="14sp"/>
-
-                                <View
-                                    android:layout_width="1dp"
-                                    android:layout_height="12dp"
-                                    android:background="#CBD5E1"
-                                    android:layout_marginHorizontal="8dp"
-                                    android:layout_gravity="center_vertical"/>
-
-                                <EditText
-                                    android:id="@+id/etCarNumber"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:background="@null"
-                                    android:hint="Raqami"
-                                    android:text="01 A 777 AA"
-                                    android:textColor="#64748B"
-                                    android:textSize="14sp"/>
-                            </LinearLayout>
-                        </LinearLayout>
-
-                        <ImageView
-                            android:id="@+id/btnSaveCar"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_check"
-                            app:tint="#10B981"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:clickable="true"/>
-                    </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+
 
             <!-- SOZLAMALAR VA BOSHQA MENYULAR -->
             <!-- Rasmdagi kabi list style -->

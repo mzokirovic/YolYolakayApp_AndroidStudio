@@ -1,6 +1,7 @@
 package com.example.yol_yolakay
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -37,17 +38,17 @@ class ProfileFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance()
 
-        // 1. Agar foydalanuvchi tizimga kirmagan bo'lsa
+        // MUHIM: Tugmalarni eng boshida sozlaymiz, shunda ular hamma uchun ishlaydi
+        setupButtons()
+
+        // 1. Agar foydalanuvchi tizimga kirmagan bo'lsa (Mehmon)
         if (auth.currentUser == null) {
             handleGuestMode()
             return
         }
 
-        // 2. Ma'lumotlarni yuklash
+        // 2. Agar tizimga kirgan bo'lsa, ma'lumotlarni yuklaymiz
         loadUserData()
-
-        // 3. Tugmalarni sozlash
-        setupButtons()
     }
 
     private fun handleGuestMode() {
@@ -56,17 +57,10 @@ class ProfileFragment : Fragment() {
         binding.tvFullName.text = "Mehmon"
         binding.tvPhone.text = "Tizimga kirmagansiz"
 
-        // Inputlarni o'chirib qo'yamiz
-        binding.etCarModel.isEnabled = false
-        binding.etCarColor.isEnabled = false
-        binding.etCarNumber.isEnabled = false
+        // O'ZGARTIRILDI: Tugmani o'chirmaymiz, u bosiladigan bo'lishi kerak
+        // binding.btnOpenCarInfo.isEnabled = false  <-- BU KERAK EMAS ENDI
 
-        // Yangi dizaynda btnSaveCar (kichik yashil tugma) bor, katta btnSave yo'q.
-        // Xavfsizlik uchun '?' qo'yamiz.
-        binding.btnSaveCar?.isEnabled = false
-        binding.btnSaveCar?.alpha = 0.5f
-
-        // Chiqish tugmasi (layout) o'rniga "Kirish" tugmasini ishlatamiz
+        // Chiqish tugmasi
         binding.btnLogout.setOnClickListener {
             val intent = Intent(context, LoginActivity::class.java)
             startActivity(intent)
@@ -74,116 +68,105 @@ class ProfileFragment : Fragment() {
     }
 
     private fun loadUserData() {
-        val userId = auth.currentUser?.uid ?: return
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            Toast.makeText(context, "Xatolik: User ID topilmadi", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val userRef = database.getReference("Users").child(userId)
+
+        // Diagnostika uchun Toast
+        // Toast.makeText(context, "Ma'lumotlar yuklanmoqda...", Toast.LENGTH_SHORT).show()
 
         userRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (_binding == null) return
 
-                // Shaxsiy ma'lumotlar
+                // 1. SHAXSIY MA'LUMOTLARNI YUKLASH
                 val firstName = snapshot.child("firstName").getValue(String::class.java) ?: "Foydalanuvchi"
                 val lastName = snapshot.child("lastName").getValue(String::class.java) ?: ""
-                val phone = snapshot.child("phone").getValue(String::class.java) ?: "+998 -- --- -- --"
+                val phone = snapshot.child("phone").getValue(String::class.java) ?: ""
 
                 binding.tvFullName.text = "$firstName $lastName"
                 binding.tvPhone.text = phone
 
-                // Statistika
                 val rating = snapshot.child("rating").getValue(String::class.java) ?: "5.0"
                 val tripCount = snapshot.child("tripCount").getValue(Int::class.java) ?: 0
 
                 binding.tvRating.text = rating
                 binding.tvTripCount.text = tripCount.toString()
 
-                // Mashina ma'lumotlari (bularni EditTextga qo'yamiz)
-                val carModel = snapshot.child("carModel").getValue(String::class.java) ?: ""
-                val carColor = snapshot.child("carColor").getValue(String::class.java) ?: ""
-                val carNumber = snapshot.child("carNumber").getValue(String::class.java) ?: ""
+                // 2. MASHINA STATUSINI TEKSHIRISH
+                val carModel = snapshot.child("carModel").getValue(String::class.java)
 
-                // Faqat foydalanuvchi yozayotgan paytda o'zgarib ketmasligi uchun tekshiramiz
-                if (!binding.etCarModel.hasFocus()) binding.etCarModel.setText(carModel)
-                if (!binding.etCarColor.hasFocus()) binding.etCarColor.setText(carColor)
-                if (!binding.etCarNumber.hasFocus()) binding.etCarNumber.setText(carNumber)
+                // TEST UCHUN: Ekranga ma'lumotni chiqaramiz
+                // Agar carModel null bo'lsa "Bo'sh", aks holda mashina nomini chiqaradi
+                // Toast.makeText(context, "Firebase'dan keldi: ${carModel ?: "Bo'sh"}", Toast.LENGTH_LONG).show()
+
+                if (!carModel.isNullOrEmpty()) {
+                    // --- MASHINA BOR -> PTICHKA ---
+                    binding.tvCarInfoTitle.text = carModel
+                    binding.ivCarStatusIcon.setImageResource(R.drawable.ic_check)
+                    binding.ivCarStatusIcon.setColorFilter(Color.WHITE)
+                    binding.ivCarStatusIcon.background.setTint(Color.parseColor("#10B981")) // Yashil
+                } else {
+                    // --- MASHINA YO'Q -> PLYUS ---
+                    binding.tvCarInfoTitle.text = "Mening mashinam"
+                    binding.ivCarStatusIcon.setImageResource(R.drawable.ic_add)
+                    binding.ivCarStatusIcon.setColorFilter(Color.parseColor("#2E5BFF"))
+                    binding.ivCarStatusIcon.background.setTint(Color.parseColor("#EFF6FF")) // Ko'k
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Xatolikni jimgina o'tkazib yuboramiz
+                // XATOLIK BO'LSA EKRANGA CHIQARAMIZ
+                Toast.makeText(context, "Firebase Xatosi: ${error.message}", Toast.LENGTH_LONG).show()
             }
         })
     }
 
+
+
+
     private fun setupButtons() {
-        // SAQLASH TUGMASI (Yangi dizayn: btnSaveCar)
-        // Agar btnSaveCar topilmasa, kod qulamaydi (safe call)
-        binding.btnSaveCar?.setOnClickListener {
-            saveCarDetails()
+        if (_binding == null) return
+
+        // --- YANGI: MASHINA QO'SHISH TUGMASI LOGIKASI ---
+        binding.btnOpenCarInfo.setOnClickListener {
+            if (auth.currentUser == null) {
+                // 1. Agar MEHMON bo'lsa -> LoginActivity ga o'tadi
+                Toast.makeText(context, "Avval ro'yxatdan o'ting", Toast.LENGTH_SHORT).show()
+                val intent = Intent(requireContext(), LoginActivity::class.java)
+                startActivity(intent)
+            } else {
+                // 2. Agar A'ZO bo'lsa -> CarInfoActivity ga o'tadi
+                val intent = Intent(requireContext(), CarInfoActivity::class.java)
+                startActivity(intent)
+            }
         }
 
-        // Tahrirlash (Headerdagi yozuv)
+        // Tahrirlash (Buni ham mehmonlar uchun Login ga yo'naltirish mumkin)
         binding.btnEditProfile?.setOnClickListener {
-            Toast.makeText(context, "Tahrirlash oynasi tez orada...", Toast.LENGTH_SHORT).show()
+            if (auth.currentUser == null) {
+                startActivity(Intent(requireContext(), LoginActivity::class.java))
+            } else {
+                Toast.makeText(context, "Tahrirlash oynasi tez orada...", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        // CHIQISH TUGMASI
+        // Chiqish
         binding.btnLogout.setOnClickListener {
             auth.signOut()
-            // Login oynasiga qaytish
             val intent = Intent(requireContext(), LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
         }
 
-        // SOZLAMALAR (Eski btnLanguage o'rniga btnSettings)
+        // Sozlamalar
         binding.btnSettings?.setOnClickListener {
             Toast.makeText(context, "Sozlamalar bo'limi", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun saveCarDetails() {
-        val userId = auth.currentUser?.uid ?: return
-
-        val model = binding.etCarModel.text.toString().trim()
-        val color = binding.etCarColor.text.toString().trim()
-        val number = binding.etCarNumber.text.toString().trim()
-
-        if (model.isEmpty() && color.isEmpty() && number.isEmpty()) {
-            Toast.makeText(context, "Hech bo'lmasa bitta ma'lumot kiriting", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Animatsiya: Tugmani vaqtincha o'chirib turamiz
-        binding.btnSaveCar?.isEnabled = false
-        binding.btnSaveCar?.alpha = 0.5f
-
-        val updates = mapOf<String, Any>(
-            "carModel" to model,
-            "carColor" to color,
-            "carNumber" to number
-        )
-
-        database.getReference("Users").child(userId).updateChildren(updates)
-            .addOnSuccessListener {
-                if (_binding != null) {
-                    Toast.makeText(context, "Mashina ma'lumotlari saqlandi! ✅", Toast.LENGTH_SHORT).show()
-
-                    // Tugmani qayta yoqamiz
-                    binding.btnSaveCar?.isEnabled = true
-                    binding.btnSaveCar?.alpha = 1.0f
-
-                    // Klaviatura yopilishi va fokus yo'qolishi uchun
-                    binding.etCarModel.clearFocus()
-                    binding.etCarColor.clearFocus()
-                    binding.etCarNumber.clearFocus()
-                }
-            }
-            .addOnFailureListener {
-                if (_binding != null) {
-                    Toast.makeText(context, "Xatolik yuz berdi", Toast.LENGTH_SHORT).show()
-                    binding.btnSaveCar?.isEnabled = true
-                    binding.btnSaveCar?.alpha = 1.0f
-                }
-            }
     }
 
     override fun onDestroyView() {

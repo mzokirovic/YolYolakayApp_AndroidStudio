@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8FAFC">
+
+    <!-- HEADER: Orqaga qaytish va Sarlavha -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:elevation="2dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_back"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="#1E293B"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="16dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mashina ma'lumotlari"
+            android:textColor="#1E293B"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- ASOSIY INPUTLAR -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:padding="24dp"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Mashina Modeli -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mashina modeli"
+            android:textColor="#64748B"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/etCarModel"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_input_premium"
+            android:backgroundTint="#FFFFFF"
+            android:hint="Masalan: Chevrolet Cobalt"
+            android:paddingHorizontal="16dp"
+            android:textColor="#1E293B"
+            android:inputType="textCapWords"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Mashina Rangi -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mashina rangi"
+            android:textColor="#64748B"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/etCarColor"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_input_premium"
+            android:backgroundTint="#FFFFFF"
+            android:hint="Masalan: Oq"
+            android:paddingHorizontal="16dp"
+            android:textColor="#1E293B"
+            android:inputType="text"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Davlat Raqami -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Davlat raqami"
+            android:textColor="#64748B"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/etCarNumber"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_input_premium"
+            android:backgroundTint="#FFFFFF"
+            android:hint="01 A 777 AA"
+            android:paddingHorizontal="16dp"
+            android:textColor="#1E293B"
+            android:inputType="textCapCharacters"
+            android:textAllCaps="true"
+            android:layout_marginBottom="40dp"/>
+
+        <!-- SAQLASH TUGMASI -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSaveCar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Saqlash"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:background="@drawable/bg_gradient_premium"
+            android:textAllCaps="false"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
