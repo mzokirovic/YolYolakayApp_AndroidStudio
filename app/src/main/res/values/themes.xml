@@ -54,7 +54,7 @@
         <item name="android:textColorPrimary">#1E293B</item>
 
         <!-- Matn o'lchami KATTA (Soat uchun maxsus 22sp) -->
-        <item name="android:textSize">22sp</item>
+        <item name="android:textSize">34sp</item>
 
         <!-- Chiziqlar yo'q (Shaffof) -->
         <item name="colorControlNormal">#00000000</item>
@@ -62,6 +62,7 @@
         <!-- Tanlangan element rangi -->
         <item name="colorControlActivated">#1E293B</item>
     </style>
+
 
 
 
