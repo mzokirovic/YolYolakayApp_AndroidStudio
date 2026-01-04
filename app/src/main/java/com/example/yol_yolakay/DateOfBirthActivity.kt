@@ -5,7 +5,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -13,8 +12,6 @@ import android.widget.CalendarView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.yol_yolakay.databinding.ActivityDateOfBirthBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -76,108 +73,128 @@ class DateOfBirthActivity : AppCompatActivity() {
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
 
-        // Biz yasagan layoutni ulaymiz
+        // XML faylni yuklaymiz
         val view = layoutInflater.inflate(R.layout.dialog_calendar_picker, null)
         dialog.setContentView(view)
 
-        // Orqa fonni shaffof qilamiz va o'lchamni to'g'irlaymiz
+        // Orqa fon shaffof
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.window?.setLayout(
-            (resources.displayMetrics.widthPixels * 0.85).toInt(),
+            (resources.displayMetrics.widthPixels * 0.90).toInt(),
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
 
         // View elementlarini topamiz
         val calendarView = view.findViewById<CalendarView>(R.id.calendarView)
-        val rvYears = view.findViewById<RecyclerView>(R.id.rvYears)
+        val wheelContainer = view.findViewById<View>(R.id.wheelContainer)
+
         val tvDateHeader = view.findViewById<TextView>(R.id.tvDateHeader)
         val tvYearHeader = view.findViewById<TextView>(R.id.tvYearHeader)
-        val btnConfirm = view.findViewById<TextView>(R.id.btnConfirmDate)
-        val btnCancel = view.findViewById<TextView>(R.id.btnCancelDate)
 
-        val dateFormat = SimpleDateFormat("d MMMM", Locale("uz", "UZ"))
-        val yearFormat = SimpleDateFormat("yyyy", Locale("uz", "UZ"))
+        // Buttonlar
+        val btnConfirm = view.findViewById<View>(R.id.btnConfirmDate)
+        val btnCancel = view.findViewById<View>(R.id.btnCancelDate)
 
+        // Baraban elementlari (NumberPicker)
+        val npDay = view.findViewById<android.widget.NumberPicker>(R.id.npDay)
+        val npMonth = view.findViewById<android.widget.NumberPicker>(R.id.npMonth)
+        val npYear = view.findViewById<android.widget.NumberPicker>(R.id.npYear)
+
+        // Asosiy o'zgarish: Kalendarni yashiramiz, Barabanni ochamiz
+        calendarView.visibility = View.GONE
+        wheelContainer.visibility = View.VISIBLE
+
+        // Header formatlari
+        val dateFormatHeader = SimpleDateFormat("d MMMM", Locale("uz", "UZ"))
+        val yearFormatHeader = SimpleDateFormat("yyyy", Locale("uz", "UZ"))
+
+        // Hozirgi vaqt yoki tanlangan vaqtni olamiz
         val calendar = Calendar.getInstance()
-
-        // Agar avval sana tanlangan bo'lsa, o'shani o'rnatamiz, aks holda 18 yil orqaga
         if (selectedYear != 0) {
             calendar.set(selectedYear, selectedMonth, selectedDay)
         } else {
-            calendar.add(Calendar.YEAR, -18) // Qulaylik uchun 18 yil orqaga
+            // Agar hali tanlanmagan bo'lsa, standart 18 yosh (2006 yil atrofida) qilib qo'yamiz
+            calendar.add(Calendar.YEAR, -18)
         }
 
-        // Kelajakni yopamiz (Tug'ilgan kun kelajakda bo'lolmaydi)
-        calendarView.maxDate = System.currentTimeMillis()
-        calendarView.date = calendar.timeInMillis // Kalendarni surish
+        // Headerga boshlang'ich matnni yozamiz
+        tvDateHeader.text = dateFormatHeader.format(calendar.time)
+        tvYearHeader.text = yearFormatHeader.format(calendar.time)
 
-        // Boshlang'ich matnlar
-        tvDateHeader.text = dateFormat.format(calendar.time)
-        tvYearHeader.text = yearFormat.format(calendar.time)
+        // --- BARABANNI SOZLASH ---
 
-        // Dastlabki qiymatlar
-        var tempDay = calendar.get(Calendar.DAY_OF_MONTH)
-        var tempMonth = calendar.get(Calendar.MONTH)
-        var tempYear = calendar.get(Calendar.YEAR)
+        // 1. OYLAR
+        val months = arrayOf(
+            "YAN", "FEV", "MAR", "APR", "MAY", "IYN",
+            "IYL", "AVG", "SEN", "OKT", "NOY", "DEK"
+        )
+        npMonth.minValue = 0
+        npMonth.maxValue = 11
+        npMonth.displayedValues = months
+        npMonth.value = calendar.get(Calendar.MONTH)
+        npMonth.wrapSelectorWheel = true
 
-        // Kalendar o'zgarganda
-        calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            tempYear = year
-            tempMonth = month
-            tempDay = dayOfMonth
+        // 2. YILLAR (1950 dan Hozirgacha - 18 yil)
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        // Ro'yxatdan o'tish uchun minimum yosh chegarasi bo'lsa (masalan 2026 - 5 = 2021)
+        val maxYear = currentYear
+        val minYear = 1950
 
-            val newDate = Calendar.getInstance()
-            newDate.set(year, month, dayOfMonth)
+        npYear.minValue = minYear
+        npYear.maxValue = maxYear
+        npYear.value = calendar.get(Calendar.YEAR)
+        npYear.wrapSelectorWheel = false
 
-            tvDateHeader.text = dateFormat.format(newDate.time)
-            tvYearHeader.text = yearFormat.format(newDate.time)
-        }
+        // 3. KUNLAR (Oy va yilga qarab o'zgaradi)
+        fun updateDaysInMonth() {
+            val tempCal = Calendar.getInstance()
+            tempCal.set(npYear.value, npMonth.value, 1)
+            val maxDay = tempCal.getActualMaximum(Calendar.DAY_OF_MONTH)
 
-        // Yilni bosganda ro'yxatni ochish
-        tvYearHeader.setOnClickListener {
-            if (rvYears.visibility == View.VISIBLE) {
-                rvYears.visibility = View.GONE
-                calendarView.visibility = View.VISIBLE
-                try {
-                    tvYearHeader.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_arrow_drop_down, 0)
-                } catch (e: Exception) {}
-            } else {
-                calendarView.visibility = View.GONE
-                rvYears.visibility = View.VISIBLE
+            npDay.minValue = 1
+            npDay.maxValue = maxDay
 
-                // Tug'ilgan kun uchun yillar: 1950 dan Hozirgacha
-                val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-                // reversed() qildik, shunda yangi yillar tepada turadi
-                val yearsList = (1950..currentYear).toList().reversed()
-
-                rvYears.layoutManager = LinearLayoutManager(this)
-                rvYears.adapter = YearAdapterDOB(yearsList, tempYear) { clickedYear ->
-                    tempYear = clickedYear
-
-                    val newDate = Calendar.getInstance()
-                    newDate.set(tempYear, tempMonth, tempDay)
-
-                    // Agar tanlangan sana maxDate dan o'tib ketsa, to'g'irlaymiz
-                    if (newDate.timeInMillis > calendarView.maxDate) {
-                        newDate.timeInMillis = calendarView.maxDate
-                    }
-
-                    calendarView.date = newDate.timeInMillis
-                    tvYearHeader.text = clickedYear.toString()
-                    tvDateHeader.text = dateFormat.format(newDate.time)
-
-                    rvYears.visibility = View.GONE
-                    calendarView.visibility = View.VISIBLE
-                }
+            // Agar tanlangan kun (masalan 31) yangi oyda yo'q bo'lsa (masalan Fevral 28), uni to'g'irlash
+            if (npDay.value > maxDay) {
+                npDay.value = maxDay
             }
         }
 
-        btnConfirm.setOnClickListener {
-            // Asl o'zgaruvchilarga saqlaymiz
-            selectedDay = tempDay
-            selectedMonth = tempMonth
-            selectedYear = tempYear
+        // Boshlanishiga kunni to'g'irlaymiz
+        npDay.minValue = 1
+        npDay.maxValue = 31 // Vaqtincha, updateDaysInMonth to'g'irlaydi
+        npDay.value = calendar.get(Calendar.DAY_OF_MONTH)
+        updateDaysInMonth()
 
+        // Baraban aylanganda Headerni va kunlar sonini yangilash
+        val updateListener = {
+            // Kunlar sonini yangilash
+            updateDaysInMonth()
+
+            // Headerni yangilash
+            val newCal = Calendar.getInstance()
+            newCal.set(npYear.value, npMonth.value, npDay.value)
+            tvDateHeader.text = dateFormatHeader.format(newCal.time)
+            tvYearHeader.text = yearFormatHeader.format(newCal.time)
+        }
+
+        npYear.setOnValueChangedListener { _, _, _ -> updateListener() }
+        npMonth.setOnValueChangedListener { _, _, _ -> updateListener() }
+        npDay.setOnValueChangedListener { _, _, _ ->
+            // Kun o'zgarganda faqat headerni yangilaymiz
+            val newCal = Calendar.getInstance()
+            newCal.set(npYear.value, npMonth.value, npDay.value)
+            tvDateHeader.text = dateFormatHeader.format(newCal.time)
+            tvYearHeader.text = yearFormatHeader.format(newCal.time)
+        }
+
+        // --- TASDIQLASH ---
+        btnConfirm.setOnClickListener {
+            selectedDay = npDay.value
+            selectedMonth = npMonth.value
+            selectedYear = npYear.value
+
+            // Formatlash: 05/01/2006
             val formattedDate = String.format("%02d/%02d/%d", selectedDay, selectedMonth + 1, selectedYear)
             binding.etDate.setText(formattedDate)
             dialog.dismiss()
@@ -189,6 +206,7 @@ class DateOfBirthActivity : AppCompatActivity() {
 
         dialog.show()
     }
+
 
     // 18 yoshga to'lganligini tekshiruvchi funksiya
     private fun isAdult(year: Int, month: Int, day: Int): Boolean {
@@ -207,39 +225,4 @@ class DateOfBirthActivity : AppCompatActivity() {
 
         return age >= 18
     }
-}
-
-// Boshqa fayldagi adapter bilan nomuvofiqlik bo'lmasligi uchun nomini o'zgartirdim (YearAdapterDOB)
-// Agar YearAdapter allaqachon alohida faylda bo'lsa, shunchaki o'shani ishlating.
-class YearAdapterDOB(
-    private val years: List<Int>,
-    private val selectedYear: Int,
-    private val onYearClick: (Int) -> Unit
-) : RecyclerView.Adapter<YearAdapterDOB.YearViewHolder>() {
-
-    inner class YearViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvYear: TextView = itemView.findViewById(R.id.tvYearItem)
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): YearViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_year_text, parent, false)
-        return YearViewHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: YearViewHolder, position: Int) {
-        val year = years[position]
-        holder.tvYear.text = year.toString()
-
-        if (year == selectedYear) {
-            holder.tvYear.setTextColor(Color.parseColor("#2E5BFF"))
-            holder.tvYear.textSize = 20f
-        } else {
-            holder.tvYear.setTextColor(Color.parseColor("#1E293B"))
-            holder.tvYear.textSize = 16f
-        }
-
-        holder.itemView.setOnClickListener { onYearClick(year) }
-    }
-
-    override fun getItemCount(): Int = years.size
 }

@@ -265,79 +265,135 @@ class AddTripActivity : AppCompatActivity() {
 
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.window?.setLayout(
-            (resources.displayMetrics.widthPixels * 0.85).toInt(),
+            (resources.displayMetrics.widthPixels * 0.90).toInt(),
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
 
+        // View elementlarini topish
         val calendarView = view.findViewById<CalendarView>(R.id.calendarView)
-        val rvYears = view.findViewById<RecyclerView>(R.id.rvYears)
+        val wheelContainer = view.findViewById<View>(R.id.wheelContainer)
+
         val tvDateHeader = view.findViewById<TextView>(R.id.tvDateHeader)
         val tvYearHeader = view.findViewById<TextView>(R.id.tvYearHeader)
-        val btnConfirm = view.findViewById<TextView>(R.id.btnConfirmDate)
-        val btnCancel = view.findViewById<TextView>(R.id.btnCancelDate)
 
-        val dateFormat = SimpleDateFormat("d MMMM", Locale("uz", "UZ"))
-        val yearFormat = SimpleDateFormat("yyyy", Locale("uz", "UZ"))
+        val btnConfirm = view.findViewById<View>(R.id.btnConfirmDate)
+        val btnCancel = view.findViewById<View>(R.id.btnCancelDate)
+
+        // Strelkalar kodi OLIB TASHLANDI, chunki XML da ular yo'q
+
+        // Baraban elementlari
+        val npDay = view.findViewById<android.widget.NumberPicker>(R.id.npDay)
+        val npMonth = view.findViewById<android.widget.NumberPicker>(R.id.npMonth)
+        val npYear = view.findViewById<android.widget.NumberPicker>(R.id.npYear)
+
+        val dateFormatHeader = SimpleDateFormat("d MMMM", Locale("uz", "UZ"))
+        val yearFormatHeader = SimpleDateFormat("yyyy", Locale("uz", "UZ"))
+        val outputFormat = SimpleDateFormat("dd.MM.yyyy", Locale("uz", "UZ"))
 
         val calendar = Calendar.getInstance()
+
+        // 1. Eskidan kiritilgan sanani tiklash
+        val currentText = binding.etDate.text.toString().trim()
+        if (currentText.isNotEmpty()) {
+            try {
+                val date = outputFormat.parse(currentText)
+                if (date != null) {
+                    calendar.time = date
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
         calendarView.minDate = System.currentTimeMillis() - 1000
+        calendarView.date = calendar.timeInMillis
 
-        tvDateHeader.text = dateFormat.format(calendar.time)
-        tvYearHeader.text = yearFormat.format(calendar.time)
+        // Headerlarni yangilash
+        tvDateHeader.text = dateFormatHeader.format(calendar.time)
+        tvYearHeader.text = yearFormatHeader.format(calendar.time)
 
-        var selectedDay = calendar.get(Calendar.DAY_OF_MONTH)
-        var selectedMonth = calendar.get(Calendar.MONTH)
-        var selectedYear = calendar.get(Calendar.YEAR)
+        // Vaqtinchalik o'zgaruvchilar
+        var tempDay = calendar.get(Calendar.DAY_OF_MONTH)
+        var tempMonth = calendar.get(Calendar.MONTH)
+        var tempYear = calendar.get(Calendar.YEAR)
 
+        // 2. Kalendar o'zgarganda
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            selectedYear = year
-            selectedMonth = month
-            selectedDay = dayOfMonth
+            tempYear = year
+            tempMonth = month
+            tempDay = dayOfMonth
 
             val newDate = Calendar.getInstance()
             newDate.set(year, month, dayOfMonth)
 
-            tvDateHeader.text = dateFormat.format(newDate.time)
-            tvYearHeader.text = yearFormat.format(newDate.time)
+            tvDateHeader.text = dateFormatHeader.format(newDate.time)
+            tvYearHeader.text = yearFormatHeader.format(newDate.time)
         }
 
-        // Yil bosilganda RecyclerViewni ko'rsatish
+        // Strelkalar logikasi (btnPrevMonth/btnNextMonth) OLIB TASHLANDI
+
+        // 3. Yilni bosganda (Baraban)
         tvYearHeader.setOnClickListener {
-            if (rvYears.visibility == View.VISIBLE) {
-                rvYears.visibility = View.GONE
+            if (wheelContainer.visibility == View.VISIBLE) {
+                wheelContainer.visibility = View.GONE
                 calendarView.visibility = View.VISIBLE
-                // Agar ic_arrow_drop_down bo'lmasa, pastdagi qatorni o'chirib tashlang yoki o'rniga boshqa rasm qo'ying
-                try {
-                    tvYearHeader.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_arrow_drop_down, 0)
-                } catch (e: Exception) { /* Rasm topilmasa muammo yo'q */ }
             } else {
                 calendarView.visibility = View.GONE
-                rvYears.visibility = View.VISIBLE
+                wheelContainer.visibility = View.VISIBLE
 
-                val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-                val yearsList = (currentYear..currentYear + 10).toList()
+                val currentCal = Calendar.getInstance()
+                currentCal.set(tempYear, tempMonth, tempDay)
 
-                rvYears.layoutManager = LinearLayoutManager(this)
-                rvYears.adapter = YearAdapter(yearsList, selectedYear) { clickedYear ->
-                    selectedYear = clickedYear
+                // Oy
+                val months = arrayOf("YAN", "FEV", "MAR", "APR", "MAY", "IYN", "IYL", "AVG", "SEN", "OKT", "NOY", "DEK")
+                npMonth.minValue = 0
+                npMonth.maxValue = 11
+                npMonth.displayedValues = months
+                npMonth.value = tempMonth
+                npMonth.wrapSelectorWheel = true
 
-                    val newDate = Calendar.getInstance()
-                    newDate.set(selectedYear, selectedMonth, selectedDay)
-                    calendarView.date = newDate.timeInMillis
+                // Yil
+                val thisYear = Calendar.getInstance().get(Calendar.YEAR)
+                npYear.minValue = thisYear
+                npYear.maxValue = thisYear + 5
+                npYear.value = tempYear
+                npYear.wrapSelectorWheel = false
 
-                    tvYearHeader.text = clickedYear.toString()
-                    tvDateHeader.text = dateFormat.format(newDate.time)
-
-                    rvYears.visibility = View.GONE
-                    calendarView.visibility = View.VISIBLE
+                // Kun
+                fun updateDays() {
+                    val temp = Calendar.getInstance()
+                    temp.set(npYear.value, npMonth.value, 1)
+                    val max = temp.getActualMaximum(Calendar.DAY_OF_MONTH)
+                    npDay.minValue = 1
+                    npDay.maxValue = max
+                    if (npDay.value > max) npDay.value = max
                 }
+                npDay.value = tempDay
+                updateDays()
+
+                npYear.setOnValueChangedListener { _, _, _ -> updateDays() }
+                npMonth.setOnValueChangedListener { _, _, _ -> updateDays() }
             }
         }
 
+        // 4. TASDIQLASH
         btnConfirm.setOnClickListener {
-            val finalDate = String.format("%02d.%02d.%d", selectedDay, selectedMonth + 1, selectedYear)
-            binding.etDate.text = finalDate
+            if (wheelContainer.visibility == View.VISIBLE) {
+                tempDay = npDay.value
+                tempMonth = npMonth.value
+                tempYear = npYear.value
+            }
+
+            val newDate = Calendar.getInstance()
+            newDate.set(tempYear, tempMonth, tempDay)
+
+            val finalDateStr = outputFormat.format(newDate.time)
+            binding.etDate.text = finalDateStr
+
+            // Xatolikni o'chirish (agar bo'lsa) va rangni to'g'irlash
+            binding.etDate.error = null
             binding.etDate.setTextColor(Color.parseColor("#1E293B"))
+
             dialog.dismiss()
         }
 
@@ -348,20 +404,83 @@ class AddTripActivity : AppCompatActivity() {
         dialog.show()
     }
 
+
+
+
     private fun showTimePicker() {
-        val calendar = Calendar.getInstance()
-        val timePickerDialog = TimePickerDialog(
-            this,
-            { _, hourOfDay, minute ->
-                val time = String.format("%02d:%02d", hourOfDay, minute)
-                binding.etTime.text = time
-            },
-            calendar.get(Calendar.HOUR_OF_DAY),
-            calendar.get(Calendar.MINUTE),
-            true
+        val dialog = Dialog(this)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)        // Biz yasagan yangi chiroyli dizaynni yuklaymiz
+        val view = layoutInflater.inflate(R.layout.dialog_time_picker, null)
+        dialog.setContentView(view)
+
+        // Orqa fon shaffof va o'lcham moslashuvchan
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.90).toInt(),
+            ViewGroup.LayoutParams.WRAP_CONTENT
         )
-        timePickerDialog.show()
+
+        // Elementlarni topish
+        val npHour = view.findViewById<android.widget.NumberPicker>(R.id.npHour)
+        val npMinute = view.findViewById<android.widget.NumberPicker>(R.id.npMinute)
+        val btnConfirm = view.findViewById<View>(R.id.btnConfirmTime)
+        val btnCancel = view.findViewById<View>(R.id.btnCancelTime)
+
+        // --- SOATNI SOZLASH (00 - 23) ---
+        npHour.minValue = 0
+        npHour.maxValue = 23
+        // Ikki xonali format (00, 01... 23)
+        npHour.setFormatter { i -> String.format("%02d", i) }
+
+        // --- DAQIQANI SOZLASH (00 - 59) ---
+        npMinute.minValue = 0
+        npMinute.maxValue = 59
+        // Ikki xonali format (00, 01... 59)
+        npMinute.setFormatter { i -> String.format("%02d", i) }
+
+        // Hozirgi vaqtni yoki avval tanlangan vaqtni o'rnatish
+        val calendar = Calendar.getInstance()
+        val currentText = binding.etTime.text.toString().trim()
+
+        if (currentText.isNotEmpty() && currentText.contains(":")) {
+            try {
+                // "14:30" dan ajratib olish
+                val parts = currentText.split(":")
+                npHour.value = parts[0].toInt()
+                npMinute.value = parts[1].toInt()
+            } catch (e: Exception) {
+                // Xatolik bo'lsa hozirgi vaqt
+                npHour.value = calendar.get(Calendar.HOUR_OF_DAY)
+                npMinute.value = calendar.get(Calendar.MINUTE)
+            }
+        } else {
+            // Bo'sh bo'lsa hozirgi vaqt
+            npHour.value = calendar.get(Calendar.HOUR_OF_DAY)
+            npMinute.value = calendar.get(Calendar.MINUTE)
+        }
+
+        // --- TASDIQLASH ---
+        btnConfirm.setOnClickListener {
+            val hour = npHour.value
+            val minute = npMinute.value
+
+            // Formatlash: 07:05
+            val formattedTime = String.format("%02d:%02d", hour, minute)
+
+            binding.etTime.text = formattedTime
+            binding.etTime.error = null // Xatolikni o'chiramiz
+            binding.etTime.setTextColor(Color.parseColor("#1E293B"))
+
+            dialog.dismiss()
+        }
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
+
 
     private fun showSuccessDialog(trip: Trip) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_success, null)

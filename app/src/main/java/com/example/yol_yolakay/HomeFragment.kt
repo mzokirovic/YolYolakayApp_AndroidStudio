@@ -3,6 +3,7 @@ package com.example.yol_yolakay
 import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
+
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -79,7 +80,7 @@ class HomeFragment : Fragment() {
             val calendar = Calendar.getInstance()
             val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale("uz", "UZ"))
             selectedDate = dateFormat.format(calendar.time)
-            binding.tvSearchDate.text = "Bugun ($selectedDate)"
+            binding.tvSearchDate.text = selectedDate
         }
     }
 
@@ -130,102 +131,144 @@ class HomeFragment : Fragment() {
     }
 
     // --- ZAMONAVIY KALENDAR FUNKSIYASI ---
+    // --- ZAMONAVIY KALENDAR FUNKSIYASI (BARABAN BILAN) ---
+    // --- ZAMONAVIY KALENDAR FUNKSIYASI (HOME FRAGMENT UCHUN) ---
+    // --- ZAMONAVIY KALENDAR FUNKSIYASI (HOME FRAGMENT UCHUN) ---
     private fun showDatePicker() {
-        // Fragment ichida 'requireContext()' ishlatamiz
         val dialog = Dialog(requireContext())
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
 
+        // XML faylni yuklaymiz
         val view = layoutInflater.inflate(R.layout.dialog_calendar_picker, null)
         dialog.setContentView(view)
 
-        // Orqa fon shaffof
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog.window?.setLayout(
-            (resources.displayMetrics.widthPixels * 0.85).toInt(),
+            (resources.displayMetrics.widthPixels * 0.90).toInt(),
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
 
+        // View elementlarini topamiz
         val calendarView = view.findViewById<CalendarView>(R.id.calendarView)
-        val rvYears = view.findViewById<RecyclerView>(R.id.rvYears)
+        val wheelContainer = view.findViewById<View>(R.id.wheelContainer)
+
         val tvDateHeader = view.findViewById<TextView>(R.id.tvDateHeader)
         val tvYearHeader = view.findViewById<TextView>(R.id.tvYearHeader)
-        val btnConfirm = view.findViewById<TextView>(R.id.btnConfirmDate)
-        val btnCancel = view.findViewById<TextView>(R.id.btnCancelDate)
+
+        val btnConfirm = view.findViewById<View>(R.id.btnConfirmDate)
+        val btnCancel = view.findViewById<View>(R.id.btnCancelDate)
+
+        // Baraban elementlari
+        val npDay = view.findViewById<android.widget.NumberPicker>(R.id.npDay)
+        val npMonth = view.findViewById<android.widget.NumberPicker>(R.id.npMonth)
+        val npYear = view.findViewById<android.widget.NumberPicker>(R.id.npYear)
 
         val dateFormatHeader = SimpleDateFormat("d MMMM", Locale("uz", "UZ"))
-        val yearFormat = SimpleDateFormat("yyyy", Locale("uz", "UZ"))
-
-        // Qidiruv uchun kerakli format (DD-MM-YYYY)
+        val yearFormatHeader = SimpleDateFormat("yyyy", Locale("uz", "UZ"))
         val searchFormat = SimpleDateFormat("dd-MM-yyyy", Locale("uz", "UZ"))
 
         val calendar = Calendar.getInstance()
-        // O'tmishdagi sanalar qidiruv uchun kerak emas
+
+        // MUHIM FIX: Agar avval sana tanlangan bo'lsa, o'shani o'rnatamiz
+        if (selectedDate.isNotEmpty()) {
+            try {
+                // selectedDate formatini tekshiramiz (dd-MM-yyyy)
+                val date = searchFormat.parse(selectedDate)
+                if (date != null) {
+                    calendar.time = date
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
         calendarView.minDate = System.currentTimeMillis() - 1000
+        calendarView.date = calendar.timeInMillis
 
         tvDateHeader.text = dateFormatHeader.format(calendar.time)
-        tvYearHeader.text = yearFormat.format(calendar.time)
+        tvYearHeader.text = yearFormatHeader.format(calendar.time)
 
-        var selectedDay = calendar.get(Calendar.DAY_OF_MONTH)
-        var selectedMonth = calendar.get(Calendar.MONTH)
-        var selectedYear = calendar.get(Calendar.YEAR)
+        // Vaqtinchalik tanlangan qiymatlar
+        var tempDay = calendar.get(Calendar.DAY_OF_MONTH)
+        var tempMonth = calendar.get(Calendar.MONTH)
+        var tempYear = calendar.get(Calendar.YEAR)
 
+        // 1. ASOSIY KALENDAR O'ZGARISHI
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            selectedYear = year
-            selectedMonth = month
-            selectedDay = dayOfMonth
+            tempYear = year
+            tempMonth = month
+            tempDay = dayOfMonth
 
             val newDate = Calendar.getInstance()
             newDate.set(year, month, dayOfMonth)
 
             tvDateHeader.text = dateFormatHeader.format(newDate.time)
-            tvYearHeader.text = yearFormat.format(newDate.time)
+            tvYearHeader.text = yearFormatHeader.format(newDate.time)
         }
 
-        // Yil bosilganda (Faqat shu yil va keyingi yil kerak xolos qidiruvga)
+        // 2. YILNI BOSGANDA (Barabanni ochish)
         tvYearHeader.setOnClickListener {
-            if (rvYears.visibility == View.VISIBLE) {
-                rvYears.visibility = View.GONE
+            if (wheelContainer.visibility == View.VISIBLE) {
+                wheelContainer.visibility = View.GONE
                 calendarView.visibility = View.VISIBLE
-                try {
-                    tvYearHeader.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_arrow_drop_down, 0)
-                } catch (e: Exception) {}
             } else {
                 calendarView.visibility = View.GONE
-                rvYears.visibility = View.VISIBLE
+                wheelContainer.visibility = View.VISIBLE
 
-                val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-                // Qidiruv uchun juda uzoq yillar shart emas, masalan keyingi 2 yil
-                val yearsList = (currentYear..currentYear + 2).toList()
+                // BARABANNI SOZLASH
+                val currentCal = Calendar.getInstance()
+                currentCal.set(tempYear, tempMonth, tempDay)
 
-                rvYears.layoutManager = LinearLayoutManager(requireContext())
-                rvYears.adapter = YearAdapterHome(yearsList, selectedYear) { clickedYear ->
-                    selectedYear = clickedYear
+                // Oylar
+                val months = arrayOf("YAN", "FEV", "MAR", "APR", "MAY", "IYN", "IYL", "AVG", "SEN", "OKT", "NOY", "DEK")
+                npMonth.minValue = 0
+                npMonth.maxValue = 11
+                npMonth.displayedValues = months
+                npMonth.value = tempMonth
+                npMonth.wrapSelectorWheel = true
 
-                    val newDate = Calendar.getInstance()
-                    newDate.set(selectedYear, selectedMonth, selectedDay)
+                // Yillar
+                val thisYear = Calendar.getInstance().get(Calendar.YEAR)
+                npYear.minValue = thisYear
+                npYear.maxValue = thisYear + 10
+                npYear.value = tempYear
+                npYear.wrapSelectorWheel = false
 
-                    // Agar tanlangan sana minDate dan kichik bo'lib qolsa (yil o'zgarganda)
-                    if (newDate.timeInMillis < calendarView.minDate) {
-                        newDate.timeInMillis = calendarView.minDate
-                    }
+                // Kunlar
+                fun updateDaysInMonth() {
+                    val tempCal = Calendar.getInstance()
+                    tempCal.set(npYear.value, npMonth.value, 1)
+                    val maxDay = tempCal.getActualMaximum(Calendar.DAY_OF_MONTH)
 
-                    calendarView.date = newDate.timeInMillis
-                    tvYearHeader.text = clickedYear.toString()
-                    tvDateHeader.text = dateFormatHeader.format(newDate.time)
-
-                    rvYears.visibility = View.GONE
-                    calendarView.visibility = View.VISIBLE
+                    npDay.minValue = 1
+                    npDay.maxValue = maxDay
+                    if (npDay.value > maxDay) npDay.value = maxDay
                 }
+                npDay.value = tempDay
+                updateDaysInMonth()
+
+                npYear.setOnValueChangedListener { _, _, _ -> updateDaysInMonth() }
+                npMonth.setOnValueChangedListener { _, _, _ -> updateDaysInMonth() }
             }
         }
 
+        // 3. TASDIQLASH
         btnConfirm.setOnClickListener {
-            // Tanlangan sanani formatlash
+            if (wheelContainer.visibility == View.VISIBLE) {
+                tempDay = npDay.value
+                tempMonth = npMonth.value
+                tempYear = npYear.value
+            }
+
             val newDate = Calendar.getInstance()
-            newDate.set(selectedYear, selectedMonth, selectedDay)
+            newDate.set(tempYear, tempMonth, tempDay)
+
+            // Formatlash: "05-01-2026"
             selectedDate = searchFormat.format(newDate.time)
 
             if (_binding != null) {
+                // Rasmga mos format: "Qachon (05-01-2026)"
+                // \n belgisi matnni yangi qatorga tushiradi
                 binding.tvSearchDate.text = selectedDate
                 binding.tvSearchDate.setTextColor(resources.getColor(android.R.color.black, null))
             }
@@ -238,6 +281,10 @@ class HomeFragment : Fragment() {
 
         dialog.show()
     }
+
+
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

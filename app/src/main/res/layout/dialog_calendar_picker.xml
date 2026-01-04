@@ -5,55 +5,57 @@
     android:layout_width="320dp"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    app:cardCornerRadius="20dp"
-    app:cardElevation="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp"
     android:backgroundTint="@android:color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="12dp">
 
-        <!-- 1. HEADER: Oy va Yil -->
+        <!-- 1. HEADER: Ixchamlashtirilgan -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="8dp">
 
-            <!-- Yil va Sana (Clickable qilinadi) -->
+            <!-- Yil va Sana -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <!-- Yilni bosganda animatsiya bo'lishi uchun background qo'shamiz -->
+                <!-- Yil (Kichikroq va ixcham) -->
                 <TextView
                     android:id="@+id/tvYearHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="2024"
+                    android:text="2026"
                     android:textSize="14sp"
-                    android:textColor="#94A3B8"
+                    android:textColor="#64748B"
                     android:textStyle="bold"
-                    android:padding="4dp"
+                    android:padding="2dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:drawableEnd="@drawable/ic_arrow_drop_down"
-                    android:drawableTint="#94A3B8"
+                    android:drawablePadding="2dp"
+                    android:drawableTint="#64748B"
                     android:gravity="center_vertical"/>
 
+                <!-- Sana -->
                 <TextView
                     android:id="@+id/tvDateHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Sentabr, 27"
+                    android:text="4 yanvar"
                     android:textSize="20sp"
                     android:textColor="#1E293B"
                     android:textStyle="bold"
-                    android:paddingStart="4dp"/>
+                    android:layout_marginTop="2dp"/>
             </LinearLayout>
 
         </LinearLayout>
@@ -62,14 +64,14 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="#F1F5F9"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="8dp"/>
 
-        <!-- CONTAINER: Kalendar va Yillar ro'yxati -->
+        <!-- CONTAINER: Balandlikni 300dp qildik (sanalar kesilmasligi uchun eng optimal ixcham o'lcham) -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="280dp"> <!-- Balandlikni ixchamlashtirdik -->
+            android:layout_height="300dp">
 
-            <!-- A) KALENDAR VIEW -->
+            <!-- A) ASOSIY KALENDAR -->
             <CalendarView
                 android:id="@+id/calendarView"
                 android:layout_width="match_parent"
@@ -80,46 +82,82 @@
                 android:showWeekNumber="false"
                 android:firstDayOfWeek="2"/>
 
-            <!-- B) YILLAR RO'YXATI (Boshida yashirin) -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvYears"
+            <!-- B) BARABAN (WHEEL PICKER) -->
+            <LinearLayout
+                android:id="@+id/wheelContainer"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="gone"
-                android:scrollbars="vertical"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:weightSum="3"
                 android:background="@android:color/white"
-                tools:listitem="@layout/item_year_text"/>
+                android:visibility="gone">
 
+                <NumberPicker
+                    android:id="@+id/npDay"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:descendantFocusability="blocksDescendants"
+                    android:theme="@style/NumberPickerTheme"/>
+
+                <NumberPicker
+                    android:id="@+id/npMonth"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:descendantFocusability="blocksDescendants"
+                    android:theme="@style/NumberPickerTheme"/>
+
+                <NumberPicker
+                    android:id="@+id/npYear"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:descendantFocusability="blocksDescendants"
+                    android:theme="@style/NumberPickerTheme"/>
+            </LinearLayout>
         </FrameLayout>
 
-        <!-- Pastki Tugmalar -->
+        <!-- Pastki Tugmalar (Kichikroq padding bilan) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="12dp"
-            android:gravity="end">
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical">
 
+            <!-- Bekor qilish -->
             <TextView
                 android:id="@+id/btnCancelDate"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Bekor qilish"
                 android:textColor="#64748B"
-                android:textSize="14sp"
+                android:textSize="15sp"
                 android:textStyle="bold"
+                android:gravity="center"
                 android:padding="10dp"
-                android:layout_marginEnd="8dp"/>
+                android:background="?attr/selectableItemBackground"/>
 
+            <Space
+                android:layout_width="12dp"
+                android:layout_height="wrap_content"/>
+
+            <!-- OK -->
             <TextView
                 android:id="@+id/btnConfirmDate"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Tanlash"
-                android:textColor="#2E5BFF"
-                android:textSize="14sp"
+                android:layout_weight="1"
+                android:text="OK"
+                android:textColor="@android:color/white"
+                android:textSize="15sp"
                 android:textStyle="bold"
-                android:padding="10dp"/>
+                android:gravity="center"
+                android:padding="10dp"
+                android:background="@drawable/bg_gradient_premium"/>
         </LinearLayout>
 
     </LinearLayout>

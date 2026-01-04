@@ -38,5 +38,31 @@
     </style>
 
 
+    <!-- NumberPicker (Baraban) uchun maxsus uslub -->
+    <style name="NumberPickerTheme" parent="Theme.AppCompat.Light">
+        <!-- Matn rangi (Sizning uslubingizdagi to'q ko'k) -->
+        <item name="android:textColorPrimary">#1E293B</item>
+        <!-- Matn o'lchami -->
+        <item name="android:textSize">18sp</item>
+        <!-- Chiziqlar rangi (Shaffof qilib qo'ysak, zamonaviyroq ko'rinadi) -->
+        <item name="colorControlNormal">#00000000</item>
+    </style>
+
+    <!-- FAQAT SOAT UCHUN yangi maxsus stil -->
+    <style name="TimePickerWheelTheme" parent="Theme.AppCompat.Light">
+        <!-- Matn rangi (To'q ko'k) -->
+        <item name="android:textColorPrimary">#1E293B</item>
+
+        <!-- Matn o'lchami KATTA (Soat uchun maxsus 22sp) -->
+        <item name="android:textSize">22sp</item>
+
+        <!-- Chiziqlar yo'q (Shaffof) -->
+        <item name="colorControlNormal">#00000000</item>
+
+        <!-- Tanlangan element rangi -->
+        <item name="colorControlActivated">#1E293B</item>
+    </style>
+
+
 
 </resources>
