@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC"
+    android:background="@android:color/white"
     android:fitsSystemWindows="true">
 
     <!-- 1. HEADER (Sana va Orqaga tugmasi) -->
@@ -14,9 +14,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp"
-        android:elevation="4dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:elevation="0dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -24,7 +24,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:padding="12dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:src="@drawable/ic_back"
             app:tint="#1E293B"
             android:background="?attr/selectableItemBackgroundBorderless"
@@ -33,18 +33,17 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
+        <!-- Sarlavha -->
         <TextView
             android:id="@+id/tvDateHeader"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Bugun, 27 Dekabr"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="#1E293B"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="16dp"
             app:layout_constraintStart_toEndOf="@id/btnBack"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
@@ -58,7 +57,7 @@
         android:clipToPadding="false"
         android:paddingBottom="100dp"
         app:layout_constraintTop_toBottomOf="@id/headerLayout"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toTopOf="@id/bottomLayout">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -66,7 +65,7 @@
             android:orientation="vertical"
             android:paddingBottom="24dp">
 
-            <!-- SAFAR CHIZIG'I (TIMELINE) - Premium Card -->
+            <!-- YO'NALISH (TIMELINE) -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -80,13 +79,13 @@
                     android:layout_height="wrap_content"
                     android:padding="20dp">
 
-                    <!-- TIME & DOTS -->
+                    <!-- START SECTION -->
                     <TextView
                         android:id="@+id/tvStartTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="15:30"
-                        android:textSize="16sp"
+                        android:text="13:50"
+                        android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="#1E293B"
                         app:layout_constraintStart_toStartOf="parent"
@@ -169,6 +168,7 @@
             </androidx.cardview.widget.CardView>
 
             <!-- NARX QISMI -->
+            <!-- NARX VA TO'LOV TURI (YANGILANGAN - SIG'ISH MUAMMOSI HAL QILINDI) -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -181,28 +181,89 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="20dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="0dp"
+                    <!-- Narx qatori -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="1 yo'lovchi uchun narx"
-                        android:textSize="16sp"
-                        android:textColor="#64748B"/>
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
 
-                    <TextView
-                        android:id="@+id/tvPrice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="50,000 so'm"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="#2E5BFF"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="1 yo'lovchi narxi"
+                            android:textSize="16sp"
+                            android:textColor="#64748B"/>
+
+                        <TextView
+                            android:id="@+id/tvPrice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="50,000 so'm"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="#2E5BFF"/>
+                    </LinearLayout>
+
+                    <!-- Chiziq -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#F1F5F9"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- To'lov turi (Moslashuvchan Layout) -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:id="@+id/iconCash"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_cash"
+                            app:tint="#10B981"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"/>
+
+                        <TextView
+                            android:id="@+id/tvPaymentTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="To'lov turi: Naqd"
+                            android:textSize="14sp"
+                            android:textColor="#1E293B"
+                            android:textStyle="bold"
+                            android:layout_marginStart="8dp"
+                            app:layout_constraintStart_toEndOf="@id/iconCash"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="(Haydovchiga)"
+                            android:textSize="14sp"
+                            android:textColor="#64748B"
+                            android:gravity="end"
+                            android:layout_marginStart="4dp"
+                            app:layout_constraintStart_toEndOf="@id/tvPaymentTitle"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+
 
             <!-- HAYDOVCHI HAQIDA -->
             <androidx.cardview.widget.CardView
@@ -396,7 +457,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- 7. PASTKI TUGMALAR PANELI (YANGILANGAN) -->
+    <!-- 7. PASTKI TUGMALAR PANELI -->
     <LinearLayout
         android:id="@+id/bottomLayout"
         android:layout_width="match_parent"
@@ -415,7 +476,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <!-- SMS Yozish (Secondary Button Style) -->
+            <!-- SMS Yozish -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSms"
                 android:layout_width="56dp"
@@ -433,7 +494,7 @@
                 android:layout_marginEnd="12dp"
                 android:tooltipText="SMS yozish"/>
 
-            <!-- Telefon qilish (Secondary Button Style) -->
+            <!-- Telefon qilish -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCallBottom"
                 android:layout_width="56dp"
@@ -451,7 +512,11 @@
                 android:layout_marginEnd="12dp"
                 android:tooltipText="Telefon qilish"/>
 
-            <!-- So'rov yuborish (Asosiy tugma - Premium Blue) -->
+            <!-- So'rov yuborish (Universal Tugma) -->
+            <!-- Kotlin kodi orqali matni o'zgaradi:
+                 1. "Joy band qilish"
+                 2. "So'rov yuborildi..."
+                 3. "Siz qabul qilindingiz" -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnBook"
                 android:layout_width="0dp"
@@ -462,11 +527,15 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/white"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 app:cornerRadius="16dp"
-                android:backgroundTint="#2E5BFF"
+                android:background="@drawable/bg_gradient_premium"
+                app:backgroundTint="@null"
                 android:elevation="4dp"/>
 
         </LinearLayout>
     </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

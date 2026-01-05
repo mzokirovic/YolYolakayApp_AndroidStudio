@@ -41,7 +41,7 @@ class TripDetailsActivity : AppCompatActivity() {
         binding = ActivityTripDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Status bar dizayni (O'zgarishsiz)
+        // Status bar dizayni
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
         } else {
@@ -92,7 +92,7 @@ class TripDetailsActivity : AppCompatActivity() {
             binding.tvToCity.text = trip.to ?: "Noma'lum"
             binding.tvDateHeader.text = trip.date ?: "Bugun"
             binding.tvStartTime.text = trip.time ?: "--:--"
-            binding.tvEndTime.text = "Manzil" // Yoki hisoblangan vaqt
+            binding.tvEndTime.text = "Manzil"
 
             val price = trip.price ?: 0
             val formattedPrice = String.format("%,d", price).replace(",", " ")
@@ -110,13 +110,12 @@ class TripDetailsActivity : AppCompatActivity() {
         }
     }
 
-    // --- ASOSIY O'ZGARISH: Tugmalar va Mantiq (Yangi dizaynga moslab) ---
     private fun setupButtons() {
         binding.btnBack.setOnClickListener { finish() }
 
         val trip = currentTrip ?: return
 
-        // 1. TELEFON VA SMS (Faqat yo'lovchi uchun kerak, lekin click listenerlarni tayyorlab qo'yamiz)
+        // 1. TELEFON VA SMS
         binding.btnCallBottom.setOnClickListener {
             val phone = trip.driverPhone
             if (!phone.isNullOrEmpty()) {
@@ -141,50 +140,42 @@ class TripDetailsActivity : AppCompatActivity() {
         // --- MANTIQ (Haydovchi yoki Yo'lovchi) ---
         if (trip.userId == myUserId && !isPreview) {
             // A) AGAR MEN HAYDOVCHI BO'LSAM
-
-            // 1. Yo'lovchi tugmalarini (SMS/Call) yashiramiz
             binding.btnSms.visibility = View.GONE
             binding.btnCallBottom.visibility = View.GONE
 
-            // 2. Asosiy tugmani "Safarni yakunlash" ga aylantiramiz
-            // (Yangi dizaynda alohida btnCompleteTrip yo'q, btnBook ishlatiladi)
             binding.btnBook.visibility = View.VISIBLE
             binding.btnBook.text = "Safarni yakunlash"
-            binding.btnBook.setBackgroundColor(Color.parseColor("#EF4444")) // Qizil rang
 
-            // 3. So'rovlar ro'yxatini yuklaymiz
+            // --- TUZATILDI: Qizil rang (yumaloq shakl uchun) ---
+            binding.btnBook.setBackgroundResource(R.drawable.bg_button_danger)
+
             loadRequests(trip.id!!)
 
-            // 4. Status tekshiruvi
             if (trip.status == "completed") {
                 binding.btnBook.isEnabled = false
                 binding.btnBook.text = "Safar yakunlangan"
-                binding.btnBook.setBackgroundColor(Color.GRAY)
+                // --- TUZATILDI: Kulrang (yumaloq shakl uchun) ---
+                binding.btnBook.setBackgroundResource(R.drawable.bg_button_completed)
             }
 
-            // 5. Bosilganda yakunlash funksiyasi
             binding.btnBook.setOnClickListener {
                 completeTrip()
             }
 
         } else {
             // B) AGAR MEN YO'LOVCHI BO'LSAM (yoki Preview)
-
-            // Barcha tugmalar ko'rinadi
             binding.btnSms.visibility = View.VISIBLE
             binding.btnCallBottom.visibility = View.VISIBLE
             binding.btnBook.visibility = View.VISIBLE
 
             if (isPreview) {
-                // Preview rejimi (E'lon berishdan oldin ko'rish)
                 binding.btnBook.text = "E'lonni nashr qilish"
+                binding.btnBook.setBackgroundResource(R.drawable.bg_gradient_premium)
                 binding.btnBook.setOnClickListener { publishTrip() }
 
-                // Previewda haydovchi o'ziga yozmaydi
                 binding.btnSms.visibility = View.GONE
                 binding.btnCallBottom.visibility = View.GONE
             } else {
-                // Oddiy Yo'lovchi rejimi: Statusni tekshiramiz
                 checkRequestStatus(trip.id!!)
             }
         }
@@ -204,21 +195,21 @@ class TripDetailsActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 Toast.makeText(this, "Safar muvaffaqiyatli yakunlandi!", Toast.LENGTH_SHORT).show()
                 binding.btnBook.text = "Safar yakunlangan"
-                binding.btnBook.setBackgroundColor(Color.GRAY)
+
+                // --- TUZATILDI: Kulrang (yumaloq shakl) ---
+                binding.btnBook.setBackgroundResource(R.drawable.bg_button_completed)
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Xatolik yuz berdi", Toast.LENGTH_SHORT).show()
                 binding.btnBook.isEnabled = true
                 binding.btnBook.text = "Safarni yakunlash"
+                // Xatolik bo'lsa qaytib Qizil rangga o'tadi
+                binding.btnBook.setBackgroundResource(R.drawable.bg_button_danger)
             }
     }
 
-    // --- E'lon qilish (Preview rejimi uchun) ---
     private fun publishTrip() {
-        // Bu funksiya AddTripActivity dan kelgan ma'lumotni bazaga yozish uchun kerak bo'ladi
-        // Hozircha oddiy Toast:
         Toast.makeText(this, "E'lon chop etilmoqda...", Toast.LENGTH_SHORT).show()
-        // Bu yerda real publish logikasi bo'lishi kerak (yoki AddTripActivity o'zi qiladi)
         finish()
     }
 
@@ -233,7 +224,6 @@ class TripDetailsActivity : AppCompatActivity() {
         binding.btnBook.isEnabled = false
         binding.btnBook.text = "Yuborilmoqda..."
 
-        // Foydalanuvchi ma'lumotlarini olamiz
         val userRef = FirebaseDatabase.getInstance().getReference("Users").child(myUserId)
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -242,7 +232,6 @@ class TripDetailsActivity : AppCompatActivity() {
                 val fullName = "$firstName $lastName".trim()
                 val myPhone = snapshot.child("phone").getValue(String::class.java) ?: ""
 
-                // Ma'lumot tayyor, endi yuboramiz
                 val requestMap = mapOf(
                     "userId" to myUserId,
                     "name" to fullName,
@@ -257,16 +246,21 @@ class TripDetailsActivity : AppCompatActivity() {
                     .setValue(requestMap)
                     .addOnSuccessListener {
                         Toast.makeText(this@TripDetailsActivity, "So'rov yuborildi! ✅", Toast.LENGTH_LONG).show()
-                        binding.btnBook.text = "So'rov yuborilgan ⏳"
-                        binding.btnBook.setBackgroundColor(Color.parseColor("#FFC107")) // Sariq
 
-                        // Push notification yuborish (agar mavjud bo'lsa)
+                        // --- TUZATILDI: Rang o'rniga Resource ---
+                        binding.btnBook.text = "So'rov yuborilgan ⏳"
+                        // Bu yerda sariq drawable ishlatiladi va shakl buzilmaydi
+                        binding.btnBook.setBackgroundResource(R.drawable.bg_button_pending)
+                        // ----------------------------------------
+
                         sendPushNotificationToDriver(trip.userId ?: "", trip.from ?: "", trip.to ?: "")
                     }
                     .addOnFailureListener {
                         Toast.makeText(this@TripDetailsActivity, "Xatolik bo'ldi", Toast.LENGTH_SHORT).show()
                         binding.btnBook.isEnabled = true
-                        binding.btnBook.text = "So'rov yuborish"
+                        binding.btnBook.text = "Joy band qilish"
+                        // Xatolik bo'lsa yana gradientga qaytamiz
+                        binding.btnBook.setBackgroundResource(R.drawable.bg_gradient_premium)
                     }
             }
 
@@ -286,7 +280,8 @@ class TripDetailsActivity : AppCompatActivity() {
                 if (snapshot.exists()) {
                     binding.btnBook.text = "Siz qabul qilingansiz ✅"
                     binding.btnBook.isEnabled = false
-                    binding.btnBook.setBackgroundColor(Color.parseColor("#4CAF50"))
+                    // --- TUZATILDI: Yashil drawable ---
+                    binding.btnBook.setBackgroundResource(R.drawable.bg_button_success)
                 } else {
                     // B) Kutilmoqdami?
                     ref.child("requests").child(myUserId).addListenerForSingleValueEvent(object : ValueEventListener {
@@ -294,11 +289,14 @@ class TripDetailsActivity : AppCompatActivity() {
                             if (reqSnapshot.exists()) {
                                 binding.btnBook.text = "So'rov yuborilgan ⏳"
                                 binding.btnBook.isEnabled = false
-                                binding.btnBook.setBackgroundColor(Color.parseColor("#FFC107"))
+                                // --- TUZATILDI: Sariq drawable ---
+                                binding.btnBook.setBackgroundResource(R.drawable.bg_button_pending)
                             } else {
                                 // Hali so'rov yubormagan
                                 binding.btnBook.text = "Joy band qilish"
                                 binding.btnBook.isEnabled = true
+                                // Default holat: Gradient
+                                binding.btnBook.setBackgroundResource(R.drawable.bg_gradient_premium)
                                 binding.btnBook.setOnClickListener { sendBookingRequest() }
                             }
                         }
@@ -312,7 +310,6 @@ class TripDetailsActivity : AppCompatActivity() {
 
     // --- 3. HAYDOVCHI: So'rovlarni yuklash ---
     private fun loadRequests(tripId: String) {
-        // XML da yangi layoutRequests ID siga o'zgartirganmiz, shuni ishlatamiz
         binding.layoutRequests.visibility = View.VISIBLE
         binding.tvRequestsTitle.text = "Kutilayotgan so'rovlar:"
 
@@ -323,7 +320,6 @@ class TripDetailsActivity : AppCompatActivity() {
         binding.rvRequests.adapter = requestAdapter
         binding.rvRequests.isNestedScrollingEnabled = false
 
-        // Bazadan o'qish
         val ref = FirebaseDatabase.getInstance().getReference("trips").child(tripId).child("requests")
 
         ref.addValueEventListener(object : ValueEventListener {
@@ -335,7 +331,6 @@ class TripDetailsActivity : AppCompatActivity() {
                     val phone = child.child("phone").getValue(String::class.java) ?: ""
                     val status = child.child("status").getValue(String::class.java) ?: "pending"
 
-                    // Faqat kutilayotgan (pending) larni ko'rsatamiz
                     if (status == "pending") {
                         requestList.add(UserRequest(userId, name, phone, status))
                     }
@@ -358,19 +353,17 @@ class TripDetailsActivity : AppCompatActivity() {
         val userBookedRef = FirebaseDatabase.getInstance().getReference("Users").child(request.userId).child("bookedTrips").child(tripId)
 
         if (isAccepted) {
-            // Qabul qilish
-            bookedRef.setValue(true) // Safar ichiga qo'shish
-            userBookedRef.setValue(true) // Foydalanuvchi profiliga qo'shish
-            requestsRef.removeValue() // So'rovlardan o'chirish
+            bookedRef.setValue(true)
+            userBookedRef.setValue(true)
+            requestsRef.removeValue()
             Toast.makeText(this, "${request.name} qabul qilindi!", Toast.LENGTH_SHORT).show()
         } else {
-            // Rad etish
             requestsRef.removeValue()
             Toast.makeText(this, "So'rov rad etildi", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // --- Push Notification (Mavjud funksionallik) ---
+    // --- Push Notification ---
     private fun sendPushNotificationToDriver(driverId: String, from: String, to: String) {
         val database = FirebaseDatabase.getInstance()
         val tokenRef = database.getReference("Users").child(driverId).child("fcmToken")
