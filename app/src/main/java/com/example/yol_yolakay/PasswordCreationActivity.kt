@@ -62,7 +62,7 @@ class PasswordCreationActivity : AppCompatActivity() {
                     val userId = auth.currentUser?.uid
 
                     if (userId != null) {
-                        val userRef = database.getReference("Users").child(userId)
+                        val userRef = database.getReference("users").child(userId)
 
                         // Bazaga to'liq ma'lumot yozish (Crash bo'lmasligi uchun bo'sh joylar bilan)
                         val userData = hashMapOf(
@@ -81,6 +81,7 @@ class PasswordCreationActivity : AppCompatActivity() {
                                 Toast.makeText(this, "Ro'yxatdan o'tish muvaffaqiyatli! 🎉", Toast.LENGTH_SHORT).show()
 
                                 // Asosiy oynaga o'tish
+                                // ✅ YANGI KOD (shunga almashtiring):
                                 val intent = Intent(this, MainActivity::class.java)
                                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                 startActivity(intent)

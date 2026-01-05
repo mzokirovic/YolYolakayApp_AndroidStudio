@@ -78,7 +78,7 @@ class HomeFragment : Fragment() {
         // Standart holatda bugungi sanani qo'yamiz
         if (selectedDate.isEmpty()) {
             val calendar = Calendar.getInstance()
-            val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale("uz", "UZ"))
+            val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale("uz", "UZ"))
             selectedDate = dateFormat.format(calendar.time)
             binding.tvSearchDate.text = selectedDate
         }
@@ -114,6 +114,7 @@ class HomeFragment : Fragment() {
         }
 
         binding.btnSearch.setOnClickListener {
+            hideKeyboard()
             val from = binding.tvSearchFrom.text.toString()
             val to = binding.tvSearchTo.text.toString()
 
@@ -165,7 +166,7 @@ class HomeFragment : Fragment() {
 
         val dateFormatHeader = SimpleDateFormat("d MMMM", Locale("uz", "UZ"))
         val yearFormatHeader = SimpleDateFormat("yyyy", Locale("uz", "UZ"))
-        val searchFormat = SimpleDateFormat("dd-MM-yyyy", Locale("uz", "UZ"))
+        val searchFormat = SimpleDateFormat("dd.MM.yyyy", Locale("uz", "UZ"))
 
         val calendar = Calendar.getInstance()
 
@@ -290,6 +291,17 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+    // --- YANGI QO'SHILADIGAN FUNKSIYA ---
+    private fun hideKeyboard() {
+        // Activity kontekstini tekshiramiz
+        val activity = activity ?: return
+        val view = activity.currentFocus ?: return
+
+        val inputMethodManager = activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager
+        inputMethodManager?.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+
 }
 
 // HomeFragment uchun maxsus YearAdapter (Nomlar to'qnashmasligi uchun YearAdapterHome deb nomladim)

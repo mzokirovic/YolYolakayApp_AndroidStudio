@@ -30,6 +30,17 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
+        // --- 1. INTERNET TEKSHIRUVI (MANA SHU YERGA QO'SHING) ---
+        if (!isInternetAvailable()) {
+            androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Aloqa yo'q")
+                .setMessage("Iltimos, internetga ulanganingizni tekshiring. Ilova internetsiz ishlamasligi mumkin.")
+                .setPositiveButton("Tushunarli", null)
+                .show()
+        }
+
+
         // Ilova ochilganda HomeFragment tursin
         loadFragment(homeFragment)
 
@@ -66,6 +77,9 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+
+
+
     }
 
     override fun onResume() {
@@ -92,7 +106,7 @@ class MainActivity : AppCompatActivity() {
             val token = task.result
 
             // Uni bazaga "Users -> userID -> fcmToken" ga yozamiz
-            val ref = FirebaseDatabase.getInstance().getReference("Users")
+            val ref = FirebaseDatabase.getInstance().getReference("users")
                 .child(currentUser.uid)
                 .child("fcmToken")
 
@@ -157,5 +171,26 @@ class MainActivity : AppCompatActivity() {
             override fun onCancelled(error: DatabaseError) {}
         })
     }
+
+    // --- BU KODNI FAYLNING ENG PASTIGA (OXIRGI QAVSDAN OLDIN) JOYLASHTIRING ---
+
+    private fun isInternetAvailable(): Boolean {
+        val connectivityManager = getSystemService(android.content.Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            val network = connectivityManager.activeNetwork ?: return false
+            val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+            return when {
+                activeNetwork.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI) -> true
+                activeNetwork.hasTransport(android.net.NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                else -> false
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            val networkInfo = connectivityManager.activeNetworkInfo
+            return networkInfo != null && networkInfo.isConnected
+        }
+    }
+
 
 }

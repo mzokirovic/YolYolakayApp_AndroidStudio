@@ -90,25 +90,22 @@ class TripDetailsActivity : AppCompatActivity() {
         try {
             binding.tvFromCity.text = trip.from ?: "Noma'lum"
             binding.tvToCity.text = trip.to ?: "Noma'lum"
-            binding.tvDateHeader.text = trip.date ?: "Bugun"
+            binding.tvDateHeader.text = trip.date ?: ""
             binding.tvStartTime.text = trip.time ?: "--:--"
-            binding.tvEndTime.text = "Manzil"
 
-            val price = trip.price ?: 0
+            // Model ichidagi funksiyadan foydalanamiz - eng toza yo'l
+            val price = trip.getPriceAsLong()
             val formattedPrice = String.format("%,d", price).replace(",", " ")
             binding.tvPrice.text = "$formattedPrice so'm"
-            binding.tvDriverName.text = trip.driverName ?: "Haydovchi"
 
-            if (trip.info.isNullOrEmpty()) {
-                binding.tvInfo.text = "Qo'shimcha ma'lumot yo'q"
-            } else {
-                binding.tvInfo.text = trip.info
-            }
+            binding.tvDriverName.text = trip.driverName ?: "Haydovchi"
+            binding.tvInfo.text = if (trip.info.isNullOrEmpty()) "Qo'shimcha ma'lumot yo'q" else trip.info
 
         } catch (e: Exception) {
             Log.e("TripDetails", "UI xatolik: ${e.message}")
         }
     }
+
 
     private fun setupButtons() {
         binding.btnBack.setOnClickListener { finish() }
@@ -209,9 +206,79 @@ class TripDetailsActivity : AppCompatActivity() {
     }
 
     private fun publishTrip() {
-        Toast.makeText(this, "E'lon chop etilmoqda...", Toast.LENGTH_SHORT).show()
-        finish()
+        val trip = currentTrip
+        if (trip == null) {
+            Toast.makeText(this, "Ma'lumotlar yo'qolgan!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Tugmani bosilmaydigan qilamiz
+        binding.btnBook.isEnabled = false
+        binding.btnBook.text = "Yuklanmoqda..."
+
+        val databaseRef = FirebaseDatabase.getInstance().getReference("trips")
+        // Agar ID bo'lmasa yangisini yaratamiz
+        val tripId = trip.id ?: databaseRef.push().key ?: return
+
+        // --- YANGI: Trip obyektini oddiy Map ga aylantiramiz ---
+        // Bu eng xavfsiz yo'l (qidiruvda muammo bo'lmasligi uchun)
+        val tripMap = hashMapOf<String, Any?>(
+            "id" to tripId,
+            "userId" to trip.userId,
+            "from" to trip.from,
+            "to" to trip.to,            "date" to trip.date,
+            "time" to trip.time,
+
+            // Endi modeldagi funksiyalarni ishlatamiz, chunki 1-bosqichda ularni qo'shdik!
+            "price" to trip.getPriceAsLong(),
+            "seats" to trip.getSeatsAsInt(),
+
+            "info" to trip.info,
+            "driverName" to trip.driverName,
+            "driverPhone" to trip.driverPhone,
+            "status" to "active"
+        )
+
+
+        databaseRef.child(tripId).setValue(tripMap)
+            .addOnSuccessListener {
+                // --- Muvaffaqiyatli! Dialogni chaqiramiz ---
+                showSuccessDialog()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Xatolik: ${e.message}", Toast.LENGTH_SHORT).show()
+                // Xatolik bo'lsa tugmani qayta yoqamiz
+                binding.btnBook.isEnabled = true
+                binding.btnBook.text = "E'lonni nashr qilish"
+            }
     }
+
+
+
+
+    // --- Muvaffaqiyat dialogini ko'rsatish ---
+    // --- Muvaffaqiyat dialogini ko'rsatish (YANGILANGAN) ---
+    private fun showSuccessDialog() {
+        val dialog = android.app.AlertDialog.Builder(this)
+            .setTitle("Muvaffaqiyatli!")
+            .setMessage("E'loningiz muvaffaqiyatli joylashtirildi.")
+            .setPositiveButton("Bosh sahifaga qaytish") { _, _ ->
+                // 1. Barcha eski oynalarni yopamiz
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+                // 2. MainActivity ni ochamiz
+                startActivity(intent)
+
+                // 3. Hozirgi oynani tugatamiz
+                finish()
+            }
+            .setCancelable(false) // Bekor qilib bo'lmasin
+            .create()
+
+        dialog.show()
+    }
+
 
     // --- 1. YO'LOVCHI: So'rov yuborish ---
     private fun sendBookingRequest() {
@@ -224,7 +291,7 @@ class TripDetailsActivity : AppCompatActivity() {
         binding.btnBook.isEnabled = false
         binding.btnBook.text = "Yuborilmoqda..."
 
-        val userRef = FirebaseDatabase.getInstance().getReference("Users").child(myUserId)
+        val userRef = FirebaseDatabase.getInstance().getReference("users").child(myUserId)
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val firstName = snapshot.child("firstName").getValue(String::class.java) ?: "Yo'lovchi"

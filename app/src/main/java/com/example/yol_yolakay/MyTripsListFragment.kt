@@ -117,7 +117,7 @@ class MyTripsListFragment : Fragment() {
             // -------------------------------------------------------
             // 2. BAND QILINGANLAR
             // -------------------------------------------------------
-            val myBookingsRef = database.getReference("Users")
+            val myBookingsRef = database.getReference("users")
                 .child(currentUser.uid).child("bookedTrips")
 
             myBookingsRef.addValueEventListener(object : ValueEventListener {

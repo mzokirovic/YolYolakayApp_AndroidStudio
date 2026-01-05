@@ -67,7 +67,7 @@ class BookedTripsFragment : Fragment() {
         binding.progressBarList.visibility = View.VISIBLE
         val database = FirebaseDatabase.getInstance()
 
-        val userBookingsRef = database.getReference("Users").child(myId).child("bookedTrips")
+        val userBookingsRef = database.getReference("users").child(myId).child("bookedTrips")
 
         userBookingsRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {

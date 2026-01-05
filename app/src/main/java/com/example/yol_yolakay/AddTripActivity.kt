@@ -65,6 +65,9 @@ class AddTripActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
 
         setupUI()
+
+        // Mana shu funksiyani chaqirib qo'ying (Orqa fonda ma'lumot olib turadi)
+        loadUserProfile()
     }
 
     private fun setupUI() {
@@ -198,39 +201,73 @@ class AddTripActivity : AppCompatActivity() {
             return
         }
 
+        // 1. Loadingni yoqamiz, tugmani o'chiramiz
         binding.btnNext.isEnabled = false
-        Toast.makeText(this, "Ma'lumotlar saqlanmoqda...", Toast.LENGTH_SHORT).show()
+        binding.progressBar.visibility = View.VISIBLE
 
-        val userRef = FirebaseDatabase.getInstance().getReference("Users").child(currentUser.uid)
+        // 2. Bazadan ma'lumot olish
+        // DIQQAT: Papka nomi "users" (kichik harf bilan) bo'lishi ehtimoli yuqori
+        val userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUser.uid)
 
-        userRef.addListenerForSingleValueEvent(object : com.google.firebase.database.ValueEventListener {
-            override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
-                val firstName = snapshot.child("firstName").getValue(String::class.java) ?: "Haydovchi"
-                val lastName = snapshot.child("lastName").getValue(String::class.java) ?: ""
-                val phone = snapshot.child("phone").getValue(String::class.java) ?: "+998xxxxxxxxx"
-                val fullName = "$firstName $lastName".trim()
+        userRef.get().addOnSuccessListener { snapshot ->
+            // Bazadan kelgan ma'lumotni olamiz.
+            // Ko'pincha 'name' yoki 'fullName' bo'ladi. Har ehtimolga qarshi hammasini tekshiramiz.
+            val dbName = snapshot.child("name").getValue(String::class.java)
+            val dbFullName = snapshot.child("fullName").getValue(String::class.java)
+            val dbFirstName = snapshot.child("firstName").getValue(String::class.java)
+            val dbLastName = snapshot.child("lastName").getValue(String::class.java)
 
-                publishTripToFirebase(fullName, phone)
+            val dbPhone = snapshot.child("phone").getValue(String::class.java) ?: snapshot.child("phoneNumber").getValue(String::class.java)
+
+            // Ismni aniqlash mantig'i:
+            val finalName = when {
+                !dbName.isNullOrEmpty() -> dbName
+                !dbFullName.isNullOrEmpty() -> dbFullName
+                !dbFirstName.isNullOrEmpty() -> "$dbFirstName ${dbLastName ?: ""}".trim()
+                else -> currentUser.displayName ?: "Haydovchi" // Agar bazada bo'lmasa, Google/Email ismini olamiz
             }
 
-            override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
-                binding.btnNext.isEnabled = true
-                Toast.makeText(this@AddTripActivity, "Xatolik: ${error.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+            val finalPhone = dbPhone ?: currentUser.phoneNumber ?: "+998xxxxxxxxx"
+
+            // Previewga o'tamiz
+            proceedToPreview(finalName, finalPhone)
+
+        }.addOnFailureListener {
+            // Agar internet bo'lmasa yoki xato bo'lsa
+            val offlineName = currentUser.displayName ?: "Haydovchi"
+            val offlinePhone = currentUser.phoneNumber ?: "+998xxxxxxxxx"
+
+            proceedToPreview(offlineName, offlinePhone)
+            Toast.makeText(this, "Profil ma'lumotlari to'liq yuklanmadi (Internet past)", Toast.LENGTH_SHORT).show()
+        }
     }
 
-    private fun publishTripToFirebase(driverName: String, driverPhone: String) {
+
+    // Orqa fonda foydalanuvchi ma'lumotlarini keshlash uchun
+    private fun loadUserProfile() {
+        val userId = auth.currentUser?.uid ?: return
+        val userRef = FirebaseDatabase.getInstance().getReference("users").child(userId)
+        userRef.keepSynced(true) // Ma'lumotni keshda saqlash
+    }
+
+
+
+
+    // BU YANGI FUNKSIYA (Eski publishTripToFirebase o'rniga)
+    private fun proceedToPreview(driverName: String, driverPhone: String) {
         val seatsStr = binding.etSeats.text.toString().trim()
         val priceStr = binding.etPrice.text.toString().trim()
         val info = binding.etInfo.text.toString().trim()
 
+        // Xavfsiz o'girish
         val seats = seatsStr.toIntOrNull() ?: 1
-        val price = priceStr.toLongOrNull() ?: 0
+        // Narxni tozalab olish (faqat raqamlar)
+        val price = priceStr.replace("[^0-9]".toRegex(), "").toLongOrNull() ?: 0L
 
         val database = FirebaseDatabase.getInstance().getReference("trips")
         val tripId = database.push().key ?: return
 
+        // Trip modelidagi funksiyalar endi bor, shuning uchun bemalol ishlatamiz
         val trip = Trip(
             id = tripId,
             userId = auth.currentUser?.uid,
@@ -238,23 +275,26 @@ class AddTripActivity : AppCompatActivity() {
             to = toCity,
             date = tripDate,
             time = tripTime,
-            price = price,
-            seats = seats,
+            price = price,     // Long formatda ketadi
+            seats = seats,     // Int formatda ketadi
             info = info,
             driverName = driverName,
-            driverPhone = driverPhone
+            driverPhone = driverPhone,
+            status = "active"
         )
 
-        database.child(tripId).setValue(trip)
-            .addOnSuccessListener {
-                binding.progressBar.visibility = View.GONE
-                showSuccessDialog(trip)
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(this, "Xatolik: ${e.message}", Toast.LENGTH_SHORT).show()
-                binding.btnNext.isEnabled = true
-            }
+        val intent = Intent(this, TripDetailsActivity::class.java)
+        val gson = com.google.gson.Gson()
+        intent.putExtra("TRIP_JSON", gson.toJson(trip))
+        intent.putExtra("IS_PREVIEW", true)
+        startActivity(intent)
+
+        binding.btnNext.isEnabled = true
+        binding.progressBar.visibility = View.GONE
     }
+
+
+
 
     private fun showDatePicker() {
         val dialog = Dialog(this)
@@ -481,37 +521,6 @@ class AddTripActivity : AppCompatActivity() {
         dialog.show()
     }
 
-
-    private fun showSuccessDialog(trip: Trip) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_success, null)
-        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
-        builder.setView(dialogView)
-
-        val dialog = builder.create()
-        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        dialog.setCancelable(false)
-
-        val btnViewTrip = dialogView.findViewById<android.widget.Button>(R.id.btnViewTrip)
-        val btnClose = dialogView.findViewById<android.widget.Button>(R.id.btnCloseDialog)
-
-        btnViewTrip.setOnClickListener {
-            dialog.dismiss()
-            val intent = Intent(this, TripDetailsActivity::class.java)
-            val gson = com.google.gson.Gson()
-            val tripJson = gson.toJson(trip)
-            intent.putExtra("TRIP_JSON", tripJson)
-            intent.putExtra("IS_PREVIEW", true)
-            startActivity(intent)
-            finish()
-        }
-
-        btnClose.setOnClickListener {
-            dialog.dismiss()
-            finish()
-        }
-
-        dialog.show()
-    }
 }
 
 // YearAdapter klassi AddTripActivity dan tashqarida yoziladi

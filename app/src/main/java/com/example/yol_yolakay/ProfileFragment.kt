@@ -74,7 +74,7 @@ class ProfileFragment : Fragment() {
             return
         }
 
-        val userRef = database.getReference("Users").child(userId)
+        val userRef = database.getReference("users").child(userId)
 
         // Diagnostika uchun Toast
         // Toast.makeText(context, "Ma'lumotlar yuklanmoqda...", Toast.LENGTH_SHORT).show()

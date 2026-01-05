@@ -75,7 +75,7 @@ class CarInfoActivity : AppCompatActivity() {
         )
 
         // 1. Firebase Realtime Database ga yozish
-        database.getReference("Users").child(userId).updateChildren(carMap)
+        database.getReference("users").child(userId).updateChildren(carMap)
             .addOnSuccessListener {
 
                 // 2. Lokal xotiraga ham saqlab qo'yamiz (zaxira uchun)
