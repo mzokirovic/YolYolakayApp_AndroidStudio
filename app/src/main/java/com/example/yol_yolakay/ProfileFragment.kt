@@ -49,6 +49,8 @@ class ProfileFragment : Fragment() {
 
         // 2. Agar tizimga kirgan bo'lsa, ma'lumotlarni yuklaymiz
         loadUserData()
+
+        checkUnreadNotifications()
     }
 
     private fun handleGuestMode() {
@@ -66,6 +68,39 @@ class ProfileFragment : Fragment() {
             startActivity(intent)
         }
     }
+
+
+    private fun checkUnreadNotifications() {
+        val userId = auth.currentUser?.uid ?: return
+        val notifRef = database.getReference("notifications").child(userId)
+
+        // Faqat o'qilmaganlarini sanash shart emas, bittasi o'qilmagan bo'lsa ham yetarli
+        notifRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (_binding == null) return
+
+                var hasUnread = false
+                for (child in snapshot.children) {
+                    val isRead = child.child("isRead").getValue(Boolean::class.java) ?: true
+                    if (!isRead) {
+                        hasUnread = true
+                        break
+                    }
+                }
+
+                // Agar o'qilmagan xabar bo'lsa, qizil nuqta ko'rinadi
+                if (hasUnread) {
+                    binding.viewNotificationBadge.visibility = View.VISIBLE
+                } else {
+                    binding.viewNotificationBadge.visibility = View.GONE
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+
 
     private fun loadUserData() {
         val userId = auth.currentUser?.uid ?: return

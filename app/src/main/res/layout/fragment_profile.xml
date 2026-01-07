@@ -352,11 +352,13 @@
                     android:gravity="center_vertical"
                     android:padding="16dp"
                     android:background="?attr/selectableItemBackground">
+
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_notifications"
                         app:tint="#64748B"/>
+
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -365,12 +367,23 @@
                         android:textColor="#334155"
                         android:textSize="16sp"
                         android:layout_marginStart="16dp"/>
+
+                    <!-- YANGI: Qizil nuqta (Boshida yashirin/gone bo'ladi) -->
+                    <View
+                        android:id="@+id/viewNotificationBadge"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:background="@drawable/shape_circle_red"
+                        android:layout_marginEnd="8dp"
+                        android:visibility="gone"/>
+
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_keyboard_right"
                         app:tint="#CBD5E1"/>
                 </LinearLayout>
+
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F8FAFC" android:layout_marginStart="56dp"/>
 

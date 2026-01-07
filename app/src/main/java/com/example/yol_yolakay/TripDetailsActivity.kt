@@ -73,6 +73,7 @@ class TripDetailsActivity : AppCompatActivity() {
 
     private fun loadTripData() {
         try {
+            // 1. Ma'lumotlarni olish (Json yoki Parcelable)
             val tripJson = intent.getStringExtra("TRIP_JSON")
             if (tripJson != null) {
                 val gson = com.google.gson.Gson()
@@ -85,12 +86,21 @@ class TripDetailsActivity : AppCompatActivity() {
                     currentTrip = intent.getParcelableExtra("trip_data")
                 }
             }
+
             isPreview = intent.getBooleanExtra("IS_PREVIEW", false)
+
+            // --- MANA SHU YERGA QO'SHILADI (TUZATILDI) ---
+            // currentTrip null emasligini tekshiramiz va funksiyaga uzatamiz
+            currentTrip?.let { trip ->
+                setupUIForUserRole(trip)
+            }
+            // ---------------------------------------------
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
+
 
     private fun setupUI() {
         val trip = currentTrip ?: return
@@ -539,6 +549,34 @@ class TripDetailsActivity : AppCompatActivity() {
     }
 
 
+    //----------------------------------------------------------------
+    // 3. UI NI ROLGA QARAB SOZLASH (HAYDOVCHI / YO'LOVCHI)
+    // ----------------------------------------------------------------
+    private fun setupUIForUserRole(trip: Trip) {
+        // Agar bu "Ko'rib chiqish" (Preview) rejimi bo'lsa, hech narsani o'zgartirmaymiz
+        if (isPreview) return
+
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+        // 1. Agar men HAYDOVCHI bo'lsam
+        if (currentUserId != null && trip.userId == currentUserId) {
+            binding.btnBook.visibility = View.GONE         // O'zimdan bron qilmayman
+
+            // "Safarni yakunlash" mantiqini setupButtons da qilgansiz, bu yerda shart emas
+
+            // So'rovlar ro'yxatini yuklaymiz
+            loadRequests(trip.id!!)
+        }
+        // 2. Agar men YO'LOVCHI bo'lsam
+        else {
+            binding.rvRequests.visibility = View.GONE      // So'rovlarni ko'rmayman
+            binding.tvRequestsTitle.visibility = View.GONE
+            // Bron holatini tekshirish
+            if (currentUserId != null) {
+                checkRequestStatus(trip.id!!)
+            }
+        }
+    }
 
 
 } // <-- BU SINFNI YOPUVCHI OXIRGI QAVS

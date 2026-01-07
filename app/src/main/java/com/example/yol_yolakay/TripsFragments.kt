@@ -15,10 +15,7 @@ import com.example.yol_yolakay.databinding.FragmentTripsBinding
 import com.example.yol_yolakay.model.Trip
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 
 class TripsFragment : Fragment() {
 
@@ -26,9 +23,11 @@ class TripsFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var tripAdapter: TripAdapter
 
-    // Rasmga moslab ikkita ro'yxat:
-    private val bookedTrips = ArrayList<Trip>() // Men yo'lovchi bo'lganlar
-    private val publishedTrips = ArrayList<Trip>() // Men haydovchi bo'lganlar (Mening e'lonlarim)
+    // Ikkita alohida ro'yxat:
+    // 1. Men bron qilganim (Yo'lovchi sifatida)
+    private val bookedTrips = ArrayList<Trip>()
+    // 2. Men e'lon qilganim (Haydovchi sifatida)
+    private val publishedTrips = ArrayList<Trip>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,35 +43,37 @@ class TripsFragment : Fragment() {
         setupRecyclerView()
         setupTabs()
         setupSearch()
+
+        // Asosiy ish shu yerda: Ma'lumotlarni yuklash
         loadMyTrips()
     }
 
     private fun setupRecyclerView() {
-        // Safe call (?) ishlatamiz. Agar XML da ID topilmasa ham ilova qulamaydi.
-        try {
-            binding.recyclerViewTrips?.layoutManager = LinearLayoutManager(context)
+        binding.recyclerViewTrips.layoutManager = LinearLayoutManager(context)
 
-            tripAdapter = TripAdapter(arrayListOf()) { trip ->
-                val intent = Intent(context, TripDetailsActivity::class.java)
-                val gson = com.google.gson.Gson()
-                intent.putExtra("TRIP_JSON", gson.toJson(trip))
-                intent.putExtra("IS_PREVIEW", false)
-                startActivity(intent)
-            }
-
-            binding.recyclerViewTrips?.adapter = tripAdapter
-        } catch (e: Exception) {
-            e.printStackTrace()
+        // Adapter bosilganda TripDetailsActivity ga o'tamiz
+        tripAdapter = TripAdapter(arrayListOf()) { trip ->
+            val intent = Intent(context, TripDetailsActivity::class.java)
+            val gson = com.google.gson.Gson()
+            // Trip obyektini to'liq JSON qilib uzatamiz
+            intent.putExtra("TRIP_JSON", gson.toJson(trip))
+            intent.putExtra("IS_PREVIEW", false)
+            startActivity(intent)
         }
+
+        binding.recyclerViewTrips.adapter = tripAdapter
     }
 
     private fun setupTabs() {
+        // Tab o'zgarganda ro'yxatni yangilash
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 when (tab?.position) {
-                    0 -> updateList(bookedTrips)     // Band qilingan (Passenger)
-                    1 -> updateList(publishedTrips)  // E'lon qilingan (Driver)
+                    0 -> updateList(bookedTrips)     // "Band qilingan"
+                    1 -> updateList(publishedTrips)  // "E'lon qilingan"
                 }
+                // Tab o'zgarganda qidiruv maydonini tozalab qo'yish yaxshi amaliyot
+                binding.etSearch.setText("")
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
@@ -80,8 +81,7 @@ class TripsFragment : Fragment() {
     }
 
     private fun setupSearch() {
-        // etSearch null bo'lishi mumkinligini hisobga olamiz
-        binding.etSearch?.addTextChangedListener(object : TextWatcher {
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 filterList(s.toString())
@@ -90,6 +90,7 @@ class TripsFragment : Fragment() {
         })
     }
 
+    // Qidiruv mantig'i
     private fun filterList(query: String) {
         val currentTab = binding.tabLayout.selectedTabPosition
         val sourceList = if (currentTab == 0) bookedTrips else publishedTrips
@@ -97,13 +98,21 @@ class TripsFragment : Fragment() {
         if (query.isEmpty()) {
             updateList(sourceList)
         } else {
+            // Qayerdan (From) yoki Qayerga (To) bo'yicha qidirish
             val filtered = sourceList.filter {
                 (it.from?.contains(query, true) == true) ||
                         (it.to?.contains(query, true) == true)
             }
-            // Adapter hali yaratilmagan bo'lsa xatolik bermasligi uchun tekshiramiz
-            if (::tripAdapter.isInitialized) {
-                tripAdapter.updateList(filtered)
+            // Filtrlangan ro'yxatni adapterga beramiz (lekin EmptyState tekshiruvi adapter ichida bo'lmagani uchun updateList ni ishlatmaymiz)
+            tripAdapter.updateList(filtered)
+
+            // UI ni yangilash
+            if (filtered.isEmpty()) {
+                binding.emptyStateLayout.visibility = View.VISIBLE
+                binding.recyclerViewTrips.visibility = View.GONE
+            } else {
+                binding.emptyStateLayout.visibility = View.GONE
+                binding.recyclerViewTrips.visibility = View.VISIBLE
             }
         }
     }
@@ -112,32 +121,45 @@ class TripsFragment : Fragment() {
         val myId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val database = FirebaseDatabase.getInstance().getReference("trips")
 
+        // Real vaqtda o'zgarishlarni tinglash
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+                // Ro'yxatlarni tozalaymiz (dublikat bo'lmasligi uchun)
                 bookedTrips.clear()
                 publishedTrips.clear()
 
                 for (data in snapshot.children) {
                     val trip = data.getValue(Trip::class.java)
                     if (trip != null) {
-                        // 1. Agar men HAYDOVCHI bo'lsam -> Published ro'yxatiga
+
+                        // 1. MEN HAYDOVCHIMAN (E'lon egasiman)
                         if (trip.userId == myId) {
                             publishedTrips.add(trip)
                         }
-                        // 2. Agar men YO'LOVCHI bo'lsam -> Booked ro'yxatiga
-                        else if (data.child("bookedUsers").hasChild(myId)) {
-                            bookedTrips.add(trip)
+
+                        // 2. MEN YO'LOVCHIMAN (Bron qilganman yoki so'rov yuborganman)
+                        else {
+                            val isBooked = data.child("bookedUsers").hasChild(myId)
+                            val isRequested = data.child("requests").hasChild(myId)
+
+                            if (isBooked || isRequested) {
+                                bookedTrips.add(trip)
+                            }
                         }
                     }
                 }
 
-                // Yangilari tepada tursin
+                // Ro'yxatlarni teskari qilamiz (Yangilari tepada turishi uchun)
                 bookedTrips.reverse()
                 publishedTrips.reverse()
 
-                // Hozirgi tabni yangilash
+                // Hozirgi tanlangan Tabga qarab ekranni yangilaymiz
                 val currentTab = binding.tabLayout.selectedTabPosition
-                if (currentTab == 0) updateList(bookedTrips) else updateList(publishedTrips)
+                if (currentTab == 0) {
+                    updateList(bookedTrips)
+                } else {
+                    updateList(publishedTrips)
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {}
@@ -147,28 +169,15 @@ class TripsFragment : Fragment() {
     private fun updateList(list: List<Trip>) {
         if (_binding == null) return
 
-        // Adapter initialized ekanligini tekshiramiz
-        if (::tripAdapter.isInitialized) {
-            tripAdapter.updateList(list)
-        }
+        tripAdapter.updateList(list)
 
-        // Empty State logikasi (Xavfsiz yondashuv - ID ni dinamik qidirish)
-        try {
-            val isEmpty = list.isEmpty()
-            val visibility = if (isEmpty) View.VISIBLE else View.GONE
-
-            // "emptyStateLayout" (yangi XML) yoki "tvEmpty" (eski XML) ID lari borligini tekshiramiz
-            val emptyResId = resources.getIdentifier("emptyStateLayout", "id", requireContext().packageName)
-            if (emptyResId != 0) {
-                binding.root.findViewById<View>(emptyResId)?.visibility = visibility
-            } else {
-                val tvEmptyId = resources.getIdentifier("tvEmpty", "id", requireContext().packageName)
-                if (tvEmptyId != 0) {
-                    binding.root.findViewById<View>(tvEmptyId)?.visibility = visibility
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        // Agar ro'yxat bo'sh bo'lsa -> Rasm chiqaramiz
+        if (list.isEmpty()) {
+            binding.emptyStateLayout.visibility = View.VISIBLE
+            binding.recyclerViewTrips.visibility = View.GONE
+        } else {
+            binding.emptyStateLayout.visibility = View.GONE
+            binding.recyclerViewTrips.visibility = View.VISIBLE
         }
     }
 
