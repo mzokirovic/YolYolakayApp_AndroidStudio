@@ -68,22 +68,14 @@ class ProfileFragment : Fragment() {
     }
 
     private fun loadUserData() {
-        val userId = auth.currentUser?.uid
-        if (userId == null) {
-            Toast.makeText(context, "Xatolik: User ID topilmadi", Toast.LENGTH_SHORT).show()
-            return
-        }
-
+        val userId = auth.currentUser?.uid ?: return
         val userRef = database.getReference("users").child(userId)
-
-        // Diagnostika uchun Toast
-        // Toast.makeText(context, "Ma'lumotlar yuklanmoqda...", Toast.LENGTH_SHORT).show()
 
         userRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (_binding == null) return
 
-                // 1. SHAXSIY MA'LUMOTLARNI YUKLASH
+                // 1. SHAXSIY MA'LUMOTLAR
                 val firstName = snapshot.child("firstName").getValue(String::class.java) ?: "Foydalanuvchi"
                 val lastName = snapshot.child("lastName").getValue(String::class.java) ?: ""
                 val phone = snapshot.child("phone").getValue(String::class.java) ?: ""
@@ -93,38 +85,65 @@ class ProfileFragment : Fragment() {
 
                 val rating = snapshot.child("rating").getValue(String::class.java) ?: "5.0"
                 val tripCount = snapshot.child("tripCount").getValue(Int::class.java) ?: 0
-
                 binding.tvRating.text = rating
                 binding.tvTripCount.text = tripCount.toString()
 
                 // 2. MASHINA STATUSINI TEKSHIRISH
                 val carModel = snapshot.child("carModel").getValue(String::class.java)
+                val carColor = snapshot.child("carColor").getValue(String::class.java) ?: ""
+                val carNumber = snapshot.child("carNumber").getValue(String::class.java) ?: ""
 
-                // TEST UCHUN: Ekranga ma'lumotni chiqaramiz
-                // Agar carModel null bo'lsa "Bo'sh", aks holda mashina nomini chiqaradi
-                // Toast.makeText(context, "Firebase'dan keldi: ${carModel ?: "Bo'sh"}", Toast.LENGTH_LONG).show()
-
+                // Mashina modeli kiritilganmi?
                 if (!carModel.isNullOrEmpty()) {
-                    // --- MASHINA BOR -> PTICHKA ---
-                    binding.tvCarInfoTitle.text = carModel
-                    binding.ivCarStatusIcon.setImageResource(R.drawable.ic_check)
-                    binding.ivCarStatusIcon.setColorFilter(Color.WHITE)
-                    binding.ivCarStatusIcon.background.setTint(Color.parseColor("#10B981")) // Yashil
+                    // --- MASHINA BOR (Ma'lumotlarni ko'rsatamiz) ---
+
+                    // Ikonkalar
+                    binding.ivCarStatusIcon.setImageResource(R.drawable.ic_car)
+                    binding.ivCarStatusIcon.setColorFilter(Color.parseColor("#6366F1")) // Binafsha
+                    binding.flCarIconContainer.background.setTint(Color.parseColor("#EEF2FF")) // Och fon
+
+                    // O'ngdagi ikonka -> Yashil Check (✅)
+                    binding.ivEditCarIcon.setImageResource(R.drawable.ic_check)
+                    binding.ivEditCarIcon.setColorFilter(Color.parseColor("#10B981"))
+
+                    // Matnlar (Yangi ID lar ishlatilmoqda)
+                    binding.tvCarModel.text = carModel      // Masalan: Chevrolet Cobalt
+                    binding.tvCarColor.text = carColor      // Masalan: Oq
+                    binding.tvCarNumber.text = carNumber    // Masalan: 01 A 777 AA
+
+                    // Qo'shimcha qatorlarni ko'rsatamiz
+                    binding.tvCarColor.visibility = View.VISIBLE
+                    binding.tvCarNumber.visibility = View.VISIBLE
+
                 } else {
-                    // --- MASHINA YO'Q -> PLYUS ---
-                    binding.tvCarInfoTitle.text = "Mening mashinam"
-                    binding.ivCarStatusIcon.setImageResource(R.drawable.ic_add)
-                    binding.ivCarStatusIcon.setColorFilter(Color.parseColor("#2E5BFF"))
-                    binding.ivCarStatusIcon.background.setTint(Color.parseColor("#EFF6FF")) // Ko'k
+                    // --- MASHINA YO'Q (Qo'shish holati) ---
+
+                    // Ikonkalar
+                    binding.ivCarStatusIcon.setImageResource(R.drawable.ic_car)
+                    binding.ivCarStatusIcon.setColorFilter(Color.parseColor("#94A3B8")) // Kulrang
+                    binding.flCarIconContainer.background.setTint(Color.parseColor("#F1F5F9")) // Kulrang fon
+
+                    // O'ngdagi ikonka -> Plyus (+)
+                    binding.ivEditCarIcon.setImageResource(R.drawable.ic_add)
+                    binding.ivEditCarIcon.setColorFilter(Color.parseColor("#6366F1"))
+
+                    // Matn
+                    binding.tvCarModel.text = "Mashina qo'shish"
+
+                    // Qo'shimcha qatorlarni yashiramiz (xunuk ko'rinmasligi uchun)
+                    binding.tvCarColor.visibility = View.GONE
+                    binding.tvCarNumber.visibility = View.GONE
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // XATOLIK BO'LSA EKRANGA CHIQARAMIZ
-                Toast.makeText(context, "Firebase Xatosi: ${error.message}", Toast.LENGTH_LONG).show()
+                if (context != null) {
+                    Toast.makeText(context, "Xatolik: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
             }
         })
     }
+
 
 
 
@@ -166,6 +185,12 @@ class ProfileFragment : Fragment() {
         // Sozlamalar
         binding.btnSettings?.setOnClickListener {
             Toast.makeText(context, "Sozlamalar bo'limi", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnNotifications.setOnClickListener {
+            // Yangi yaratgan NotificationsActivity ni ochish
+            val intent = Intent(requireContext(), NotificationsActivity::class.java)
+            startActivity(intent)
         }
     }
 

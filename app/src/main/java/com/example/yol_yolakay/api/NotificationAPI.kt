@@ -1,20 +1,19 @@
 package com.example.yol_yolakay.api
 
+// Biz boya yaratgan yangi modelni chaqiramizimport com.example.yol_yolakay.model.PushNotification
 import com.example.yol_yolakay.model.PushNotification
-
 import okhttp3.ResponseBody
-import retrofit2.Response
+import retrofit2.Call
 import retrofit2.http.Body
-import retrofit2.http.Headers
+import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface NotificationAPI {
-
-    // Firebase Console -> Project Settings -> Cloud Messaging -> Cloud Messaging API (Legacy)
-    // Server Key ni shu yerga qo'ying:
-    @Headers("Authorization: key=BFQUlU1aHO_I4mlaAHnlbglU2TvXwrpAxsYCLQ2OXUKXZfibHSLjRowFpSpEjSR_ToaasMaGI43rcLYvR2rQf0s", "Content-Type: application/json")
-    @POST("fcm/send")
-    suspend fun postNotification(
+    // Bu yangi HTTP v1 manzili
+    // "myapp1f" o'rniga o'z Project ID ingizni yozishingiz kerak bo'ladi (keyinroq tushuntiraman)
+    @POST("v1/projects/myapp1f/messages:send")
+    fun postNotification(
+        @Header("Authorization") accessToken: String,
         @Body notification: PushNotification
-    ): Response<ResponseBody>
+    ): Call<ResponseBody>
 }

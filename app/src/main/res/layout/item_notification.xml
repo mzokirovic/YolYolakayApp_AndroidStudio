@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:layout_marginHorizontal="4dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="@android:color/white">
+    <!-- Elevation 0 qildim, chunki ro'yxatda tekis turgani chiroyli,
+         yoki xohlasangiz 2dp qiling -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- 1. IKONKA (Chap tomonda) -->
+        <!-- Dinamik ravishda rangi o'zgaradi (Yashil/Qizil) -->
+        <FrameLayout
+            android:id="@+id/iconContainer"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/shape_circle_green"
+            android:backgroundTint="#F1F5F9"> <!-- Boshlanishiga kulrang fon -->
+
+            <ImageView
+                android:id="@+id/ivNotifIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_notifications"
+                app:tint="#64748B"/>
+        </FrameLayout>
+
+        <!-- 2. MATN QISMI (O'rtada) -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp">
+
+            <!-- Sarlavha va Vaqt bir qatorda -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Safar tasdiqlandi"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#1E293B"
+                    android:ellipsize="end"
+                    android:maxLines="1"/>
+
+                <!-- Vaqt (Masalan: 12:45) -->
+                <TextView
+                    android:id="@+id/tvTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="12:30"
+                    android:textSize="12sp"
+                    android:textColor="#94A3B8"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+
+            <!-- Asosiy Xabar -->
+            <TextView
+                android:id="@+id/tvMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Haydovchi sizning so'rovingizni qabul qildi."
+                android:textSize="14sp"
+                android:textColor="#64748B"
+                android:layout_marginTop="4dp"
+                android:maxLines="2"
+                android:ellipsize="end"/>
+        </LinearLayout>
+
+        <!-- 3. O'QILMAGAN BELGISI (O'ngda, qizil nuqta) -->
+        <View
+            android:id="@+id/viewUnreadDot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/shape_circle_green"
+            android:backgroundTint="#EF4444"
+            android:visibility="gone" /> <!-- Boshida ko'rinmay turadi -->
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

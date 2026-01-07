@@ -13,7 +13,7 @@ data class Trip(
     var date: String? = null,
     var time: String? = null,
 
-    // Narx va joyni har qanday turda qabul qilamiz (xavfsizlik uchun)
+    // Narx va joyni har qanday turda qabul qilamiz
     var price: Any? = null,
     var seats: Any? = null,
 
@@ -21,7 +21,11 @@ data class Trip(
     var driverName: String? = "Haydovchi",
     var driverPhone: String? = null,
     var status: String = "active",
-    var bookedUsers: HashMap<String, Boolean>? = null
+
+    // --- O'ZGARISH SHU YERDA ---
+    // Boolean o'rniga Any qildik. Endi Map kelsa ham, True kelsa ham ishlayveradi.
+    // Bu eng xavfsiz yechim.
+    var bookedUsers: HashMap<String, Any>? = null
 ) : Parcelable {
 
     constructor(parcel: Parcel) : this(
@@ -39,7 +43,7 @@ data class Trip(
         parcel.readString() ?: "active"
     )
 
-    // --- YORDAMCHI FUNKSIYALAR (Qolgan fayllar uchun zarur) ---
+    // --- YORDAMCHI FUNKSIYALAR ---
 
     fun getPriceAsLong(): Long {
         return when (price) {
@@ -60,7 +64,6 @@ data class Trip(
             else -> 1
         }
     }
-    // ---------------------------------------------------------
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(id)

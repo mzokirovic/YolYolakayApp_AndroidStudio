@@ -1,7 +1,6 @@
 package com.example.yol_yolakay
 
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -9,10 +8,9 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.yol_yolakay.adapter.RequestAdapter
 import com.example.yol_yolakay.api.RetrofitInstance
 import com.example.yol_yolakay.databinding.ActivityTripDetailsBinding
-import com.example.yol_yolakay.model.NotificationData
-import com.example.yol_yolakay.model.PushNotification
 import com.example.yol_yolakay.model.Trip
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -22,6 +20,16 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+// ... boshqa importlar ...
+import com.example.yol_yolakay.model.UserRequest    // <-- Biz yaratgan model
+import com.example.yol_yolakay.model.PushNotification
+import com.example.yol_yolakay.model.Message
+import com.example.yol_yolakay.model.NotificationBody
+import com.example.yol_yolakay.api.NotificationAPI
+import com.example.yol_yolakay.model.Notification
+
+// ...
+
 
 class TripDetailsActivity : AppCompatActivity() {
 
@@ -31,7 +39,7 @@ class TripDetailsActivity : AppCompatActivity() {
 
     // Haydovchi uchun adapter va ro'yxat
     private lateinit var requestAdapter: RequestAdapter
-    private val requestList = ArrayList<UserRequest>()
+    private var requestList = ArrayList<UserRequest>()
 
     private val myUserId: String
         get() = FirebaseAuth.getInstance().currentUser?.uid ?: ""
@@ -280,7 +288,9 @@ class TripDetailsActivity : AppCompatActivity() {
     }
 
 
-    // --- 1. YO'LOVCHI: So'rov yuborish ---
+    // ----------------------------------------------------------------
+    // 1. YO'LOVCHI UCHUN: JOY BAND QILISH (So'rov yuborish)
+    // ----------------------------------------------------------------
     private fun sendBookingRequest() {
         val trip = currentTrip ?: return
         if (myUserId.isEmpty()) {
@@ -299,34 +309,31 @@ class TripDetailsActivity : AppCompatActivity() {
                 val fullName = "$firstName $lastName".trim()
                 val myPhone = snapshot.child("phone").getValue(String::class.java) ?: ""
 
-                val requestMap = mapOf(
-                    "userId" to myUserId,
-                    "name" to fullName,
-                    "phone" to myPhone,
-                    "status" to "pending"
+                // YANGI MODEL (NotificationModels.kt dagi)
+                val request = UserRequest(
+                    userId = myUserId,
+                    name = fullName,
+                    phone = myPhone,
+                    status = "pending"
                 )
 
                 FirebaseDatabase.getInstance().getReference("trips")
                     .child(trip.id!!)
                     .child("requests")
                     .child(myUserId)
-                    .setValue(requestMap)
+                    .setValue(request)
                     .addOnSuccessListener {
                         Toast.makeText(this@TripDetailsActivity, "So'rov yuborildi! ✅", Toast.LENGTH_LONG).show()
-
-                        // --- TUZATILDI: Rang o'rniga Resource ---
                         binding.btnBook.text = "So'rov yuborilgan ⏳"
-                        // Bu yerda sariq drawable ishlatiladi va shakl buzilmaydi
                         binding.btnBook.setBackgroundResource(R.drawable.bg_button_pending)
-                        // ----------------------------------------
 
+                        // Notification yuborish
                         sendPushNotificationToDriver(trip.userId ?: "", trip.from ?: "", trip.to ?: "")
                     }
                     .addOnFailureListener {
                         Toast.makeText(this@TripDetailsActivity, "Xatolik bo'ldi", Toast.LENGTH_SHORT).show()
                         binding.btnBook.isEnabled = true
                         binding.btnBook.text = "Joy band qilish"
-                        // Xatolik bo'lsa yana gradientga qaytamiz
                         binding.btnBook.setBackgroundResource(R.drawable.bg_gradient_premium)
                     }
             }
@@ -337,7 +344,9 @@ class TripDetailsActivity : AppCompatActivity() {
         })
     }
 
-    // --- 2. YO'LOVCHI: Statusni tekshirish ---
+    // ----------------------------------------------------------------
+    // 2. STATUSNI TEKSHIRISH (Yo'lovchi uchun)
+    // ----------------------------------------------------------------
     private fun checkRequestStatus(tripId: String) {
         val ref = FirebaseDatabase.getInstance().getReference("trips").child(tripId)
 
@@ -347,7 +356,6 @@ class TripDetailsActivity : AppCompatActivity() {
                 if (snapshot.exists()) {
                     binding.btnBook.text = "Siz qabul qilingansiz ✅"
                     binding.btnBook.isEnabled = false
-                    // --- TUZATILDI: Yashil drawable ---
                     binding.btnBook.setBackgroundResource(R.drawable.bg_button_success)
                 } else {
                     // B) Kutilmoqdami?
@@ -356,13 +364,11 @@ class TripDetailsActivity : AppCompatActivity() {
                             if (reqSnapshot.exists()) {
                                 binding.btnBook.text = "So'rov yuborilgan ⏳"
                                 binding.btnBook.isEnabled = false
-                                // --- TUZATILDI: Sariq drawable ---
                                 binding.btnBook.setBackgroundResource(R.drawable.bg_button_pending)
                             } else {
                                 // Hali so'rov yubormagan
                                 binding.btnBook.text = "Joy band qilish"
                                 binding.btnBook.isEnabled = true
-                                // Default holat: Gradient
                                 binding.btnBook.setBackgroundResource(R.drawable.bg_gradient_premium)
                                 binding.btnBook.setOnClickListener { sendBookingRequest() }
                             }
@@ -375,8 +381,11 @@ class TripDetailsActivity : AppCompatActivity() {
         })
     }
 
-    // --- 3. HAYDOVCHI: So'rovlarni yuklash ---
+    // ----------------------------------------------------------------
+    // 3. HAYDOVCHI UCHUN: SO'ROVLARNI YUKLASH
+    // ----------------------------------------------------------------
     private fun loadRequests(tripId: String) {
+        // Layout ko'rinadigan bo'lsin
         binding.layoutRequests.visibility = View.VISIBLE
         binding.tvRequestsTitle.text = "Kutilayotgan so'rovlar:"
 
@@ -393,13 +402,9 @@ class TripDetailsActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 requestList.clear()
                 for (child in snapshot.children) {
-                    val userId = child.key ?: continue
-                    val name = child.child("name").getValue(String::class.java) ?: "Noma'lum"
-                    val phone = child.child("phone").getValue(String::class.java) ?: ""
-                    val status = child.child("status").getValue(String::class.java) ?: "pending"
-
-                    if (status == "pending") {
-                        requestList.add(UserRequest(userId, name, phone, status))
+                    val req = child.getValue(UserRequest::class.java)
+                    if (req != null) {
+                        requestList.add(req)
                     }
                 }
                 requestAdapter.notifyDataSetChanged()
@@ -408,41 +413,77 @@ class TripDetailsActivity : AppCompatActivity() {
                     binding.tvRequestsTitle.text = "Yangi so'rovlar yo'q"
                 }
             }
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@TripDetailsActivity, "So'rovlarni yuklashda xatolik", Toast.LENGTH_SHORT).show()
-            }
+            override fun onCancelled(error: DatabaseError) {}
         })
     }
 
+    // ----------------------------------------------------------------
+    // 4. HAYDOVCHI UCHUN: SO'ROVNI QABUL QILISH / RAD ETISH
+    // ----------------------------------------------------------------
+    // ----------------------------------------------------------------
+    // 4. HAYDOVCHI UCHUN: SO'ROVNI QABUL QILISH / RAD ETISH
+    // ----------------------------------------------------------------
     private fun handleRequestAction(tripId: String, request: UserRequest, isAccepted: Boolean) {
         val requestsRef = FirebaseDatabase.getInstance().getReference("trips").child(tripId).child("requests").child(request.userId)
         val bookedRef = FirebaseDatabase.getInstance().getReference("trips").child(tripId).child("bookedUsers").child(request.userId)
-        val userBookedRef = FirebaseDatabase.getInstance().getReference("Users").child(request.userId).child("bookedTrips").child(tripId)
+        val userBookedRef = FirebaseDatabase.getInstance().getReference("users").child(request.userId).child("bookedTrips").child(tripId)
 
         if (isAccepted) {
-            bookedRef.setValue(true)
+            // 1. Qabul qilish logikasi
+            val userData = mapOf(
+                "name" to request.name,
+                "phone" to request.phone
+            )
+            bookedRef.setValue(userData)
             userBookedRef.setValue(true)
             requestsRef.removeValue()
-            Toast.makeText(this, "${request.name} qabul qilindi!", Toast.LENGTH_SHORT).show()
+
+            Toast.makeText(this, "${request.name} qabul qilindi ✅", Toast.LENGTH_SHORT).show()
+
+            // 2. YANGI: Yo'lovchiga "Tasdiqlandi" xabarini yuborish
+            sendNotification(
+                userId = request.userId,
+                title = "Safar tasdiqlandi! ✅",
+                message = "Haydovchi sizning so'rovingizni qabul qildi. Safarga tayyorlaning!",
+                type = "success"
+            )
+
         } else {
+            // 1. Rad etish logikasi
             requestsRef.removeValue()
-            Toast.makeText(this, "So'rov rad etildi", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "So'rov rad etildi ❌", Toast.LENGTH_SHORT).show()
+
+            // 2. YANGI: Yo'lovchiga "Rad etildi" xabarini yuborish
+            sendNotification(
+                userId = request.userId,
+                title = "So'rov rad etildi ❌",
+                message = "Afsuski, haydovchi so'rovingizni qabul qila olmadi. Boshqa safar qidirib ko'ring.",
+                type = "error"
+            )
         }
     }
 
-    // --- Push Notification ---
+
+    // ----------------------------------------------------------------
+    // 5. TEXNIK QISM: NOTIFICATION YUBORISH (Yangi API bilan)
+    // ----------------------------------------------------------------
     private fun sendPushNotificationToDriver(driverId: String, from: String, to: String) {
         val database = FirebaseDatabase.getInstance()
-        val tokenRef = database.getReference("Users").child(driverId).child("fcmToken")
+        val tokenRef = database.getReference("users").child(driverId).child("fcmToken")
 
         tokenRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val token = snapshot.getValue(String::class.java)
-                if (token != null) {
-                    val pushNotification = PushNotification(
-                        NotificationData("Yangi buyurtma!", "$from dan $to ga yangi yo'lovchi so'rov yubordi."),
-                        token
-                    )
+
+                if (!token.isNullOrEmpty()) {
+                    val title = "Yangi buyurtma!"
+                    val body = "$from dan $to ga yangi yo'lovchi so'rov yubordi."
+
+                    // Yangi modellarni ishlatamiz
+                    val notificationBody = NotificationBody(title, body)
+                    val message = Message(token, notificationBody)
+                    val pushNotification = PushNotification(message)
+
                     sendNotification(pushNotification)
                 }
             }
@@ -450,18 +491,54 @@ class TripDetailsActivity : AppCompatActivity() {
         })
     }
 
-    private fun sendNotification(notification: PushNotification) {
+    private fun sendNotification(pushNotification: PushNotification) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = RetrofitInstance.api.postNotification(notification)
-                if (response.isSuccessful) {
-                    Log.d("FCM", "Xabar yuborildi: ${response.body()}")
+                // Access Tokenni olish
+                val accessToken = com.example.yol_yolakay.api.AccessToken.getAccessToken(this@TripDetailsActivity)
+
+                if (accessToken != null) {
+                    val call = com.example.yol_yolakay.api.RetrofitInstance.api.postNotification(
+                        "Bearer $accessToken",
+                        pushNotification
+                    )
+
+                    val response = call.execute()
+
+                    if (response.isSuccessful) {
+                        Log.d("FCM", "Yuborildi ✅")
+                    } else {
+                        Log.e("FCM", "Xato: ${response.code()} ${response.errorBody()?.string()}")
+                    }
                 } else {
-                    Log.e("FCM", "Xatolik: ${response.errorBody()?.string()}")
+                    Log.e("FCM", "Token topilmadi")
                 }
             } catch (e: Exception) {
-                Log.e("FCM", "Xatolik: ${e.message}")
+                Log.e("FCM", "Xato: ${e.message}")
             }
         }
     }
-}
+
+
+    // Bildirishnoma yuborish funksiyasi
+    private fun sendNotification(userId: String, title: String, message: String, type: String) {
+        val notifRef = FirebaseDatabase.getInstance().getReference("notifications").child(userId)
+        val notifId = notifRef.push().key
+
+        if (notifId != null) {
+            val notification = Notification(
+                id = notifId,
+                title = title,
+                message = message,
+                date = System.currentTimeMillis(),
+                isRead = false,
+                type = type
+            )
+            notifRef.child(notifId).setValue(notification)
+        }
+    }
+
+
+
+
+} // <-- BU SINFNI YOPUVCHI OXIRGI QAVS

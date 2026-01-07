@@ -4,17 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC">
+    android:background="#F8FAFC"> <!-- Oq-kulrang toza fon -->
 
-    <!-- 1. TEPADAGI HEADER (Soddalashtirilgan) -->
+    <!-- 1. HEADER (Faqat "Profil" yozuvi) -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        android:elevation="0dp"
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
+        android:elevation="1dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -22,29 +22,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Profil"
-            android:textColor="#1E293B"
+            android:textColor="#0F172A"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="24dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <!-- Tahrirlash tugmasi (O'ng burchakda) -->
-        <TextView
-            android:id="@+id/btnEditProfile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Tahrirlash"
-            android:textColor="#2E5BFF"
-            android:textStyle="bold"
-            android:textSize="14sp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginEnd="8dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -54,120 +38,94 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:fillViewport="true"
-        android:paddingBottom="100dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="24dp"
-            android:paddingTop="24dp">
+            android:paddingBottom="40dp">
 
-            <!-- PROFIL RASMI VA ISM (Markazlashgan) -->
+            <!-- PROFIL KARTASI (Bosiladigan qilib, btnEditProfile ID sini shunga berdik) -->
+            <!-- Tahrirlash tugmasi vazifasini endi shu layout bajaradi -->
             <LinearLayout
+                android:id="@+id/btnEditProfile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
                 android:orientation="vertical"
-                android:layout_marginBottom="32dp">
+                android:gravity="center"
+                android:background="@android:color/white"
+                android:paddingTop="24dp"
+                android:paddingBottom="24dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
 
-                <RelativeLayout
-                    android:layout_width="100dp"
-                    android:layout_height="100dp">
+                <!-- Avatar -->
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/imgProfile"
+                    android:layout_width="88dp"
+                    android:layout_height="88dp"
+                    android:src="@drawable/ic_person"
+                    app:civ_border_color="#F1F5F9"
+                    app:civ_border_width="2dp" />
 
-                    <de.hdodenhof.circleimageview.CircleImageView
-                        android:id="@+id/imgProfile"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:src="@drawable/ic_person"
-                        app:civ_border_color="#F1F5F9"
-                        app:civ_border_width="1dp" />
-
-                    <!-- Tasdiqlangan belgisi (Rasmdagi ko'k "galochka") -->
-                    <ImageView
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_alignParentBottom="true"
-                        android:src="@drawable/ic_check"
-                        android:padding="6dp"
-                        android:background="@drawable/shape_circle_green"
-                        android:backgroundTint="#2E5BFF"
-                        app:tint="#FFFFFF"/>
-                </RelativeLayout>
-
-                <TextView
-                    android:id="@+id/tvFullName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Aziz Karimov"
-                    android:textColor="#1E293B"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
-
-                <!-- Status Label -->
+                <!-- Ism va Tahrirlash belgisi -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:background="@drawable/bg_input_premium"
-                    android:backgroundTint="#EFF6FF"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="6dp"
-                    android:layout_marginTop="8dp">
+                    android:layout_marginTop="12dp">
 
+                    <TextView
+                        android:id="@+id/tvFullName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mehmon Aliyev"
+                        android:textColor="#0F172A"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <!-- Kichkina tahrirlash qalami (Ism yonida) -->
                     <ImageView
                         android:layout_width="16dp"
                         android:layout_height="16dp"
-                        android:src="@drawable/ic_check"
-                        app:tint="#2E5BFF"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Tasdiqlangan haydovchi"
-                        android:textColor="#2E5BFF"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:layout_marginStart="6dp"/>
+                        android:src="@drawable/ic_keyboard_right"
+                        app:tint="#94A3B8"
+                        android:layout_marginStart="8dp"/>
                 </LinearLayout>
 
                 <TextView
                     android:id="@+id/tvPhone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="4dp"
                     android:text="+998 90 123 45 67"
                     android:textColor="#64748B"
                     android:textSize="14sp" />
+
             </LinearLayout>
 
-            <!-- STATISTIKA GRID (2x2) - Rasmdagi kabi -->
-            <GridLayout
+            <!-- STATISTIKA (Safarlar va Reyting) -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:columnCount="2"
-                android:rowCount="1"
-                android:useDefaultMargins="true"
-                android:alignmentMode="alignMargins"
-                android:columnOrderPreserved="false"
-                android:layout_marginBottom="24dp">
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp"
+                android:baselineAligned="false">
 
-                <!-- 1. Jami safarlar -->
+                <!-- Safarlar -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
+                    android:layout_weight="1"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
-                    app:cardBackgroundColor="#F1F5F9"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="16dp">
+                    app:cardBackgroundColor="@android:color/white"
+                    android:layout_marginEnd="8dp">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -178,13 +136,13 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_location"
-                            app:tint="#2E5BFF"/>
+                            app:tint="#6366F1"/>
                         <TextView
                             android:id="@+id/tvTripCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="156"
-                            android:textColor="#1E293B"
+                            android:textColor="#0F172A"
                             android:textSize="20sp"
                             android:textStyle="bold"
                             android:layout_marginTop="8dp"/>
@@ -197,17 +155,15 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- 2. Reyting -->
+                <!-- Reyting -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
+                    android:layout_weight="1"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
-                    app:cardBackgroundColor="#F1F5F9"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginBottom="16dp">
+                    app:cardBackgroundColor="@android:color/white"
+                    android:layout_marginStart="8dp">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -218,152 +174,322 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_star"
-                            app:tint="#2E5BFF"/>
+                            app:tint="#F59E0B"/>
                         <TextView
                             android:id="@+id/tvRating"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="4.9"
-                            android:textColor="#1E293B"
+                            android:textColor="#0F172A"
                             android:textSize="20sp"
                             android:textStyle="bold"
                             android:layout_marginTop="8dp"/>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Reyting"
+                            android:text="89 baho"
                             android:textColor="#64748B"
                             android:textSize="12sp"/>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
+            </LinearLayout>
 
+            <!-- MENING MASHINAM SEKSIYASI -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="24dp"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Mening mashinam"
+                    android:textColor="#334155"
+                    android:textSize="14sp"
+                    android:textStyle="bold"/>
 
-            </GridLayout>
+                <!-- Tahrirlash ikonchasi -->
+                <ImageView
+                    android:id="@+id/ivEditCarIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_add"
+                    app:tint="#6366F1"/>
+            </LinearLayout>
 
-            <!-- MENING MASHINAM (List Item style) -->
-            <!-- MENING MASHINAM TUGMASI -->
+            <!-- Mashina Kartochkasi -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/btnOpenCarInfo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="#F1F5F9"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:layout_marginBottom="24dp">
+                app:cardBackgroundColor="@android:color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingVertical="16dp"
-                    android:paddingHorizontal="16dp">
+                    android:padding="16dp">
 
-                    <TextView
-                        android:id="@+id/tvCarInfoTitle"
+                    <!-- Mashina Ikonkasi (Fonda) -->
+                    <FrameLayout
+                        android:id="@+id/flCarIconContainer"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/shape_circle_green"
+                        android:backgroundTint="#EEF2FF">
+
+                        <ImageView
+                            android:id="@+id/ivCarStatusIcon"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_gravity="center"
+                            android:scaleX="-1"
+                            android:src="@drawable/ic_car"
+                            app:tint="#6366F1" />
+                    </FrameLayout>
+
+                    <!-- Mashina Ma'lumotlari -->
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Mening mashinam"
-                        android:textColor="#1E293B"
-                        android:textSize="16sp"
-                        android:textStyle="bold"/>
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
 
-                    <ImageView
-                        android:id="@+id/ivCarStatusIcon"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:src="@drawable/ic_add"
-                        app:tint="#2E5BFF"
-                        android:background="@drawable/shape_circle_green"
-                        android:backgroundTint="#EFF6FF"
-                        android:padding="6dp"/>
+                        <!-- Mashina Modeli -->
+                        <TextView
+                            android:id="@+id/tvCarModel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Chevrolet Lacetti"
+                            android:textColor="#0F172A"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
 
+                        <!-- Mashina Rangi va Raqami -->
+                        <TextView
+                            android:id="@+id/tvCarColor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="2022 • Oq"
+                            android:textColor="#64748B"
+                            android:textSize="13sp"
+                            android:layout_marginTop="2dp"/>
+                        <TextView
+                            android:id="@+id/tvCarNumber"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="01 A 123 BC"
+                            android:textColor="#94A3B8"
+                            android:textSize="12sp"
+                            android:layout_marginTop="2dp"/>
+                    </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-
-
-            <!-- SOZLAMALAR VA BOSHQA MENYULAR -->
-            <!-- Rasmdagi kabi list style -->
-
-            <!-- 1. Sozlamalar -->
-            <LinearLayout
-                android:id="@+id/btnSettings"
-                android:layout_width="match_parent"
+            <!-- MENYULAR (HISOB) -->
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingVertical="16dp"
-                android:background="?attr/selectableItemBackground">
+                android:text="HISOB"
+                android:textColor="#94A3B8"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp"/>
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_settings"
-                    app:tint="#64748B"/>
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Sozlamalar"
-                    android:textColor="#1E293B"
-                    android:textSize="16sp"
-                    android:layout_marginStart="16dp"/>
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_keyboard_right"
-                    app:tint="#CBD5E1"/>
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#F1F5F9"/>
-
-            <!-- 2. Bildirishnomalar -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingVertical="16dp"
-                android:background="?attr/selectableItemBackground">
+                android:orientation="vertical"
+                android:background="@android:color/white">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_notifications"
-                    app:tint="#64748B"/>
-
-                <TextView
-                    android:layout_width="0dp"
+                <!-- To'lov usullari (Yangi qo'shildi, vizual) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Bildirishnomalar"
-                    android:textColor="#1E293B"
-                    android:textSize="16sp"
-                    android:layout_marginStart="16dp"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="16dp"
+                    android:background="?attr/selectableItemBackground">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_wallet"
+                        app:tint="#64748B"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="To'lov usullari"
+                        android:textColor="#334155"
+                        android:textSize="16sp"
+                        android:layout_marginStart="16dp"/>
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_keyboard_right"
+                        app:tint="#CBD5E1"/>
+                </LinearLayout>
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_keyboard_right"
-                    app:tint="#CBD5E1"/>
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F8FAFC" android:layout_marginStart="56dp"/>
+
+                <!-- Bildirishnomalar -->
+                <LinearLayout
+                    android:id="@+id/btnNotifications"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="16dp"
+                    android:background="?attr/selectableItemBackground">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_notifications"
+                        app:tint="#64748B"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Bildirishnomalar"
+                        android:textColor="#334155"
+                        android:textSize="16sp"
+                        android:layout_marginStart="16dp"/>
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_keyboard_right"
+                        app:tint="#CBD5E1"/>
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F8FAFC" android:layout_marginStart="56dp"/>
+
+                <!-- Sozlamalar -->
+                <LinearLayout
+                    android:id="@+id/btnSettings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="16dp"
+                    android:background="?attr/selectableItemBackground">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_settings"
+                        app:tint="#64748B"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Sozlamalar"
+                        android:textColor="#334155"
+                        android:textSize="16sp"
+                        android:layout_marginStart="16dp"/>
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_keyboard_right"
+                        app:tint="#CBD5E1"/>
+                </LinearLayout>
             </LinearLayout>
 
-            <!-- CHIQISH TUGMASI (Pastda) -->
+            <!-- MENYULAR (UMUMIY) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="UMUMIY"
+                android:textColor="#94A3B8"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@android:color/white">
+
+                <!-- Yordam markazi -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="16dp"
+                    android:background="?attr/selectableItemBackground">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_help"
+                        app:tint="#64748B"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Yordam markazi"
+                        android:textColor="#334155"
+                        android:textSize="16sp"
+                        android:layout_marginStart="16dp"/>
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_keyboard_right"
+                        app:tint="#CBD5E1"/>
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#F8FAFC" android:layout_marginStart="56dp"/>
+
+                <!-- Maxfiylik -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="16dp"
+                    android:background="?attr/selectableItemBackground">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_secure"
+                        app:tint="#64748B"/>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Xavfsizlik"
+                        android:textColor="#334155"
+                        android:textSize="16sp"
+                        android:layout_marginStart="16dp"/>
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_keyboard_right"
+                        app:tint="#CBD5E1"/>
+                </LinearLayout>
+            </LinearLayout>
+
+
+            <!-- CHIQISH TUGMASI (Originali kabi qizil va alohida) -->
             <LinearLayout
                 android:id="@+id/btnLogout"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
+                android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="32dp"
+                android:layout_marginBottom="24dp"
                 android:background="@drawable/bg_input_premium"
                 android:backgroundTint="#FEF2F2"
                 android:gravity="center"
@@ -373,7 +499,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@android:drawable/ic_lock_power_off"
+                    android:src="@drawable/ic_logout"
                     app:tint="#EF4444"/>
 
                 <TextView
@@ -385,6 +511,16 @@
                     android:textStyle="bold"
                     android:layout_marginStart="8dp"/>
             </LinearLayout>
+
+            <!-- Versiya -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Yo'l-Yo'lakay v1.0.0"
+                android:textColor="#CBD5E1"
+                android:textSize="12sp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="32dp"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
