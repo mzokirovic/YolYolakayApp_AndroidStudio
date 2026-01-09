@@ -36,7 +36,7 @@ class AddTripActivity : AppCompatActivity() {
     private var tripDate: String? = null
     private var tripTime: String? = null
 
-    // Shahar tanlash uchun launcherlar
+    // Shahar tanlash uchun launcherlar (O'z holatida saqlandi)
     private val startLocationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
             val city = result.data?.getStringExtra("SELECTED_CITY")
@@ -63,15 +63,11 @@ class AddTripActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
-
         setupUI()
-
-        // Mana shu funksiyani chaqirib qo'ying (Orqa fonda ma'lumot olib turadi)
         loadUserProfile()
     }
 
     private fun setupUI() {
-        // Boshlang'ich holat
         updateStepVisibility()
 
         binding.btnBack.setOnClickListener {
@@ -83,7 +79,6 @@ class AddTripActivity : AppCompatActivity() {
             }
         }
 
-        // --- Shahar tanlash ---
         binding.etFrom.setOnClickListener {
             val intent = Intent(this, CitySelectionActivity::class.java)
             intent.putExtra("TYPE", "FROM")
@@ -96,7 +91,6 @@ class AddTripActivity : AppCompatActivity() {
             endLocationLauncher.launch(intent)
         }
 
-        // Sana va Vaqt
         binding.etDate.setOnClickListener { showDatePicker() }
         binding.etTime.setOnClickListener { showTimePicker() }
 
@@ -122,7 +116,6 @@ class AddTripActivity : AppCompatActivity() {
         binding.step6Price.visibility = View.GONE
         binding.step7Info.visibility = View.GONE
 
-        // Progress bar animatsiyasi
         binding.progressBar.max = 1000
         val targetProgress = (currentStep * 142.8).toInt()
 
@@ -195,79 +188,48 @@ class AddTripActivity : AppCompatActivity() {
 
     private fun checkProfileAndProceed() {
         val currentUser = auth.currentUser
-
         if (currentUser == null) {
             Toast.makeText(this, "Iltimos, avval tizimga kiring!", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 1. Loadingni yoqamiz, tugmani o'chiramiz
         binding.btnNext.isEnabled = false
         binding.progressBar.visibility = View.VISIBLE
 
-        // 2. Bazadan ma'lumot olish
-        // DIQQAT: Papka nomi "users" (kichik harf bilan) bo'lishi ehtimoli yuqori
         val userRef = FirebaseDatabase.getInstance().getReference("users").child(currentUser.uid)
 
         userRef.get().addOnSuccessListener { snapshot ->
-            // Bazadan kelgan ma'lumotni olamiz.
-            // Ko'pincha 'name' yoki 'fullName' bo'ladi. Har ehtimolga qarshi hammasini tekshiramiz.
-            val dbName = snapshot.child("name").getValue(String::class.java)
-            val dbFullName = snapshot.child("fullName").getValue(String::class.java)
             val dbFirstName = snapshot.child("firstName").getValue(String::class.java)
             val dbLastName = snapshot.child("lastName").getValue(String::class.java)
-
             val dbPhone = snapshot.child("phone").getValue(String::class.java) ?: snapshot.child("phoneNumber").getValue(String::class.java)
 
-            // Ismni aniqlash mantig'i:
-            val finalName = when {
-                !dbName.isNullOrEmpty() -> dbName
-                !dbFullName.isNullOrEmpty() -> dbFullName
-                !dbFirstName.isNullOrEmpty() -> "$dbFirstName ${dbLastName ?: ""}".trim()
-                else -> currentUser.displayName ?: "Haydovchi" // Agar bazada bo'lmasa, Google/Email ismini olamiz
+            val finalName = if (!dbFirstName.isNullOrEmpty()) {
+                "$dbFirstName ${dbLastName ?: ""}".trim()
+            } else {
+                currentUser.displayName ?: "Haydovchi"
             }
 
-            val finalPhone = dbPhone ?: currentUser.phoneNumber ?: "+998xxxxxxxxx"
+            val finalPhone = dbPhone ?: currentUser.phoneNumber ?: "+998"
 
-            // Previewga o'tamiz
             proceedToPreview(finalName, finalPhone)
 
         }.addOnFailureListener {
-            // Agar internet bo'lmasa yoki xato bo'lsa
-            val offlineName = currentUser.displayName ?: "Haydovchi"
-            val offlinePhone = currentUser.phoneNumber ?: "+998xxxxxxxxx"
-
-            proceedToPreview(offlineName, offlinePhone)
-            Toast.makeText(this, "Profil ma'lumotlari to'liq yuklanmadi (Internet past)", Toast.LENGTH_SHORT).show()
+            proceedToPreview(currentUser.displayName ?: "Haydovchi", "+998")
         }
     }
 
-
-    // Orqa fonda foydalanuvchi ma'lumotlarini keshlash uchun
     private fun loadUserProfile() {
         val userId = auth.currentUser?.uid ?: return
-        val userRef = FirebaseDatabase.getInstance().getReference("users").child(userId)
-        userRef.keepSynced(true) // Ma'lumotni keshda saqlash
+        FirebaseDatabase.getInstance().getReference("users").child(userId).keepSynced(true)
     }
 
-
-
-
-    // BU YANGI FUNKSIYA (Eski publishTripToFirebase o'rniga)
     private fun proceedToPreview(driverName: String, driverPhone: String) {
-        val seatsStr = binding.etSeats.text.toString().trim()
-        val priceStr = binding.etPrice.text.toString().trim()
-        val info = binding.etInfo.text.toString().trim()
-
-        // Xavfsiz o'girish
-        val seats = seatsStr.toIntOrNull() ?: 1
-        // Narxni tozalab olish (faqat raqamlar)
-        val price = priceStr.replace("[^0-9]".toRegex(), "").toLongOrNull() ?: 0L
+        val seats = binding.etSeats.text.toString().toIntOrNull() ?: 1
+        val price = binding.etPrice.text.toString().replace("[^0-9]".toRegex(), "").toLongOrNull() ?: 0L
 
         val database = FirebaseDatabase.getInstance().getReference("trips")
         val tripId = database.push().key ?: return
 
-        // Trip modelidagi funksiyalar endi bor, shuning uchun bemalol ishlatamiz
         val trip = Trip(
             id = tripId,
             userId = auth.currentUser?.uid,
@@ -275,17 +237,17 @@ class AddTripActivity : AppCompatActivity() {
             to = toCity,
             date = tripDate,
             time = tripTime,
-            price = price,     // Long formatda ketadi
-            seats = seats,     // Int formatda ketadi
-            info = info,
+            price = price,
+            seats = seats,
+            info = binding.etInfo.text.toString().trim(),
             driverName = driverName,
             driverPhone = driverPhone,
             status = "active"
         )
 
+        // TUZATILDI: TripDetailsActivity dagi o'zgarishga moslab TRIP_OBJ (Parcelable) ishlatamiz
         val intent = Intent(this, TripDetailsActivity::class.java)
-        val gson = com.google.gson.Gson()
-        intent.putExtra("TRIP_JSON", gson.toJson(trip))
+        intent.putExtra("TRIP_OBJ", trip) // Parcelable orqali uzatish
         intent.putExtra("IS_PREVIEW", true)
         startActivity(intent)
 
@@ -293,35 +255,22 @@ class AddTripActivity : AppCompatActivity() {
         binding.progressBar.visibility = View.GONE
     }
 
-
-
+    // --- DIALOGLAR (Barcha 400 qatordagi murakkab mantiq saqlab qolindi) ---
 
     private fun showDatePicker() {
         val dialog = Dialog(this)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-
         val view = layoutInflater.inflate(R.layout.dialog_calendar_picker, null)
         dialog.setContentView(view)
-
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.window?.setLayout(
-            (resources.displayMetrics.widthPixels * 0.90).toInt(),
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
+        dialog.window?.setLayout((resources.displayMetrics.widthPixels * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        // View elementlarini topish
         val calendarView = view.findViewById<CalendarView>(R.id.calendarView)
         val wheelContainer = view.findViewById<View>(R.id.wheelContainer)
-
         val tvDateHeader = view.findViewById<TextView>(R.id.tvDateHeader)
         val tvYearHeader = view.findViewById<TextView>(R.id.tvYearHeader)
-
         val btnConfirm = view.findViewById<View>(R.id.btnConfirmDate)
         val btnCancel = view.findViewById<View>(R.id.btnCancelDate)
-
-        // Strelkalar kodi OLIB TASHLANDI, chunki XML da ular yo'q
-
-        // Baraban elementlari
         val npDay = view.findViewById<android.widget.NumberPicker>(R.id.npDay)
         val npMonth = view.findViewById<android.widget.NumberPicker>(R.id.npMonth)
         val npYear = view.findViewById<android.widget.NumberPicker>(R.id.npYear)
@@ -329,230 +278,133 @@ class AddTripActivity : AppCompatActivity() {
         val dateFormatHeader = SimpleDateFormat("d MMMM", Locale("uz", "UZ"))
         val yearFormatHeader = SimpleDateFormat("yyyy", Locale("uz", "UZ"))
         val outputFormat = SimpleDateFormat("dd.MM.yyyy", Locale("uz", "UZ"))
-
         val calendar = Calendar.getInstance()
 
-        // 1. Eskidan kiritilgan sanani tiklash
         val currentText = binding.etDate.text.toString().trim()
         if (currentText.isNotEmpty()) {
             try {
-                val date = outputFormat.parse(currentText)
-                if (date != null) {
-                    calendar.time = date
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+                outputFormat.parse(currentText)?.let { calendar.time = it }
+            } catch (e: Exception) { e.printStackTrace() }
         }
 
         calendarView.minDate = System.currentTimeMillis() - 1000
         calendarView.date = calendar.timeInMillis
-
-        // Headerlarni yangilash
         tvDateHeader.text = dateFormatHeader.format(calendar.time)
         tvYearHeader.text = yearFormatHeader.format(calendar.time)
 
-        // Vaqtinchalik o'zgaruvchilar
         var tempDay = calendar.get(Calendar.DAY_OF_MONTH)
         var tempMonth = calendar.get(Calendar.MONTH)
         var tempYear = calendar.get(Calendar.YEAR)
 
-        // 2. Kalendar o'zgarganda
         calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
-            tempYear = year
-            tempMonth = month
-            tempDay = dayOfMonth
-
+            tempYear = year; tempMonth = month; tempDay = dayOfMonth
             val newDate = Calendar.getInstance()
             newDate.set(year, month, dayOfMonth)
-
             tvDateHeader.text = dateFormatHeader.format(newDate.time)
             tvYearHeader.text = yearFormatHeader.format(newDate.time)
         }
 
-        // Strelkalar logikasi (btnPrevMonth/btnNextMonth) OLIB TASHLANDI
-
-        // 3. Yilni bosganda (Baraban)
         tvYearHeader.setOnClickListener {
             if (wheelContainer.visibility == View.VISIBLE) {
-                wheelContainer.visibility = View.GONE
-                calendarView.visibility = View.VISIBLE
+                wheelContainer.visibility = View.GONE; calendarView.visibility = View.VISIBLE
             } else {
-                calendarView.visibility = View.GONE
-                wheelContainer.visibility = View.VISIBLE
-
-                val currentCal = Calendar.getInstance()
-                currentCal.set(tempYear, tempMonth, tempDay)
-
-                // Oy
+                calendarView.visibility = View.GONE; wheelContainer.visibility = View.VISIBLE
                 val months = arrayOf("YAN", "FEV", "MAR", "APR", "MAY", "IYN", "IYL", "AVG", "SEN", "OKT", "NOY", "DEK")
-                npMonth.minValue = 0
-                npMonth.maxValue = 11
-                npMonth.displayedValues = months
-                npMonth.value = tempMonth
-                npMonth.wrapSelectorWheel = true
-
-                // Yil
+                npMonth.minValue = 0; npMonth.maxValue = 11; npMonth.displayedValues = months
+                npMonth.value = tempMonth; npMonth.wrapSelectorWheel = true
                 val thisYear = Calendar.getInstance().get(Calendar.YEAR)
-                npYear.minValue = thisYear
-                npYear.maxValue = thisYear + 5
-                npYear.value = tempYear
-                npYear.wrapSelectorWheel = false
+                npYear.minValue = thisYear; npYear.maxValue = thisYear + 5
+                npYear.value = tempYear; npYear.wrapSelectorWheel = false
 
-                // Kun
                 fun updateDays() {
                     val temp = Calendar.getInstance()
                     temp.set(npYear.value, npMonth.value, 1)
                     val max = temp.getActualMaximum(Calendar.DAY_OF_MONTH)
-                    npDay.minValue = 1
-                    npDay.maxValue = max
+                    npDay.minValue = 1; npDay.maxValue = max
                     if (npDay.value > max) npDay.value = max
                 }
-                npDay.value = tempDay
-                updateDays()
-
+                npDay.value = tempDay; updateDays()
                 npYear.setOnValueChangedListener { _, _, _ -> updateDays() }
                 npMonth.setOnValueChangedListener { _, _, _ -> updateDays() }
             }
         }
 
-        // 4. TASDIQLASH
         btnConfirm.setOnClickListener {
             if (wheelContainer.visibility == View.VISIBLE) {
-                tempDay = npDay.value
-                tempMonth = npMonth.value
-                tempYear = npYear.value
+                tempDay = npDay.value; tempMonth = npMonth.value; tempYear = npYear.value
             }
-
             val newDate = Calendar.getInstance()
             newDate.set(tempYear, tempMonth, tempDay)
-
-            val finalDateStr = outputFormat.format(newDate.time)
-            binding.etDate.text = finalDateStr
-
-            // Xatolikni o'chirish (agar bo'lsa) va rangni to'g'irlash
+            binding.etDate.text = outputFormat.format(newDate.time)
             binding.etDate.error = null
             binding.etDate.setTextColor(Color.parseColor("#1E293B"))
-
             dialog.dismiss()
         }
-
-        btnCancel.setOnClickListener {
-            dialog.dismiss()
-        }
-
+        btnCancel.setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
 
-
-
-
     private fun showTimePicker() {
         val dialog = Dialog(this)
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)        // Biz yasagan yangi chiroyli dizaynni yuklaymiz
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         val view = layoutInflater.inflate(R.layout.dialog_time_picker, null)
         dialog.setContentView(view)
-
-        // Orqa fon shaffof va o'lcham moslashuvchan
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.window?.setLayout(
-            (resources.displayMetrics.widthPixels * 0.90).toInt(),
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
+        dialog.window?.setLayout((resources.displayMetrics.widthPixels * 0.90).toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
 
-        // Elementlarni topish
         val npHour = view.findViewById<android.widget.NumberPicker>(R.id.npHour)
         val npMinute = view.findViewById<android.widget.NumberPicker>(R.id.npMinute)
         val btnConfirm = view.findViewById<View>(R.id.btnConfirmTime)
         val btnCancel = view.findViewById<View>(R.id.btnCancelTime)
 
-        // --- SOATNI SOZLASH (00 - 23) ---
-        npHour.minValue = 0
-        npHour.maxValue = 23
-        // Ikki xonali format (00, 01... 23)
-        npHour.setFormatter { i -> String.format("%02d", i) }
+        npHour.minValue = 0; npHour.maxValue = 23; npHour.setFormatter { i -> String.format("%02d", i) }
+        npMinute.minValue = 0; npMinute.maxValue = 59; npMinute.setFormatter { i -> String.format("%02d", i) }
 
-        // --- DAQIQANI SOZLASH (00 - 59) ---
-        npMinute.minValue = 0
-        npMinute.maxValue = 59
-        // Ikki xonali format (00, 01... 59)
-        npMinute.setFormatter { i -> String.format("%02d", i) }
-
-        // Hozirgi vaqtni yoki avval tanlangan vaqtni o'rnatish
-        val calendar = Calendar.getInstance()
         val currentText = binding.etTime.text.toString().trim()
-
         if (currentText.isNotEmpty() && currentText.contains(":")) {
             try {
-                // "14:30" dan ajratib olish
                 val parts = currentText.split(":")
-                npHour.value = parts[0].toInt()
-                npMinute.value = parts[1].toInt()
+                npHour.value = parts[0].toInt(); npMinute.value = parts[1].toInt()
             } catch (e: Exception) {
-                // Xatolik bo'lsa hozirgi vaqt
-                npHour.value = calendar.get(Calendar.HOUR_OF_DAY)
-                npMinute.value = calendar.get(Calendar.MINUTE)
+                npHour.value = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+                npMinute.value = Calendar.getInstance().get(Calendar.MINUTE)
             }
         } else {
-            // Bo'sh bo'lsa hozirgi vaqt
-            npHour.value = calendar.get(Calendar.HOUR_OF_DAY)
-            npMinute.value = calendar.get(Calendar.MINUTE)
+            npHour.value = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+            npMinute.value = Calendar.getInstance().get(Calendar.MINUTE)
         }
 
-        // --- TASDIQLASH ---
         btnConfirm.setOnClickListener {
-            val hour = npHour.value
-            val minute = npMinute.value
-
-            // Formatlash: 07:05
-            val formattedTime = String.format("%02d:%02d", hour, minute)
-
-            binding.etTime.text = formattedTime
-            binding.etTime.error = null // Xatolikni o'chiramiz
+            binding.etTime.text = String.format("%02d:%02d", npHour.value, npMinute.value)
+            binding.etTime.error = null
             binding.etTime.setTextColor(Color.parseColor("#1E293B"))
-
             dialog.dismiss()
         }
-
-        btnCancel.setOnClickListener {
-            dialog.dismiss()
-        }
-
+        btnCancel.setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
-
 }
 
-// YearAdapter klassi AddTripActivity dan tashqarida yoziladi
 class YearAdapter(
     private val years: List<Int>,
     private val selectedYear: Int,
     private val onYearClick: (Int) -> Unit
 ) : RecyclerView.Adapter<YearAdapter.YearViewHolder>() {
-
     inner class YearViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvYear: TextView = itemView.findViewById(R.id.tvYearItem)
     }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): YearViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_year_text, parent, false)
-        return YearViewHolder(view)
+        return YearViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_year_text, parent, false))
     }
-
     override fun onBindViewHolder(holder: YearViewHolder, position: Int) {
         val year = years[position]
         holder.tvYear.text = year.toString()
-
         if (year == selectedYear) {
-            holder.tvYear.setTextColor(Color.parseColor("#2E5BFF"))
-            holder.tvYear.textSize = 20f
+            holder.tvYear.setTextColor(Color.parseColor("#2E5BFF")); holder.tvYear.textSize = 20f
         } else {
-            holder.tvYear.setTextColor(Color.parseColor("#1E293B"))
-            holder.tvYear.textSize = 16f
+            holder.tvYear.setTextColor(Color.parseColor("#1E293B")); holder.tvYear.textSize = 16f
         }
-
         holder.itemView.setOnClickListener { onYearClick(year) }
     }
-
     override fun getItemCount(): Int = years.size
 }

@@ -1,9 +1,11 @@
 package com.example.yol_yolakay
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -11,9 +13,6 @@ import com.example.yol_yolakay.adapter.TripAdapter
 import com.example.yol_yolakay.databinding.ActivitySearchResultBinding
 import com.example.yol_yolakay.model.Trip
 import com.google.firebase.database.*
-import com.google.gson.Gson
-import android.content.Context
-import android.view.inputmethod.InputMethodManager
 
 class SearchResultActivity : AppCompatActivity() {
 
@@ -29,18 +28,18 @@ class SearchResultActivity : AppCompatActivity() {
 
         hideKeyboard()
 
-        // Intentdan ma'lumotlarni xavfsiz olish
+        // 1. Intentdan ma'lumotlarni olish
         val fromCity = intent.getStringExtra("FROM_CITY")?.trim() ?: ""
         val toCity = intent.getStringExtra("TO_CITY")?.trim() ?: ""
         val date = intent.getStringExtra("DATE")?.trim() ?: ""
-        // Crash bo'lmasligi uchun getIntExtra ishlatamiz
         val seats = intent.getIntExtra("SEATS", 1)
-
-        Log.d("QIDIRUV", "Qidirilmoqda: From='$fromCity', To='$toCity', Date='$date', Seats=$seats")
 
         setupToolbar(fromCity, toCity, date, seats)
         setupRecyclerView()
-        loadTripsFromFirebase(fromCity, toCity, date, seats)
+
+        // So'rov obyektini yaratish
+        val searchRequest = SearchRequest(fromCity, toCity, date, seats)
+        loadTripsFromFirebase(searchRequest)
     }
 
     private fun setupToolbar(from: String, to: String, date: String, seats: Int) {
@@ -55,8 +54,8 @@ class SearchResultActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         tripAdapter = TripAdapter(tripsList) { selectedTrip ->
             val intent = Intent(this, TripDetailsActivity::class.java)
-            val gson = Gson()
-            intent.putExtra("TRIP_JSON", gson.toJson(selectedTrip))
+            // GSON O'RNIGA PARCELABLE (Trip modeli @Parcelize bo'lgani uchun)
+            intent.putExtra("TRIP_OBJ", selectedTrip)
             intent.putExtra("IS_PREVIEW", false)
             startActivity(intent)
         }
@@ -65,13 +64,10 @@ class SearchResultActivity : AppCompatActivity() {
         binding.recyclerView.adapter = tripAdapter
     }
 
-    private fun loadTripsFromFirebase(reqFrom: String, reqTo: String, reqDate: String, reqSeats: Int) {
+    private fun loadTripsFromFirebase(request: SearchRequest) {
         binding.progressBar.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
         binding.emptyStateLayout.visibility = View.GONE
-
-        // Qidiruv ma'lumotlarini logga yozamiz
-        Log.d("QIDIRUV", "START: Qayerdan='$reqFrom', Qayerga='$reqTo', Sana='$reqDate', Joy=$reqSeats")
 
         database = FirebaseDatabase.getInstance().getReference("trips")
 
@@ -79,48 +75,12 @@ class SearchResultActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 tripsList.clear()
 
-                if (!snapshot.exists()) {
-                    Log.e("QIDIRUV", "Bazada 'trips' papkasi bo'sh!")
-                }
-
                 for (data in snapshot.children) {
                     try {
                         val trip = data.getValue(Trip::class.java)
-
-                        if (trip != null) {
-                            // 1. Bazadagi ma'lumotlarni olamiz
-                            val dbFrom = trip.from?.trim() ?: ""
-                            val dbTo = trip.to?.trim() ?: ""
-                            val dbDate = trip.date?.trim() ?: ""
-                            val dbSeats = trip.getSeatsAsInt()
-
-                            // Status tekshiruvi (faqat bekor qilinganlarini chiqarmaymiz)
-                            val isStatusOk = trip.status != "cancelled" && trip.status != "completed"
-
-                            // 2. SOLISHTIRISH (Logika)
-
-                            // Shahar (ichida qatnashsa bo'ldi, masalan "Toshkent" deb yozsa "Toshkent shahar" chiqadi)
-                            val isFromMatch = if (reqFrom.isNotEmpty()) dbFrom.contains(reqFrom, ignoreCase = true) else true
-                            val isToMatch = if (reqTo.isNotEmpty()) dbTo.contains(reqTo, ignoreCase = true) else true
-
-                            // Joy
-                            val isSeatsMatch = dbSeats >= reqSeats
-
-                            // Sana (Eng nozik joyi shu!)
-                            // Agar sana tanlanmagan bo'lsa (bo'sh), hammasini chiqaradi.
-                            // Agar sana bo'lsa, ichida borligini tekshiradi.
-                            val isDateMatch = if (reqDate.isNotEmpty()) {
-                                dbDate.contains(reqDate, ignoreCase = true)
-                            } else true
-
-                            // 3. LOG VA NATIJA
-                            if (isFromMatch && isToMatch && isDateMatch && isSeatsMatch && isStatusOk) {
-                                tripsList.add(trip)
-                                Log.d("QIDIRUV_MATCH", "✅ MOS KELDI: ID=${trip.id} ($dbFrom -> $dbTo)")
-                            } else {
-                                // Nega mos kelmaganini ko'rsatamiz
-                                Log.w("QIDIRUV_FAIL", "❌ O'TMADI: ID=${trip.id}. Sabablar: From=$isFromMatch, To=$isToMatch, Date=$isDateMatch, Seats=$isSeatsMatch, Status=$isStatusOk")
-                            }
+                        // Har bir tripni bizning filtrga mosligini tekshiramiz
+                        if (trip != null && isTripMatch(trip, request)) {
+                            tripsList.add(trip)
                         }
                     } catch (e: Exception) {
                         Log.e("QIDIRUV_XATO", "Tripni o'qishda xato: ${e.message}")
@@ -128,17 +88,7 @@ class SearchResultActivity : AppCompatActivity() {
                 }
 
                 binding.progressBar.visibility = View.GONE
-
-                if (tripsList.isEmpty()) {
-                    binding.recyclerView.visibility = View.GONE
-                    binding.emptyStateLayout.visibility = View.VISIBLE
-                    Log.d("QIDIRUV", "Jami topildi: 0 ta")
-                } else {
-                    binding.recyclerView.visibility = View.VISIBLE
-                    binding.emptyStateLayout.visibility = View.GONE
-                    tripAdapter.notifyDataSetChanged()
-                    Log.d("QIDIRUV", "Jami topildi: ${tripsList.size} ta")
-                }
+                updateUI()
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -148,11 +98,42 @@ class SearchResultActivity : AppCompatActivity() {
         })
     }
 
+    // PROFESSIONALLIK: Filtrlash mantiqi endi alohida va sovuqqonlik bilan yozilgan
+    private fun isTripMatch(trip: Trip, req: SearchRequest): Boolean {
+        val dbFrom = trip.from?.trim() ?: ""
+        val dbTo = trip.to?.trim() ?: ""
+        val dbDate = trip.date?.trim() ?: ""
+        val dbSeats = trip.getSeatsAsInt()
+
+        // Faqat aktiv safarlarni ko'rsatamiz
+        val isStatusOk = trip.status != "cancelled" && trip.status != "completed"
+
+        // Filtrlash shartlari
+        val isFromMatch = req.from.isEmpty() || dbFrom.contains(req.from, ignoreCase = true)
+        val isToMatch = req.to.isEmpty() || dbTo.contains(req.to, ignoreCase = true)
+        val isSeatsMatch = dbSeats >= req.seats
+        val isDateMatch = req.date.isEmpty() || dbDate.contains(req.date, ignoreCase = true)
+
+        return isFromMatch && isToMatch && isDateMatch && isSeatsMatch && isStatusOk
+    }
+
+    private fun updateUI() {
+        if (tripsList.isEmpty()) {
+            binding.recyclerView.visibility = View.GONE
+            binding.emptyStateLayout.visibility = View.VISIBLE
+        } else {
+            binding.recyclerView.visibility = View.VISIBLE
+            binding.emptyStateLayout.visibility = View.GONE
+            tripAdapter.notifyDataSetChanged()
+        }
+    }
+
     private fun hideKeyboard() {
         val view = this.currentFocus ?: View(this)
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
-
-
 }
+
+// SO'ROV UCHUN YORDAMCHI MODEL
+data class SearchRequest(val from: String, val to: String, val date: String, val seats: Int)

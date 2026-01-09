@@ -3,7 +3,9 @@ package com.example.yol_yolakay.adapter
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+
 import com.example.yol_yolakay.R
 import com.example.yol_yolakay.databinding.ItemTripBinding
 import com.example.yol_yolakay.model.Trip
@@ -13,57 +15,53 @@ class TripAdapter(
     private val onItemClick: (Trip) -> Unit
 ) : RecyclerView.Adapter<TripAdapter.TripViewHolder>() {
 
-    inner class TripViewHolder(val binding: ItemTripBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class TripViewHolder(val binding: ItemTripBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(trip: Trip) {
-
-            // 1. YO'NALISH (Yangi dizaynda alohida-alohida)
-            // Eski 'tvRoute' o'rniga 'tvFromCity' va 'tvToCity' ishlatamiz
+            // 1. YO'NALISH
             binding.tvFromCity.text = trip.from ?: "Qayerdan"
             binding.tvToCity.text = trip.to ?: "Qayerga"
 
-            // 2. VAQT (Boshlanish va Tugash)
+            // 2. VAQT
             binding.tvStartTime.text = trip.time ?: "--:--"
-            // Tugash vaqti hisoblanmagan bo'lsa, shunchaki manzil so'zini yoki taxminiy vaqtni qo'yamiz
             binding.tvEndTime.text = "Manzil"
 
-            // 3. SANA (Header qismida)
+            // 3. SANA
             binding.tvDate.text = trip.date ?: "Sana yo'q"
 
-            // 4. NARX
-            val formattedPrice = String.format("%,d", trip.price ?: 0).replace(",", " ")
-            binding.tvPrice.text = "$formattedPrice so'm"
+            // 4. NARX (Xavfsiz hisoblash funksiyasidan foydalanamiz)
+            val price = trip.getPriceAsLong()
+            binding.tvPrice.text = String.format("%,d", price).replace(",", " ") + " so'm"
 
             // 5. HAYDOVCHI ISMI
             binding.tvPersonName.text = trip.driverName ?: "Haydovchi"
 
-            // 6. STATUS (Yashil yoki Sariq belgi)
+            // 6. STATUS (Mantiq soddalashtirildi)
             if (trip.status == "completed") {
-                binding.tvStatusBadge.text = "TUGAGAN"
-                binding.tvStatusBadge.setTextColor(Color.parseColor("#9E9E9E")) // Kulrang
-                // Agar orqa fon drawable fayli yo'q bo'lsa, shunchaki rang berish mumkin:
-                // binding.tvStatusBadge.setBackgroundColor(Color.parseColor("#EEEEEE"))
-
-                // Lekin sizda bg_status_... fayllari bor deb hisoblaymiz:
-                binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_status_yellow)
+                binding.tvStatusBadge.apply {
+                    text = "TUGAGAN"
+                    setTextColor(Color.GRAY)
+                    setBackgroundResource(R.drawable.bg_status_yellow)
+                }
             } else {
-                binding.tvStatusBadge.text = "FAOL"
-                binding.tvStatusBadge.setTextColor(Color.parseColor("#10B981")) // Yashil
-                binding.tvStatusBadge.setBackgroundResource(R.drawable.bg_status_green)
+                binding.tvStatusBadge.apply {
+                    text = "FAOL"
+                    setTextColor(Color.parseColor("#10B981"))
+                    setBackgroundResource(R.drawable.bg_status_green)
+                }
             }
 
             // 7. AVATAR
             binding.imgAvatar.setImageResource(R.drawable.ic_person)
 
-            // Bosilganda
-            binding.root.setOnClickListener {
-                onItemClick(trip)
-            }
+            binding.root.setOnClickListener { onItemClick(trip) }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TripViewHolder {
-        val binding = ItemTripBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return TripViewHolder(binding)
+        return TripViewHolder(
+            ItemTripBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        )
     }
 
     override fun onBindViewHolder(holder: TripViewHolder, position: Int) {
@@ -72,9 +70,30 @@ class TripAdapter(
 
     override fun getItemCount(): Int = tripList.size
 
+    // PROFESSIONALLIK: DiffUtil orqali aqlli yangilanish
     fun updateList(newList: List<Trip>) {
-        tripList.clear()
-        tripList.addAll(newList)
-        notifyDataSetChanged()
+        val diffCallback = TripDiffCallback(this.tripList, newList)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+
+        this.tripList.clear()
+        this.tripList.addAll(newList)
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    // Solishtirish algoritmi
+    class TripDiffCallback(
+        private val oldList: List<Trip>,
+        private val newList: List<Trip>
+    ) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].id == newList[newItemPosition].id
+        }
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition] == newList[newItemPosition]
+        }
     }
 }
