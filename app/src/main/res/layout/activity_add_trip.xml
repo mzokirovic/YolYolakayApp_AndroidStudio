@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center_vertical"
-            android:paddingBottom="100dp"> <!-- FAB uchun joy -->
+            android:paddingBottom="100dp">
 
             <!-- STEP 1: Qayerdan -->
             <LinearLayout
@@ -90,14 +90,6 @@
                     android:textSize="26sp"
                     android:textStyle="bold"
                     android:textColor="#1E293B"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Safar boshlanadigan shahar yoki tuman"
-                    android:textSize="14sp"
-                    android:textColor="#64748B"
-                    android:layout_marginTop="8dp"/>
 
                 <EditText
                     android:id="@+id/etFrom"
@@ -148,7 +140,7 @@
                     android:drawableTint="#2E5BFF"/>
             </LinearLayout>
 
-            <!-- STEP 3: Sana (TUZATILGAN FINAL VERSIYA) -->
+            <!-- STEP 3: Sana -->
             <LinearLayout
                 android:id="@+id/step3Date"
                 android:layout_width="match_parent"
@@ -165,7 +157,6 @@
                     android:textStyle="bold"
                     android:textColor="#1E293B"/>
 
-                <!-- Container (LinearLayout) ishlatamiz. Bu 100% ishonchli -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="64dp"
@@ -196,7 +187,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- STEP 4: Vaqt (TUZATILGAN FINAL VERSIYA) -->
+            <!-- STEP 4: Vaqt -->
             <LinearLayout
                 android:id="@+id/step4Time"
                 android:layout_width="match_parent"
@@ -213,7 +204,6 @@
                     android:textStyle="bold"
                     android:textColor="#1E293B"/>
 
-                <!-- Container (LinearLayout) ishlatamiz -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="64dp"
@@ -244,74 +234,120 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- STEP 5: O'rindiqlar -->
+            <!-- STEP 5: Joylar (BLABLACAR STYLE) -->
             <LinearLayout
                 android:id="@+id/step5Seats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="24dp"
+                android:gravity="center_horizontal"
                 android:visibility="gone">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Nechta joy bor?"
+                    android:text="Nechta yo'lovchi ola olasiz?"
                     android:textSize="26sp"
                     android:textStyle="bold"
-                    android:textColor="#1E293B"/>
+                    android:textColor="#1E293B"
+                    android:gravity="center"/>
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="48dp"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <ImageButton
+                        android:id="@+id/btnMinusSeat"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@drawable/ic_minus"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        app:tint="#2E5BFF"
+                        android:scaleType="centerInside"
+                        android:padding="12dp"/>
+
+                    <TextView
+                        android:id="@+id/tvSeatDisplay"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:text="1"
+                        android:textSize="56sp"
+                        android:textStyle="bold"
+                        android:textColor="#1E293B"
+                        android:gravity="center"/>
+
+                    <ImageButton
+                        android:id="@+id/btnPlusSeat"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@drawable/ic_add"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        app:tint="#2E5BFF"
+                        android:scaleType="centerInside"
+                        android:padding="12dp"/>
+                </LinearLayout>
+
+                <!-- Hidden EditText for backward compatibility -->
                 <EditText
                     android:id="@+id/etSeats"
-                    android:layout_width="match_parent"
-                    android:layout_height="64dp"
-                    android:layout_marginTop="32dp"
-                    android:background="@drawable/bg_input_premium"
-                    android:hint="Masalan: 3"
-                    android:textColorHint="#94A3B8"
-                    android:textColor="#1E293B"
-                    android:inputType="number"
-                    android:paddingHorizontal="20dp"
-                    android:drawableEnd="@drawable/ic_person"
-                    android:drawableTint="#2E5BFF"/>
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:text="1"
+                    android:visibility="invisible"/>
             </LinearLayout>
 
-            <!-- STEP 6: Narx -->
+            <!-- STEP 6: Narx (BLABLACAR STYLE) -->
             <LinearLayout
                 android:id="@+id/step6Price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="24dp"
+                android:gravity="center_horizontal"
                 android:visibility="gone">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Narx qancha?"
+                    android:text="Har bir yo'lovchi uchun narx?"
                     android:textSize="26sp"
                     android:textStyle="bold"
-                    android:textColor="#1E293B"/>
+                    android:textColor="#1E293B"
+                    android:gravity="center"/>
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Bir kishi uchun so'mda kiriting"
-                    android:textSize="14sp"
-                    android:textColor="#64748B"
-                    android:layout_marginTop="8dp"/>
+                    android:layout_marginTop="48dp"
+                    android:orientation="horizontal"
+                    android:gravity="bottom">
 
-                <EditText
-                    android:id="@+id/etPrice"
-                    android:layout_width="match_parent"
-                    android:layout_height="64dp"
-                    android:layout_marginTop="32dp"
-                    android:background="@drawable/bg_input_premium"
-                    android:hint="Masalan: 50 000"
-                    android:textColorHint="#94A3B8"
-                    android:textColor="#1E293B"
-                    android:inputType="number"
-                    android:paddingHorizontal="20dp"/>
+                    <EditText
+                        android:id="@+id/etPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:hint="0"
+                        android:inputType="number"
+                        android:textSize="56sp"
+                        android:textStyle="bold"
+                        android:textColor="#2E5BFF"
+                        android:minWidth="120dp"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="so'm"
+                        android:textSize="22sp"
+                        android:textColor="#64748B"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginBottom="14dp"/>
+                </LinearLayout>
             </LinearLayout>
 
             <!-- STEP 7: Qo'shimcha ma'lumot -->
@@ -337,7 +373,7 @@
                     android:layout_height="140dp"
                     android:layout_marginTop="32dp"
                     android:background="@drawable/bg_input_premium"
-                    android:hint="Masalan: Faqat ayollar, konditsioner bor, yukxona bo'sh..."
+                    android:hint="Masalan: Konditsioner bor..."
                     android:textColorHint="#94A3B8"
                     android:textColor="#1E293B"
                     android:gravity="top|start"
@@ -347,7 +383,7 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- PREMIUM FAB (Tugma) -->
+    <!-- PREMIUM FAB -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnNext"
         android:layout_width="wrap_content"

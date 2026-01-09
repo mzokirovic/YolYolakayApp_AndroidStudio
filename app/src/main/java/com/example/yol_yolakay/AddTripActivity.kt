@@ -1,7 +1,6 @@
 package com.example.yol_yolakay
 
 import android.app.Dialog
-import android.app.TimePickerDialog
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -15,7 +14,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.yol_yolakay.databinding.ActivityAddTripBinding
 import com.example.yol_yolakay.model.Trip
@@ -36,7 +34,10 @@ class AddTripActivity : AppCompatActivity() {
     private var tripDate: String? = null
     private var tripTime: String? = null
 
-    // Shahar tanlash uchun launcherlar (O'z holatida saqlandi)
+    // YANGI: BlaBlaCar Stepper uchun o'zgaruvchi
+    private var seatCount = 1
+
+    // Shahar tanlash uchun launcherlar
     private val startLocationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
             val city = result.data?.getStringExtra("SELECTED_CITY")
@@ -69,6 +70,9 @@ class AddTripActivity : AppCompatActivity() {
 
     private fun setupUI() {
         updateStepVisibility()
+
+        setupPriceFormatting() // Narxni formatlashni yoqish
+        setupSeatStepper()     // Stepper (plus/minus) ni yoqish
 
         binding.btnBack.setOnClickListener {
             if (currentStep > 1) {
@@ -105,6 +109,54 @@ class AddTripActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    // --- PROFESSIONALLIK: BlaBlaCar Stepper Mantiqi ---
+    private fun setupSeatStepper() {
+        binding.btnMinusSeat?.setOnClickListener {
+            if (seatCount > 1) {
+                seatCount--
+                updateSeatUI()
+            }
+        }
+        binding.btnPlusSeat?.setOnClickListener {
+            if (seatCount < 4) { // Talabga binoan max 4 kishi
+                seatCount++
+                updateSeatUI()
+            }
+        }
+    }
+
+    private fun updateSeatUI() {
+        // Katta raqamni yangilaydi
+        binding.tvSeatDisplay?.text = seatCount.toString()
+        // Yashirin EditText ni yangilaydi (validation buzilmasligi uchun)
+        binding.etSeats.setText(seatCount.toString())
+    }
+
+    private fun setupPriceFormatting() {
+        binding.etPrice.addTextChangedListener(object : android.text.TextWatcher {
+            private var current = ""
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: android.text.Editable?) {
+                if (s.toString() != current) {
+                    binding.etPrice.removeTextChangedListener(this)
+
+                    val cleanString = s.toString().replace("[^0-9]".toRegex(), "")
+                    val parsed = cleanString.toDoubleOrNull() ?: 0.0
+
+                    val formatted = java.text.DecimalFormat("#,###").format(parsed).replace(",", " ")
+
+                    current = formatted
+                    binding.etPrice.setText(formatted)
+                    binding.etPrice.setSelection(formatted.length)
+
+                    binding.etPrice.addTextChangedListener(this)
+                }
+            }
+        })
     }
 
     private fun updateStepVisibility() {
@@ -245,17 +297,14 @@ class AddTripActivity : AppCompatActivity() {
             status = "active"
         )
 
-        // TUZATILDI: TripDetailsActivity dagi o'zgarishga moslab TRIP_OBJ (Parcelable) ishlatamiz
         val intent = Intent(this, TripDetailsActivity::class.java)
-        intent.putExtra("TRIP_OBJ", trip) // Parcelable orqali uzatish
+        intent.putExtra("TRIP_OBJ", trip)
         intent.putExtra("IS_PREVIEW", true)
         startActivity(intent)
 
         binding.btnNext.isEnabled = true
         binding.progressBar.visibility = View.GONE
     }
-
-    // --- DIALOGLAR (Barcha 400 qatordagi murakkab mantiq saqlab qolindi) ---
 
     private fun showDatePicker() {
         val dialog = Dialog(this)
@@ -385,6 +434,7 @@ class AddTripActivity : AppCompatActivity() {
     }
 }
 
+// YearAdapter va boshqa yordamchi klasslar klassdan tashqarida saqlanadi
 class YearAdapter(
     private val years: List<Int>,
     private val selectedYear: Int,
