@@ -34,10 +34,19 @@ class AddTripActivity : AppCompatActivity() {
     private var tripDate: String? = null
     private var tripTime: String? = null
 
-    // YANGI: BlaBlaCar Stepper uchun o'zgaruvchi
     private var seatCount = 1
 
-    // Shahar tanlash uchun launcherlar
+    // --- YANGI: AQLLI NARX O'ZGARUVCHILARI ---
+    private var currentPrice: Long = 100000
+    private var minRecommended: Long = 80000
+    private var maxRecommended: Long = 120000
+
+    private val cityDistances = mapOf(
+        "Toshkent" to 0, "Guliston" to 120, "Jizzax" to 200, "Samarqand" to 300,
+        "Navoiy" to 450, "Buxoro" to 600, "Nukus" to 1100, "Urganch" to 1000,
+        "Qarshi" to 520, "Termiz" to 700, "Andijon" to 350, "Namangan" to 280, "Farg'ona" to 320
+    )
+
     private val startLocationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == AppCompatActivity.RESULT_OK) {
             val city = result.data?.getStringExtra("SELECTED_CITY")
@@ -70,9 +79,8 @@ class AddTripActivity : AppCompatActivity() {
 
     private fun setupUI() {
         updateStepVisibility()
-
-        setupPriceFormatting() // Narxni formatlashni yoqish
-        setupSeatStepper()     // Stepper (plus/minus) ni yoqish
+        setupSeatStepper()
+        setupPriceLogic() // Narx mantiqi ulandi
 
         binding.btnBack.setOnClickListener {
             if (currentStep > 1) {
@@ -111,53 +119,131 @@ class AddTripActivity : AppCompatActivity() {
         }
     }
 
-    // --- PROFESSIONALLIK: BlaBlaCar Stepper Mantiqi ---
     private fun setupSeatStepper() {
         binding.btnMinusSeat?.setOnClickListener {
-            if (seatCount > 1) {
-                seatCount--
-                updateSeatUI()
-            }
+            if (seatCount > 1) { seatCount--; updateSeatUI() }
         }
         binding.btnPlusSeat?.setOnClickListener {
-            if (seatCount < 4) { // Talabga binoan max 4 kishi
-                seatCount++
-                updateSeatUI()
-            }
+            if (seatCount < 4) { seatCount++; updateSeatUI() }
         }
     }
 
     private fun updateSeatUI() {
-        // Katta raqamni yangilaydi
         binding.tvSeatDisplay?.text = seatCount.toString()
-        // Yashirin EditText ni yangilaydi (validation buzilmasligi uchun)
         binding.etSeats.setText(seatCount.toString())
     }
 
-    private fun setupPriceFormatting() {
+
+    private fun calculateRecommendedPrice() {
+        val from = fromCity ?: ""
+        val to = toCity ?: ""
+        val dist1 = cityDistances.entries.find { from.contains(it.key) }?.value ?: 0
+        val dist2 = cityDistances.entries.find { to.contains(it.key) }?.value ?: 300
+
+        val isVodiyFrom = from.contains("Andijon") || from.contains("Namangan") || from.contains("Farg'ona")
+        val isWestTo = to.contains("Samarqand") || to.contains("Buxoro") || to.contains("Xorazm") || to.contains("Navoiy")
+
+        val totalKm = if (isVodiyFrom && isWestTo) dist1 + dist2 else kotlin.math.abs(dist1 - dist2)
+        val basePrice = (totalKm * 380L).let { if (it < 25000) 30000L else it }
+        val roundedPrice = (basePrice / 5000) * 5000
+
+        minRecommended = roundedPrice - 20000
+        maxRecommended = roundedPrice + 20000
+        currentPrice = roundedPrice
+
+        binding.tvRecommendedLabel?.text = "Tavsiya qilingan narx: ${formatSum(minRecommended)} - ${formatSum(maxRecommended)}"
+        binding.tvRecommendedLabel?.visibility = View.VISIBLE
+        updatePriceUI()
+    }
+
+    private fun checkPriceStatus() {
+        binding.tvPriceHint?.visibility = View.VISIBLE
+
+        // LIMITLAR: Narxni asossiz oshirishni cheklash (Masalan, tavsiya qilingandan 2 baravar ko'p)
+        val absoluteMaxLimit = maxRecommended * 2
+        val absoluteMinLimit = minRecommended / 2
+
+        when {
+            // 1. IDEAL NARX (Yashil)
+            currentPrice in minRecommended..maxRecommended -> {
+                binding.etPrice.setTextColor(Color.parseColor("#10B981"))
+                binding.tvRecommendedLabel?.setBackgroundResource(R.drawable.bg_recommended_green)
+                binding.tvPriceHint?.text = "Safar uchun ideal narx! Yo'lovchilar sizni tezda topishadi. ✅"
+                binding.tvPriceHint?.setTextColor(Color.parseColor("#10B981"))
+            }
+
+            // 2. NARX PAST (Sariq)
+            currentPrice < minRecommended && currentPrice >= absoluteMinLimit -> {
+                binding.etPrice.setTextColor(Color.parseColor("#F59E0B"))
+                binding.tvRecommendedLabel?.setBackgroundResource(R.drawable.bg_recommended_orange)
+                binding.tvPriceHint?.text = "Narx tavsiya qilingandan past. Xarajatlarni yopishni o'ylab ko'ring. ⚠️"
+                binding.tvPriceHint?.setTextColor(Color.parseColor("#F59E0B"))
+            }
+
+            // 3. NARX BIROZ BALAND (To'q sariq - Orange)
+            currentPrice > maxRecommended && currentPrice <= (maxRecommended + 40000) -> {
+                binding.etPrice.setTextColor(Color.parseColor("#F59E0B"))
+                binding.tvRecommendedLabel?.setBackgroundResource(R.drawable.bg_recommended_orange)
+                binding.tvPriceHint?.text = "Narx biroz qimmat. Yo'lovchilar arzonroq e'lonlarni tanlashi mumkin. ⚠️"
+                binding.tvPriceHint?.setTextColor(Color.parseColor("#F59E0B"))
+            }
+
+            // 4. NARX JUDA BALAND (Qizil)
+            currentPrice > (maxRecommended + 40000) -> {
+                binding.etPrice.setTextColor(Color.parseColor("#EF4444"))
+                binding.tvRecommendedLabel?.setBackgroundResource(R.drawable.bg_recommended_red)
+                binding.tvPriceHint?.text = "Narx juda baland! Katta ehtimol bilan yo'lovchilar sizni tanlamaydi. ❌"
+                binding.tvPriceHint?.setTextColor(Color.parseColor("#EF4444"))
+            }
+        }
+    }
+
+    // Stepper tugmalari uchun limitlarni qo'llash
+    private fun setupPriceLogic() {
+        binding.btnMinusPrice?.setOnClickListener {
+            val absoluteMinLimit = minRecommended / 2
+            if (currentPrice > absoluteMinLimit) {
+                currentPrice -= 5000
+                updatePriceUI()
+            } else {
+                Toast.makeText(this, "Narxni bundan ortiq tushirib bo'lmaydi", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.btnPlusPrice?.setOnClickListener {
+            val absoluteMaxLimit = maxRecommended * 2
+            if (currentPrice < absoluteMaxLimit) {
+                currentPrice += 5000
+                updatePriceUI()
+            } else {
+                Toast.makeText(this, "Narx juda baland, limitga yetdingiz", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         binding.etPrice.addTextChangedListener(object : android.text.TextWatcher {
-            private var current = ""
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
             override fun afterTextChanged(s: android.text.Editable?) {
-                if (s.toString() != current) {
-                    binding.etPrice.removeTextChangedListener(this)
-
-                    val cleanString = s.toString().replace("[^0-9]".toRegex(), "")
-                    val parsed = cleanString.toDoubleOrNull() ?: 0.0
-
-                    val formatted = java.text.DecimalFormat("#,###").format(parsed).replace(",", " ")
-
-                    current = formatted
-                    binding.etPrice.setText(formatted)
-                    binding.etPrice.setSelection(formatted.length)
-
-                    binding.etPrice.addTextChangedListener(this)
+                val clean = s.toString().replace("[^0-9]".toRegex(), "").toLongOrNull() ?: 0L
+                if (clean != currentPrice) {
+                    currentPrice = clean
+                    checkPriceStatus()
                 }
             }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
     }
+
+
+    private fun updatePriceUI() {
+        val formatted = formatSum(currentPrice)
+        binding.etPrice.setText(formatted)
+        binding.etPrice.setSelection(formatted.length)
+        checkPriceStatus()
+    }
+
+    private fun formatSum(sum: Long) = java.text.DecimalFormat("#,###").format(sum).replace(",", " ")
+
+    private fun setupPriceFormatting() { /* Eski mantiq setupPriceLogic ichiga ko'chirildi */ }
 
     private fun updateStepVisibility() {
         binding.step1From.visibility = View.GONE
@@ -171,16 +257,8 @@ class AddTripActivity : AppCompatActivity() {
         binding.progressBar.max = 1000
         val targetProgress = (currentStep * 142.8).toInt()
 
-        android.animation.ObjectAnimator.ofInt(
-            binding.progressBar,
-            "progress",
-            binding.progressBar.progress,
-            targetProgress
-        ).apply {
-            duration = 600
-            interpolator = androidx.interpolator.view.animation.FastOutSlowInInterpolator()
-            start()
-        }
+        android.animation.ObjectAnimator.ofInt(binding.progressBar, "progress", binding.progressBar.progress, targetProgress)
+            .apply { duration = 600; start() }
 
         when (currentStep) {
             1 -> binding.step1From.visibility = View.VISIBLE
@@ -188,7 +266,10 @@ class AddTripActivity : AppCompatActivity() {
             3 -> binding.step3Date.visibility = View.VISIBLE
             4 -> binding.step4Time.visibility = View.VISIBLE
             5 -> binding.step5Seats.visibility = View.VISIBLE
-            6 -> binding.step6Price.visibility = View.VISIBLE
+            6 -> {
+                binding.step6Price.visibility = View.VISIBLE
+                calculateRecommendedPrice() // Narx qadamida hisoblash
+            }
             7 -> {
                 binding.step7Info.visibility = View.VISIBLE
                 binding.btnNext.setImageResource(R.drawable.ic_check)
@@ -260,9 +341,7 @@ class AddTripActivity : AppCompatActivity() {
             } else {
                 currentUser.displayName ?: "Haydovchi"
             }
-
             val finalPhone = dbPhone ?: currentUser.phoneNumber ?: "+998"
-
             proceedToPreview(finalName, finalPhone)
 
         }.addOnFailureListener {
@@ -277,7 +356,7 @@ class AddTripActivity : AppCompatActivity() {
 
     private fun proceedToPreview(driverName: String, driverPhone: String) {
         val seats = binding.etSeats.text.toString().toIntOrNull() ?: 1
-        val price = binding.etPrice.text.toString().replace("[^0-9]".toRegex(), "").toLongOrNull() ?: 0L
+        val price = currentPrice
 
         val database = FirebaseDatabase.getInstance().getReference("trips")
         val tripId = database.push().key ?: return
@@ -434,7 +513,6 @@ class AddTripActivity : AppCompatActivity() {
     }
 }
 
-// YearAdapter va boshqa yordamchi klasslar klassdan tashqarida saqlanadi
 class YearAdapter(
     private val years: List<Int>,
     private val selectedYear: Int,
